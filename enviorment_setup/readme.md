@@ -11,7 +11,7 @@ Use the 'pacman' command to install the nasm package: ``pacman -S mingw-w64-ucrt
 
 <h3>CLANG</h3>
 
-Use the 'pacman' command to install the clang package: ``pacman -S mingw-w64-ucrt-x86_64-clang-15``
+Use the 'pacman' command to install the clang package: ``pacman -S mingw-w64-x86_64-clang``
 
 <h3>LLVM LLD</h3>
 
