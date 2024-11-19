@@ -1,13 +1,13 @@
 #!/bin/bash
 
 nasmCompile(){
-    C:/msys64/ucrt64/bin/nasm.exe $1 -f elf32 -o $2
-    echo "NASM  | Compiled $1 to $2"
+    C:/msys64/ucrt64/bin/nasm.exe "$@" -f elf32 -o build/bin/NASM_$(basename $@ .asm).o
+    echo "NASM  | Compiled $@ to build/bin/NASM_$(basename $@ .asm).o"
 }
 
 clangCompile(){
-    C:/msys64/mingw64/bin/clang.exe -c -target i686-none-elf -o $2 -ffreestanding -w -mno-sse -Wall $1
-    echo "Clang | Compiled $1 to $2"
+    C:/msys64/mingw64/bin/clang.exe -c -target i686-none-elf -o build/bin/CLANG_$(basename $@ .c).o -ffreestanding -w -mno-sse -Wall "$@"
+    echo "Clang | Compiled $@ to build/bin/CLANG_$(basename $@ .c).o"
 }
 
 clean(){
@@ -25,8 +25,8 @@ echo "-------------------------------------"
 echo "| Compilation Start |"
 echo ""
 
-nasmCompile source/boot/boot.asm build/bin/boot.o
-clangCompile source/kernel/kernel.c build/bin/kernel.o
+nasmCompile $(find source/ -name "*.asm")
+clangCompile $(find source/ -name "*.c")
 
 C:/msys64/ucrt64/bin/ld.exe -m i386pe -T linker.ld -o build/build.bin -static -nostdlib build/bin/*.o
 
