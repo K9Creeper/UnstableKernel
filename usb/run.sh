@@ -4,7 +4,7 @@ echo "--------------------------"
 echo "Creating Your Image"
 echo "--------------------------"
 
-grub-mkrescue -o iso/boot/os.iso iso
+grub-mkrescue -o boot/os.iso iso
 
 mv os.iso ../os.iso
 
