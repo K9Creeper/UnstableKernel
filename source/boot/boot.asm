@@ -1,3 +1,5 @@
+; boot.asm
+
 MBALIGN  equ  (1 << 0)
 MEMINFO  equ  (1 << 2)
 MBFLAGS  equ  MBALIGN | MEMINFO
