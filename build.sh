@@ -38,8 +38,6 @@ C:/msys64/ucrt64/bin/ld.exe -m i386pe -T linker.ld -o build/build.bin -nostdlib 
 
 cp build/build.bin usb/boot/build.bin
 
-clean
-
 echo ""
 echo "| Compilation Completed |"
 echo "-------------------------------------"
