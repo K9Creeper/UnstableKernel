@@ -1,19 +1,25 @@
 #!/bin/bash
 
 nasmCompile(){
-    C:/msys64/ucrt64/bin/nasm.exe "$@" -f elf32 -o build/bin/NASM_$(basename $@ .asm).o
-    echo "NASM  | Compiled $@ to build/bin/NASM_$(basename $@ .asm).o"
+    for file in "$@"; do
+        C:/msys64/ucrt64/bin/nasm.exe "$file" -f elf32 -o "build/bin/NASM_$(basename "$file" .asm).o"
+        echo "NASM  | Compiled $file to build/bin/NASM_$(basename "$file" .asm).o"
+    done
 }
 
 clangCompile(){
-    C:/msys64/mingw64/bin/clang.exe -c -target i686-none-elf -o build/bin/CLANG_$(basename $@ .c).o -ffreestanding -w -mno-sse -Wall "$@"
-    echo "Clang | Compiled $@ to build/bin/CLANG_$(basename $@ .c).o"
+    for file in "$@"; do
+        C:/msys64/mingw64/bin/clang.exe -c -target i686-none-elf -o "build/bin/CLANG_$(basename "$file" .c).o" -ffreestanding -w -mno-sse -Wall "$file"
+        echo "Clang | Compiled $file to build/bin/CLANG_$(basename "$file" .c).o"
+    done
 }
 
 clean(){
     rm -f build/*.bin
     rm -f build/bin/*.o
 }
+
+mkdir -p build/bin usb/boot
 
 rm -f usb/boot/*.bin
 
@@ -28,7 +34,7 @@ echo ""
 nasmCompile $(find source/ -name "*.asm")
 clangCompile $(find source/ -name "*.c")
 
-C:/msys64/ucrt64/bin/ld.exe -m i386pe -T linker.ld -o build/build.bin -static -nostdlib build/bin/*.o
+C:/msys64/ucrt64/bin/ld.exe -m i386pe -T linker.ld -o build/build.bin -nostdlib -static build/bin/*.o
 
 cp build/build.bin usb/boot/build.bin
 

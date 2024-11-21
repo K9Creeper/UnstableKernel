@@ -1,7 +1,7 @@
 ; boot.asm
 
-MBALIGN  equ  (1 << 0)
-MEMINFO  equ  (1 << 2)
+MBALIGN  equ  1 << 0
+MEMINFO  equ  1 << 2
 MBFLAGS  equ  MBALIGN | MEMINFO
 MAGIC    equ  0x1BADB002
 CHECKSUM equ -(MAGIC + MBFLAGS)
@@ -20,7 +20,7 @@ section .text
     global _start
 
     mov esp, system_stack
-
+    
     _start:
         extern kernel_entry
         call kernel_entry
