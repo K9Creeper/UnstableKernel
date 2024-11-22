@@ -2,7 +2,7 @@
 
 nasmCompile(){
     for file in "$@"; do
-        C:/msys64/ucrt64/bin/nasm.exe "$file" -f bin -o "build/bin/NASM_$(basename "$file" .asm).o"
+        C:/msys64/ucrt64/bin/nasm.exe "$file" -f elf32 -o "build/bin/NASM_$(basename "$file" .asm).o"
         echo "NASM  | Compiled $file to build/bin/NASM_$(basename "$file" .asm).o"
     done
 }
