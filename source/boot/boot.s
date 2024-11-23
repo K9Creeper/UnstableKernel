@@ -1,29 +1,23 @@
-.set ALIGN,    1<<0
-.set MEMINFO,  1<<1
-.set FLAGS,    ALIGN | MEMINFO
-.set MAGIC,    0x1BADB002
-.set CHECKSUM, -(MAGIC + FLAGS)
+    .section .multiboot
+    .align 4
+    .long 0x1BADB002              # MAGIC
+    .long 0x3                     # MBFLAGS (MBALIGN | MEMINFO)
+    .long -(0x1BADB002 + 0x3)     # CHECKSUM
 
-.section .multiboot
-.align 4
-.long MAGIC
-.long FLAGS
-.long CHECKSUM
+    .section .bss
+system_stack:
+    .skip 8192                    # 8 KiB for stack
 
-.section .bss
-.align 16
-stack_bottom:
-.skip 16384
-stack_top:
-
-.section .text
-.global _start
-.type _start, @function
+    .section .text
+    .global _start
 _start:
-	mov $stack_top, %esp
-	call kernel_main
-	cli
-1:	hlt
-	jmp 1b
+    movl $system_stack, %esp      # Set stack pointer to system_stack
 
-.size _start, . - _start
+    # Call kernel_entry
+    .extern kernel_entry
+    call kernel_entry
+
+    # Padding to make the boot sector 512 bytes
+    .org 510
+    .byte 0                        # Fill up to byte 510
+    .word 0xAA55                   # Boot signature
