@@ -43,3 +43,15 @@ Search for the ```texinfo``` package, and select it.
 <h3>Libisl-Devel</h3>
 
 Search for the ```libisl-devel``` package, and select it.
+
+<h2> CygWin Terminal Setup in Visual Studio Code </h2>
+
+1. Open a terminal, then next to the + symbol, click the drop down, and select default profile.
+2. Then, there should be a 'detected' terminal profile, ex: bash (cygwin); and select bash (cygwin) option.
+3. Now, you can go back to select default profile and set it back to it's default if wanted.
+
+<h3> TO ACCESS THE PROJECT DIRECTORY IN CygWin Terminal </h3>
+
+1. Locate the directory on your windows machine.
+2. Replace the "drive", ex: "C:/", with ex: "/cygdrive/c/". <b> These examples, are based off the cygwin64 folder, located at ```C:/cygwin64/```. </b>
+3. In the terminal, run: ```cd <the_path_you_made>```. Example of ```<the_path_you_made>```: ```/cygdrive/c/Users/nickk/OneDrive/Documents/GitHub/UnstableKernel```.
