@@ -44,6 +44,15 @@ Search for the ```texinfo``` package, and select it.
 
 Search for the ```libisl-devel``` package, and select it.
 
+<h3> Genisoimage </h3>
+
+Search for the ```genisoimage``` package, and select it.
+
+
+<h2>GRUB for CYGWIN </h2>
+
+Though techinally not apart of Cygwin, GRUB can be downloaded for Windows at https://ftp.gnu.org/gnu/grub/, ex: ```grub-2.06-for-windows.zip```. Once downloaded, rename the extracted folder to ```grub-for-windows```. Then put the fodler into the ```<PARENT_DIR>/cygwin64/home/<USER>/src/``` path, ex: ```C:/cygwin64/home/nickk/src/```.
+
 <h2> CygWin Terminal Setup in Visual Studio Code </h2>
 
 1. Open a terminal, then next to the + symbol, click the drop down, and select default profile.

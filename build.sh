@@ -1,27 +1,32 @@
 #!/bin/bash
 
+export PREFIX="$HOME/opt/cross"
+export TARGET=i686-elf
+export PATH="$PREFIX/bin:$PATH"
+
+export PATH="$HOME/opt/cross/bin:$PATH"
+
 asmCompile(){ for file in "$@"; do
-        i686-elf-as "$file" -o "build/bin/AS_$(basename "$file" .s).o"
+        $TARGET-as "$file" -o "build/bin/AS_$(basename "$file" .s).o"
         echo "ASSEMBLY...   Compiled $file to build/bin/AS_$(basename "$file" .s).o"
     done
 }
 
 cCompile(){
     for file in "$@"; do
-        i686-elf-gcc -c "$file" -o "build/bin/GCC_$(basename "$file" .c).o" -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+        $TARGET-gcc -c "$file" -o "build/bin/GCC_$(basename "$file" .c).o" -std=gnu99 -ffreestanding -O2 -Wall -Wextra
         echo "GCC...    Compiled $file to build/bin/GCC_$(basename "$file" .c).o"
     done
 }
 
-cleanPrevBuilds(){
+cleanBuild(){
     rm -f build/bin/*.o
     rm -f build/*.bin
-    rm -f usb/boot/*.bin
 }
 
 clear
 
-cleanPrevBuilds
+./clean.sh
 
 echo "------------------"
 echo "Compilation Begin"
@@ -58,14 +63,32 @@ echo ""
 echo ""
 echo "Copying build/build.bin to usb/boot/build.bin"
 
-cp build/build.bin usb/boot/build.bin
+cp build/build.bin iso/boot/build.bin
 
-cleanPrevBuilds
+cleanBuild
 
 echo ""
 echo ""
 echo "------------------"
+echo "GRUB-MKIMAGE"
 echo ""
-echo "Read usb/readme.md"
+echo ""
+
+$HOME/src/grub-for-windows/grub-mkimage.exe -o iso/boot/grub/grub.img -O i386-pc -p iso/boot/grub iso9660 part_msdos normal linux
+
+echo ""
+echo ""
+echo "------------------"
+
+echo ""
+echo ""
+echo "------------------"
+echo "Genisoimage"
+echo ""
+echo ""
+
+genisoimage -o iso/os.iso -b boot/grub/grub.img -no-emul-boot -boot-load-size 4 -boot-info-table iso
+
+echo ""
 echo ""
 echo "------------------"
