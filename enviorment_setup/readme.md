@@ -1,27 +1,45 @@
 <h1> Enviorment Setup </h1>
-<h2>MSYS2 Install / Download</h2>
+<h2>CYGWIN Install / Download</h2>
 
-1. Visit the MSYS2 download page at https://www.msys2.org/
+1. Visit the CYGWIN download page at https://www.cygwin.com/
 2. Download and Run the installer.
+3. Select "Install from Internet"
+4. Continue...
+5. Select any mirror website.
 
-<h2>MSYS2 Install Packages</h2>
-<h3>NASM</h3>
+<h2>CYGWIN Install Packages</h2>
+<h3>GCC-G++</h3>
 
-Use the 'pacman' command to install the nasm package: ``pacman -S mingw-w64-ucrt-x86_64-nasm``
+Search for the ```mingw64-i686-gcc-g++``` package, and select it.
 
-<h3>CLANG</h3>
+<h3>Make</h3>
 
-Use the 'pacman' command to install the clang package: ``pacman -S mingw-w64-x86_64-clang``
+Search for the ```make``` package, and select it.
 
-<h3>LLVM LLD</h3>
+<h3>Bison</h3>
 
-Use the 'pacman' command to install the llvm linker package: ``pacman -S mingw-w64-ucrt-x86_64-lld``
+Search for the ```bison``` package, and select it.
 
-<h1> Visual Studio Code Setup </h1>
-<h2>Terminal Setup</h2>
+<h3>Flex</h3>
 
-1. Open a terminal, then next to the + symbol, click the drop down, and select default profile.
-![](set_up_msys2_terminal_vs_code.gif)
+Search for the ```flex``` package, and select it.
 
-2. Then, there should be a 'detected' terminal profile, ex: bash (MSYS2); and select bash (MSYS2) option.
-3. Now, you can go back to select default profile and set it back to it's default if wanted.
+<h3>Libgmp-Devel</h3>
+
+Search for the ```libgmp-devel``` package, and select it.
+
+<h3>Libmpc-Devel</h3>
+
+Search for the ```libmpc-devel``` package, and select it.
+
+<h3>Libmpfr-Devel</h3>
+
+Search for the ```libmpfr-devel``` package, and select it.
+
+<h3>Texinfo</h3>
+
+Search for the ```texinfo``` package, and select it.
+
+<h3>Libisl-Devel</h3>
+
+Search for the ```libisl-devel``` package, and select it.
