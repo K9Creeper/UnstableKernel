@@ -1,6 +1,5 @@
-/// kernel.c
-
-extern void kernel_entry(void){
-    
-    return;
+extern void kernel_entry()
+{
+  for(;;)
+      asm volatile ("hlt");
 }

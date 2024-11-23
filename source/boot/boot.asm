@@ -23,6 +23,7 @@ section .text
   _start:
     extern kernel_entry
         call kernel_entry
-
+  
+; sig
 times 510-($ - $$) db 0
 dw 0xAA55
