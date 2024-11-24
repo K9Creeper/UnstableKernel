@@ -1,25 +1,9 @@
 #!/bin/bash
 
-<<<<<<< HEAD
-nasmCompile(){
-    for file in "$@"; do
-        C:/cygwin64/bin/nasm.exe -f elf32 "$file" -o "build/bin/NASM_$(basename "$file" .asm).o"
-        echo "NASM  | Compiled $file to build/bin/NASM_$(basename "$file" .asm).o"
-    done
-}
-
-cCompile(){
-    for file in "$@"; do
-        C:/cygwin64/bin/clang-8.exe -c --target=i686-none-elf -o "build/bin/CLANG_$(basename "$file" .c).o" -ffreestanding -w -mno-sse -Wall "$file"
-        echo "CLANG | Compiled $file to build/bin/CLANG_$(basename "$file" .c).o"
-    done
-}
-=======
 export TARGET=i686-elf
 
 # This must be done for the cross-compiler to be recognized
 export PATH=$HOME/opt/cross/bin:$PATH
->>>>>>> 41eab55d5429bfdfa657e20ea26a3fca60c23696
 
 # Clean the build directory
 cleanBuild(){
@@ -59,15 +43,6 @@ echo -e "\n-------------------------------"
 echo -e "Compilation Process Started"
 echo -e "-------------------------------\n"
 
-<<<<<<< HEAD
-nasmCompile $(find source/ -name "*.asm")
-cCompile $(find source/ -name "*.c")
-
-C:/cygwin64/bin/ld.exe -m i386pe -T linker.ld -o build/build.bin -nostdlib -static build/bin/*.o
-
-C:/cygwin64/bin/objcopy.exe -I elf32-i386 build/build.bin build/build
-
-=======
 # Assembly Compilation
 echo -e "\033[1mASSEMBLY Compilation\033[0m"
 echo -e "---------------------"
@@ -79,7 +54,6 @@ echo -e "\033[1mGCC Compilation\033[0m"
 echo -e "---------------"
 cCompile $(find source/ -name "*.c")
 echo -e "\n"
->>>>>>> 41eab55d5429bfdfa657e20ea26a3fca60c23696
 
 # G++ Compilation
 echo -e "\033[1mG++ Compilation\033[0m"
@@ -114,6 +88,12 @@ echo -e ""
 
 # Creating ISO with Grub
 echo -e "\033[1mGrub-Mkrescue\033[0m"
+echo -e "---------------"
+grub-mkrescue -o iso/os.iso iso
+echo -e "\n"b-Mkrescue\033[0m"
+echo -e "---------------"
+grub-mkrescue -o iso/os.iso iso
+echo -e "\n"b-Mkrescue\033[0m"
 echo -e "---------------"
 grub-mkrescue -o iso/os.iso iso
 echo -e "\n"
