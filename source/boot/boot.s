@@ -1,23 +1,33 @@
-    .section .multiboot
-    .align 4
-    .long 0x1BADB002              # MAGIC
-    .long 0x3                     # MBFLAGS (MBALIGN | MEMINFO)
-    .long -(0x1BADB002 + 0x3)     # CHECKSUM
+.set ALIGN,    1<<0             /* align loaded modules on page boundaries */
+.set MEMINFO,  1<<1             /* provide memory map */
+.set FLAGS,    ALIGN | MEMINFO  /* this is the Multiboot 'flag' field */
+.set MAGIC,    0x1BADB002       /* 'magic number' lets bootloader find the header */
+.set CHECKSUM, -(MAGIC + FLAGS) /* checksum of above, to prove we are multiboot */
 
-    .section .bss
-system_stack:
-    .skip 8192                    # 8 KiB for stack
 
-    .section .text
-    .global _start
+.section .multiboot
+.align 4
+.long MAGIC
+.long FLAGS
+.long CHECKSUM
+
+
+.section .bss
+.align 16
+stack_bottom:
+.skip 16384 # 16 KiB
+stack_top:
+
+.section .text
+.global _start
+.type _start, @function
 _start:
-    movl $system_stack, %esp      # Set stack pointer to system_stack
+	mov $stack_top, %esp
 
-    # Call kernel_entry
-    .extern kernel_entry
-    call kernel_entry
+	call kernel_main
 
-    # Padding to make the boot sector 512 bytes
-    .org 510
-    .byte 0                        # Fill up to byte 510
-    .word 0xAA55                   # Boot signature
+	cli
+1:	hlt
+	jmp 1b
+
+.size _start, . - _start

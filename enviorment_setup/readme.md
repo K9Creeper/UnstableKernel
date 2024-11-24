@@ -1,66 +1,53 @@
 <h1> Enviorment Setup </h1>
-<h2>CYGWIN Install / Download</h2>
+<h2>WSL Install</h2>
 
-1. Visit the CYGWIN download page at https://www.cygwin.com/
-2. Download and Run the installer.
-3. Select "Install from Internet"
-4. Continue...
-5. Select any mirror website.
+It's really not that difficult
 
-<h2>CYGWIN Install Packages</h2>
-<h3>GCC-G++</h3>
+1. Open Windows Command Prompt.
+2. Enter ```wsl --install --no-distribution```.
+3. Restart your system.
+4. After the reboot, create your unix-login.
 
-Search for the ```mingw64-i686-gcc-g++``` package, and select it.
+<h2> WSL Packages </h2>
 
-<h3>Make</h3>
+<h3> Compiler and Make </h3>
 
-Search for the ```make``` package, and select it.
+Run: ```sudo apt-get install build-essential```.
 
-<h3>Bison</h3>
+<h3> Bison </h3>
 
-Search for the ```bison``` package, and select it.
+Run: ```sudo apt-get install bison```.
 
-<h3>Flex</h3>
+<h3> Flex </h3>
 
-Search for the ```flex``` package, and select it.
+Run: ```sudo apt-get install flex```.
 
-<h3>Libgmp-Devel</h3>
+<h3> GMP </h3>
 
-Search for the ```libgmp-devel``` package, and select it.
+Run: ```sudo apt-get install libgmp3-dev```.
 
-<h3>Libmpc-Devel</h3>
+<h3> MPC </h3>
 
-Search for the ```libmpc-devel``` package, and select it.
+Run: ```sudo apt-get install libmpc-dev```.
 
-<h3>Libmpfr-Devel</h3>
+<h3> MPFR </h3>
 
-Search for the ```libmpfr-devel``` package, and select it.
+Run: ```sudo apt-get install libmpfr-dev```.
 
-<h3>Texinfo</h3>
+<h3> Texinfo </h3>
 
-Search for the ```texinfo``` package, and select it.
+Run: ```sudo apt-get install texinfo```.
 
-<h3>Libisl-Devel</h3>
+<h3> ISL </h3>
 
-Search for the ```libisl-devel``` package, and select it.
+Run: ```sudo apt-get install libisl-dev```.
 
-<h3> Genisoimage </h3>
+<h3> Xorriso </h3>
 
-Search for the ```genisoimage``` package, and select it.
+Run: ```sudo apt-get install xorriso```.
 
+<h3> Grub2 & PC-Binaries </h3>
 
-<h2>GRUB for CYGWIN </h2>
+Run: ```sudo apt-get install grub2-common```.
 
-Though techinally not apart of Cygwin, GRUB can be downloaded for Windows at https://ftp.gnu.org/gnu/grub/, ex: ```grub-2.06-for-windows.zip```. Once downloaded, rename the extracted folder to ```grub-for-windows```. Then put the fodler into the ```<PARENT_DIR>/cygwin64/home/<USER>/src/``` path, ex: ```C:/cygwin64/home/nickk/src/```.
-
-<h2> CygWin Terminal Setup in Visual Studio Code </h2>
-
-1. Open a terminal, then next to the + symbol, click the drop down, and select default profile.
-2. Then, there should be a 'detected' terminal profile, ex: bash (cygwin); and select bash (cygwin) option.
-3. Now, you can go back to select default profile and set it back to it's default if wanted.
-
-<h3> TO ACCESS THE PROJECT DIRECTORY IN CygWin Terminal </h3>
-
-1. Locate the directory on your windows machine.
-2. Replace the "drive", ex: "C:/", with ex: "/cygdrive/c/". <b> These examples, are based off the cygwin64 folder, located at ```C:/cygwin64/```. </b>
-3. In the terminal, run: ```cd <the_path_you_made>```. Example of ```<the_path_you_made>```: ```/cygdrive/c/Users/nickk/OneDrive/Documents/GitHub/UnstableKernel```.
+Run: ```sudo apt-get install grub-pc-bin```.
