@@ -84,10 +84,10 @@ fi
 echo -e "Copying build/build.bin to iso/boot/build.bin"
 cp build/build.bin iso/boot/build.bin
 
+cleanBuild
+
 rmdir build/bin
 rmdir build
-
-cleanBuild
 
 echo -e ""
 

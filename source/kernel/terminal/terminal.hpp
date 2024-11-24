@@ -2,19 +2,23 @@
 
 #include <stdint.h>
 
-namespace Kernel{
-    namespace Terminal{
-        extern uint16_t* const buffer;
-        
+namespace Kernel
+{
+    namespace Terminal
+    {
+        extern uint16_t *const buffer;
+
         extern uint16_t vga_width;
         extern uint16_t vga_height;
 
-        namespace Cursor{
+        namespace Cursor
+        {
             extern unsigned int column;
             extern unsigned int row;
         }
 
-        namespace Customization{
+        namespace Customization
+        {
             extern uint16_t color_fg;
             extern uint16_t color_bg;
 
@@ -26,6 +30,6 @@ namespace Kernel{
         extern void PutChar(char c);
         extern void RemoveLastChar();
 
-        extern void WriteString(const char* data);
+        extern void WriteString(const char *data);
     }
 }
