@@ -10,7 +10,9 @@ It's really not that difficult
 5. Enter ```wsl --install```.
 6. Create your unix-login.
 
-<h2> WSL Packages </h2>
+<h2> Packages </h2>
+
+Run: ```sudo apt-get update```.
 
 <h3> Compiler and Make </h3>
 
