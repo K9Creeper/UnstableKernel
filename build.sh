@@ -39,6 +39,8 @@ cCompile(){
 clear
 ./clean.sh
 
+mkdir build build/bin
+
 echo -e "\n-------------------------------"
 echo -e "Compilation Process Started"
 echo -e "-------------------------------\n"
@@ -81,6 +83,9 @@ fi
 # Copy the build to the USB boot directory
 echo -e "Copying build/build.bin to iso/boot/build.bin"
 cp build/build.bin iso/boot/build.bin
+
+rmdir build/bin
+rmdir build
 
 cleanBuild
 
