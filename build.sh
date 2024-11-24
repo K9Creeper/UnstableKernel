@@ -79,7 +79,7 @@ else
 fi
 
 # Copy the build to the USB boot directory
-echo -e "Copying build/build.bin to usb/boot/build.bin"
+echo -e "Copying build/build.bin to iso/boot/build.bin"
 cp build/build.bin iso/boot/build.bin
 
 cleanBuild
