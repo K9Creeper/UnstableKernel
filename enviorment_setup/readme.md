@@ -4,7 +4,7 @@
 It's really not that difficult
 
 1. Open Windows Command Prompt.
-2. Enter ```wsl --install --no-distribution```.
+2. Enter ```wsl --install```.
 3. Restart your system.
 4. After the reboot, create your unix-login.
 
