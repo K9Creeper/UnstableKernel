@@ -95,10 +95,4 @@ echo -e ""
 echo -e "\033[1mGrub-Mkrescue\033[0m"
 echo -e "---------------"
 grub-mkrescue -o iso/os.iso iso
-echo -e "\n"b-Mkrescue\033[0m"
-echo -e "---------------"
-grub-mkrescue -o iso/os.iso iso
-echo -e "\n"b-Mkrescue\033[0m"
-echo -e "---------------"
-grub-mkrescue -o iso/os.iso iso
 echo -e "\n"
