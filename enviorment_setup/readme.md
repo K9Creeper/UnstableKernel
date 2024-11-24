@@ -4,9 +4,11 @@
 It's really not that difficult
 
 1. Open Windows Command Prompt.
-2. Enter ```wsl --install```.
+2. Enter ```wsl --install --no-distribution```.
 3. Restart your system.
-4. After the reboot, create your unix-login.
+4. Re-open Windows Command Prompt.
+5. Enter ```wsl --install```.
+6. After the reboot, create your unix-login.
 
 <h2> WSL Packages </h2>
 
