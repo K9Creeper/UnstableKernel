@@ -36,6 +36,8 @@ void Test(){
 
 }
 
+// Take a look here: https://wiki.osdev.org/Higher_Half_x86_Bare_Bones
+
 extern "C" void kernel_main(void) 
 {
 	Kernel::Memory::KHeap::Init(linkerld_endofkernel);
