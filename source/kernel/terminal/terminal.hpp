@@ -25,6 +25,8 @@ namespace Kernel
             extern uint8_t GetColor();
         }
 
+        extern void Init();
+
         extern void Clear();
 
         extern void PutChar(char c);

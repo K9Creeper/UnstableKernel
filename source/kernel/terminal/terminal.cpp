@@ -44,6 +44,21 @@ uint16_t Terminal_VGA_Entry(unsigned char uc, uint8_t color)
   return static_cast<uint16_t>(uc) | static_cast<uint16_t>(color) << 8;
 }
 
+void Terminal_Enable_Cursor()
+{
+	outportb(0x3D4, 0x0A);
+	outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
+
+	outportb(0x3D4, 0x0B);
+	outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 237);
+}
+
+void Terminal_Disable_Cursor()
+{
+	outportb(0x3D4, 0x0A);
+	outportb(0x3D5, 0x20);
+}
+
 void Terminal_Cursor_Update(uint16_t x, uint16_t y)
 {
   uint16_t pos = y * Kernel::Terminal::vga_width + x;
@@ -74,6 +89,11 @@ void Terminal_Write(const char *data, unsigned int size)
 uint8_t Kernel::Terminal::Customization::GetColor()
 {
   return Terminal_VGA_Entry_Color(Kernel::Terminal::Customization::color_fg, Kernel::Terminal::Customization::color_bg);
+}
+
+void Kernel::Terminal::Init(){
+  Terminal_Enable_Cursor();
+  Kernel::Terminal::Clear();
 }
 
 void Kernel::Terminal::Clear()
