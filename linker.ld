@@ -3,6 +3,7 @@ ENTRY(_start)
 SECTIONS
 {
     . = 2M;  /* Start address of the program */
+    linkerld_startofkernel = .;
 
     .text BLOCK(4K) : ALIGN(4K)
     {
@@ -26,5 +27,5 @@ SECTIONS
         *(.bss)
     }
 
-    linkerld_endofprogram = .;  /* Set 'end' symbol to the current address (end of the last section) */
+    linkerld_endofkernel = .;
 }

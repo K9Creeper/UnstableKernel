@@ -9,6 +9,7 @@
 
 #include "memory/physical_memory_manager/physical_memory_manager.hpp"
 #include "memory/paging/paging.hpp"
+#include "memory/kheap/kheap.hpp"
 
 extern "C" void jump_usermode(void);
 
@@ -19,8 +20,26 @@ extern "C" void real_mode_handle(void){
 	Kernel::Terminal::WriteString("The most unstable kernel you'll ever see.");
 }
 
+extern uint32_t linkerld_endofkernel;
+
+void Test(){
+	char* buffer = reinterpret_cast<char*>(Kernel::Memory::KHeap::Malloc(256));
+
+	for(int i = 33; i < 126; i++)
+	{
+		buffer[i-33] = static_cast<char>(i);
+	}
+
+	Kernel::Terminal::WriteString(buffer);
+
+	Kernel::Memory::KHeap::Free(buffer);
+
+}
+
 extern "C" void kernel_main(void) 
 {
+	Kernel::Memory::KHeap::Init(linkerld_endofkernel);
+
 	Kernel::Terminal::Init();
 	
 	Kernel::Memory::GDT::Init();
@@ -29,22 +48,9 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::IDT::Init();
 	Kernel::Memory::IDT::Install();
 
-	Kernel::Memory::TSS::Install();
+	asm volatile("sti");
 
-	Kernel::Memory::PMM::Init(1096 * (1024 * 1024));
-
-	Kernel::Memory::Paging::Init();
-
-	Kernel::Memory::ISR::Install();
-  	Kernel::Memory::IRQ::Install();
-	
-	// switch_to_real_mode();
-
-	// switch_to_protected_mode();
-
-	// jump_usermode();
-
-	Kernel::Terminal::WriteString("Hi!");
+	Kernel::Terminal::WriteString("Past STI\n");
 
 	for(;;)
 		asm volatile("hlt");

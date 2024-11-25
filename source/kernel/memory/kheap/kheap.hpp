@@ -23,11 +23,14 @@ namespace Kernel{
 
             extern void Init(uint32_t kernel_end);
             
+            
             extern void Free(void *mem);
-            extern unsigned char * Malloc(unsigned int size);
+            
+            extern void* Malloc(unsigned int size);
 
             extern void PAFree(void *mem);
-            extern unsigned char * PAMalloc(unsigned int size);
+
+            extern void* PAMalloc(unsigned int size);
         }
     }
 }

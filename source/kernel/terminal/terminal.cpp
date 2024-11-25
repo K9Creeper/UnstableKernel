@@ -92,6 +92,7 @@ uint8_t Kernel::Terminal::Customization::GetColor()
 }
 
 void Kernel::Terminal::Init(){
+  Terminal_Disable_Cursor();
   Terminal_Enable_Cursor();
   Kernel::Terminal::Clear();
 }

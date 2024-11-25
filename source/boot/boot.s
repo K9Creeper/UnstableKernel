@@ -13,18 +13,17 @@
 
 
 .section .bss
-.align 16
-stack_bottom:
+_stack:
 .skip 16384 # 16 KiB
-stack_top:
 
 .section .text
 .global _start
 .type _start, @function
 _start:
-	mov $stack_top, %esp
+	mov $_stack, %esp
 
 	call kernel_main
+
 
 
 .size _start, . - _start

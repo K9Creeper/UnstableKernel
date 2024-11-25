@@ -4,12 +4,12 @@
 
 #define PHYSICAL_MEMORY_MANAGER_BLOCK_ALIGN(addr) (((addr) & 0xFFFFF000) + 0x1000)
 
-extern uint32_t linkerld_endofprogram;
+extern uint32_t linkerld_endofkernel;
 
 namespace Kernel{
     namespace Memory{
         namespace PMM{
-            uint8_t* bitmap = (uint8_t*)(&linkerld_endofprogram);
+            uint8_t* bitmap = (uint8_t*)(&linkerld_endofkernel);
             uint8_t* mem_start;
             uint32_t total_blocks;
             uint32_t bitmap_size;
