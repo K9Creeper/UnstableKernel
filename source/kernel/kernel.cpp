@@ -22,6 +22,8 @@ extern "C" void real_mode_handle(void){
 
 extern uint32_t linkerld_startofkernel;
 
+// Look here: https://github.com/JetStarBlues/JamesM-Kernel-Tutorial
+
 extern "C" void kernel_main(void) 
 {
 	Kernel::Terminal::Init();
