@@ -11,7 +11,7 @@ namespace Kernel
 {
   namespace Terminal
   {
-    uint16_t *const buffer = reinterpret_cast<uint16_t *>(0xB8000);
+    uint16_t *const buffer = reinterpret_cast<uint16_t *>(0xC03FF000);
 
     uint16_t vga_width = 80;
     uint16_t vga_height = 25;

@@ -40,8 +40,6 @@ void Test(){
 
 extern "C" void kernel_main(void) 
 {
-	Kernel::Memory::KHeap::Init(linkerld_endofkernel);
-
 	Kernel::Terminal::Init();
 	
 	Kernel::Memory::GDT::Init();
@@ -50,9 +48,18 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::IDT::Init();
 	Kernel::Memory::IDT::Install();
 
+	Kernel::Memory::ISR::Install();
+	Kernel::Memory::IRQ::Install();
+
+	Kernel::Terminal::WriteString("Past 1\n");
+
+	Kernel::Memory::Paging::Init();
+
+	Kernel::Terminal::WriteString("Past 2\n");
+
 	asm volatile("sti");
 
-	Kernel::Terminal::WriteString("Past STI\n");
+	Kernel::Terminal::WriteString("Past 3\n");
 
 	for(;;)
 		asm volatile("hlt");

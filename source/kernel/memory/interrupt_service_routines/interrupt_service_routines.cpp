@@ -1,5 +1,7 @@
 #include "interrupt_service_routines.hpp"
 
+#include "../../terminal/terminal.hpp"
+
 extern void IDTSetGate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 
 extern "C" void _isr0();
@@ -35,14 +37,92 @@ extern "C" void _isr29();
 extern "C" void _isr30();
 extern "C" void _isr31();
 
+char *itoa(int num, char *str, int base)
+{
+    int i = 0;
+    int isNegative = 0;
+
+    // Handle 0 explicitly
+    if (num == 0)
+    {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+
+    // Handle negative numbers only if base is 10
+    if (num < 0 && base == 10)
+    {
+        isNegative = 1;
+        num = -num;
+    }
+
+    // Process individual digits
+    while (num != 0)
+    {
+        int rem = num % base;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        num = num / base;
+    }
+
+    // Append negative sign for negative numbers
+    if (isNegative)
+    {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0'; // Null-terminate the string
+
+    // Reverse the string
+    for (int start = 0, end = i - 1; start < end; start++, end--)
+    {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+    }
+
+    return str;
+}
+
 extern "C" void _fault_handler(Kernel::Memory::ISR::Regs *r)
 {
-    if(r->int_no < 32){
-        for(;;);
+    static char buffer[32];
+    if (r->int_no < 32)
+    {
+        if (r->int_no == 14)
+        {
+            uint32_t faulting_address;
+            asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
+
+            itoa(faulting_address, buffer, 16);
+            Kernel::Terminal::WriteString("\nPage fault at address: ");
+            Kernel::Terminal::WriteString(buffer);
+
+            itoa(r->err_code, buffer, 10);
+            Kernel::Terminal::WriteString("\nError code: ");
+            Kernel::Terminal::WriteString(buffer);
+            Kernel::Terminal::WriteString("\n");
+
+            for (;;)
+            {
+            }
+        }
+        else
+        {
+
+            itoa(r->int_no, buffer, 10);
+            Kernel::Terminal::WriteString("\nFault... ");
+            Kernel::Terminal::WriteString(buffer);
+            Kernel::Terminal::WriteString("\n");
+            for (;;)
+            {
+            }
+        }
     }
 }
 
-void Kernel::Memory::ISR::Install(){
+void Kernel::Memory::ISR::Install()
+{
     IDTSetGate(0, reinterpret_cast<unsigned int>(_isr0), 0x08, 0x8E);
     IDTSetGate(1, reinterpret_cast<unsigned int>(_isr1), 0x08, 0x8E);
     IDTSetGate(2, reinterpret_cast<unsigned int>(_isr2), 0x08, 0x8E);
