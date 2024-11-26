@@ -1,6 +1,5 @@
     .global loadPageDirectory
     .global enablePaging
-    .global disablePaging
 
 loadPageDirectory:
     push %ebp
@@ -15,18 +14,8 @@ enablePaging:
     push %ebp
     mov %esp, %ebp
     mov %cr0, %eax
-    or $0x80000000, %eax
+    or $0x80010000, %eax
     mov %eax, %cr0
     mov %ebp, %esp
     pop %ebp
     ret
-
-disablePaging:
-    push %ebp           
-    mov %esp, %ebp      
-    mov %cr0, %eax      
-    and $~(0x80000000), %eax 
-    mov %eax, %cr0       
-    mov %ebp, %esp      
-    pop %ebp            
-    ret                 

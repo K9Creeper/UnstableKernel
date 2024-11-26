@@ -20,23 +20,7 @@ extern "C" void real_mode_handle(void){
 	Kernel::Terminal::WriteString("The most unstable kernel you'll ever see.");
 }
 
-extern uint32_t linkerld_endofkernel;
-
-void Test(){
-	char* buffer = reinterpret_cast<char*>(Kernel::Memory::KHeap::Malloc(256));
-
-	for(int i = 33; i < 126; i++)
-	{
-		buffer[i-33] = static_cast<char>(i);
-	}
-
-	Kernel::Terminal::WriteString(buffer);
-
-	Kernel::Memory::KHeap::Free(buffer);
-
-}
-
-// Take a look here: https://wiki.osdev.org/Higher_Half_x86_Bare_Bones
+extern uint32_t linkerld_startofkernel;
 
 extern "C" void kernel_main(void) 
 {
@@ -51,15 +35,7 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::ISR::Install();
 	Kernel::Memory::IRQ::Install();
 
-	Kernel::Terminal::WriteString("Past 1\n");
 
-	Kernel::Memory::Paging::Init();
-
-	Kernel::Terminal::WriteString("Past 2\n");
-
-	asm volatile("sti");
-
-	Kernel::Terminal::WriteString("Past 3\n");
 
 	for(;;)
 		asm volatile("hlt");

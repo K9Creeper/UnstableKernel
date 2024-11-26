@@ -1,41 +1,31 @@
-ENTRY (_start)
+ENTRY(_start)
 
 SECTIONS
 {
-    . = 0x00100000;
+    . = 2M;  /* Start address of the program */
+    linkerld_startofkernel = .;
 
-	linkerld_startofkernel = .;
-        .multiboot.data : {
-            *(.multiboot.data)
-        }
+    .text BLOCK(4K) : ALIGN(4K)
+    {
+        *(.multiboot)
+        *(.text)
+    }
 
-       .multiboot.text : {
-           *(.multiboot.text)
-       }
+    .rodata BLOCK(4K) : ALIGN(4K)
+    {
+        *(.rodata)
+    }
 
-	. += 0xC0000000;
+    .data BLOCK(4K) : ALIGN(4K)
+    {
+        *(.data)
+    }
 
-	.text ALIGN (4K) : AT (ADDR (.text) - 0xC0000000)
-	{
-		*(.text)
-	}
+    .bss BLOCK(4K) : ALIGN(4K)
+    {
+        *(COMMON)
+        *(.bss)
+    }
 
-	.rodata ALIGN (4K) : AT (ADDR (.rodata) - 0xC0000000)
-	{
-		*(.rodata)
-	}
-
-	.data ALIGN (4K) : AT (ADDR (.data) - 0xC0000000)
-	{
-		*(.data)
-	}
-
-	.bss ALIGN (4K) : AT (ADDR (.bss) - 0xC0000000)
-	{
-		*(COMMON)
-		*(.bss)
-		*(.bootstrap_stack)
-	}
-
-	linkerld_endofkernel = .;
+    linkerld_endofkernel = .;
 }
