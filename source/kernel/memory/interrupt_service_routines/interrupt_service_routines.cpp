@@ -111,7 +111,7 @@ extern "C" void _fault_handler(Kernel::Memory::ISR::Regs *r)
         {
 
             itoa(r->int_no, buffer, 10);
-            Kernel::Terminal::WriteString("\nFault... ");
+            Kernel::Terminal::WriteString("\nFault ");
             Kernel::Terminal::WriteString(buffer);
             Kernel::Terminal::WriteString("\n");
             for (;;)

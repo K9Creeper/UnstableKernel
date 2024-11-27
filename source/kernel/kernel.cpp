@@ -34,11 +34,8 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::IDT::Init();
 	Kernel::Memory::IDT::Install();
 
-	Kernel::Memory::ISR::Install();
 	Kernel::Memory::IRQ::Install();
-
-    // causes fault 13
-	// asm volatile("sti");
+	Kernel::Memory::ISR::Install();
 
 	Kernel::Memory::Paging::Init();
 

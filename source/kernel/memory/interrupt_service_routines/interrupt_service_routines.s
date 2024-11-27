@@ -32,186 +32,189 @@
     .global _isr31
 
 _isr0:
-    cli
-    pushb $0
-    pushb $0
-    jmp isr_common_stub
+  cli
+  push $0
+  push $0
+  jmp isr_common_stub
 
 _isr1:
-    cli
-    pushb $0
-    pushb $1
-    jmp isr_common_stub
-
+  cli
+  push $0
+  push $1
+  jmp isr_common_stub
 _isr2:
-    cli
-    pushb $0
-    pushb $2
-    jmp isr_common_stub
+  cli
+  push $0
+  push $2
+  jmp isr_common_stub
 
 _isr3:
-    cli
-    pushb $0
-    pushb $3
-    jmp isr_common_stub
+  cli
+  push $0
+  push $3
+  jmp isr_common_stub
 
 _isr4:
-    cli
-    pushb $0
-    pushb $4
-    jmp isr_common_stub
+  cli
+  push $0
+  push $4
+  jmp isr_common_stub
 
 _isr5:
-    cli
-    pushb $0
-    pushb $5
-    jmp isr_common_stub
+  cli
+  push $0
+  push $5
+  jmp isr_common_stub
 
 _isr6:
-    cli
-    pushb $0
-    pushb $6
-    jmp isr_common_stub
+  cli
+  push $0
+  push $6
+  jmp isr_common_stub
 
 _isr7:
-    cli
-    pushb $0
-    pushb $7
-    jmp isr_common_stub
+  cli
+  push $0
+  push $7
+  jmp isr_common_stub
 
 _isr8:
     cli
-    pushb $8
+    push $8 
     jmp isr_common_stub
 
 _isr9:
-    cli
-    pushb $0
-    pushb $9
-    jmp isr_common_stub
+  cli
+  push $0
+  push $9 
+  jmp isr_common_stub
 
 _isr10:
-    cli
-    pushb $10
-    jmp isr_common_stub
+  cli
+  push $10
+  jmp isr_common_stub
 
 _isr11:
-    cli
-    pushb $11
-    jmp isr_common_stub
+  cli
+  push $11
+  jmp isr_common_stub
 
 _isr12:
-    cli
-    pushb $12
-    jmp isr_common_stub
+  cli
+  push $12
+  jmp isr_common_stub
 
 _isr13:
-    cli
-    pushb $13
-    jmp isr_common_stub
+  cli
+  push $13
+  jmp isr_common_stub
 
 _isr14:
-    cli
-    pushb $14
-    jmp isr_common_stub
+  cli
+  push $14
+  jmp isr_common_stub
 
 _isr15:
-    cli
-    pushb $0
-    pushb $14
-    jmp isr_common_stub
+  cli
+  push $0
+  push $15
+  jmp isr_common_stub
 
 _isr16:
-    cli
-    pushb $0
-    pushb $16
-    jmp isr_common_stub
+  cli
+  push $0
+  push $16
+  jmp isr_common_stub
 
 _isr17:
-    cli
-    pushb $17
-    jmp isr_common_stub
+  cli
+  push $0
+  push $17
+  jmp isr_common_stub
 
 _isr18:
-    cli
-    pushb $0
-    pushb $18
-    jmp isr_common_stub
+  cli
+  push $0
+  push $18
+  jmp isr_common_stub
 
 _isr19:
-    cli
-    pushb $0
-    pushb $19
-    jmp isr_common_stub
+  cli
+  push $0
+  push $19
+  jmp isr_common_stub
 
 _isr20:
-    cli
-    pushb $0
-    pushb $20
-    jmp isr_common_stub
+  cli
+  push $0
+  push $20
+  jmp isr_common_stub
 
 _isr21:
-    cli
-    pushb $21
-    jmp isr_common_stub
+  cli
+  push $0
+  push $21
+  jmp isr_common_stub
 
 _isr22:
-    cli
-    pushb $0
-    pushb $22
-    jmp isr_common_stub
+  cli
+  push $0
+  push $22
+  jmp isr_common_stub
 
 _isr23:
-    cli
-    pushb $0
-    pushb $23
-    jmp isr_common_stub
+  cli
+  push $0
+  push $23
+  jmp isr_common_stub
 
 _isr24:
-    cli
-    pushb $0
-    pushb $24
-    jmp isr_common_stub
+  cli
+  push $0
+  push $24
+  jmp isr_common_stub
 
 _isr25:
-    cli
-    pushb $0
-    pushb $25
-    jmp isr_common_stub
+  cli
+  push $0
+  push $25
+  jmp isr_common_stub
 
 _isr26:
-    cli
-    pushb $0
-    pushb $26
-    jmp isr_common_stub
+  cli
+  push $0
+  push $26
+  jmp isr_common_stub
 
 _isr27:
-    cli
-    pushb $0
-    pushb $27
-    jmp isr_common_stub
+  cli
+  push $0
+  push $27
+  jmp isr_common_stub
 
 _isr28:
-    cli
-    pushb $0
-    pushb $28
-    jmp isr_common_stub
+  cli
+  push $0
+  push $28
+  jmp isr_common_stub
 
 _isr29:
-    cli
-    pushb $29
-    jmp isr_common_stub
+  cli
+  push $0
+  push $29
+  jmp isr_common_stub
 
 _isr30:
-    cli
-    pushb $30
-    jmp isr_common_stub
+  cli
+  push $0
+  push $30
+  jmp isr_common_stub
 
 _isr31:
-    cli
-    pushb $0
-    pushb $31
-    jmp isr_common_stub
+  cli
+  push $0
+  push $31
+  jmp isr_common_stub
 
 .extern _fault_handler
 
@@ -221,20 +224,22 @@ isr_common_stub:
     push %es
     push %fs
     push %gs
-    mov $0x10, %ax  ; Load the Kernel Data Segment descriptor
+    mov $0x10, %ax  
     mov %ax, %ds
     mov %ax, %es
     mov %ax, %fs
     mov %ax, %gs
-    mov %esp, %eax   ; Push the stack pointer
+    mov %esp, %eax   
     push %eax
-    mov _fault_handler, %eax
-    call *%eax       ; Call the fault handler (preserves the EIP)
+    call _fault_handler
     pop %eax
     pop %gs
     pop %fs
     pop %es
     pop %ds
     popa
-    add $8, %esp     ; Clean up the pushed error code and ISR number
-    iret             ; Pops CS, EIP, EFLAGS, SS, ESP
+    add $8, %esp     
+
+    sti # enable interrupts
+
+    iret             

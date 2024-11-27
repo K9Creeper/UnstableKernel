@@ -1,4 +1,4 @@
-	  .global _irq0
+    .global _irq0
     .global _irq1
     .global _irq2
     .global _irq3
@@ -17,98 +17,98 @@
 
 _irq0:
     cli
-    pushb $0
-    pushb $32
+    push $0
+    push $32
     jmp irq_common_stub
 
 _irq1:
     cli
-    pushb $0
-    pushb $33
+    push $0
+    push $33
     jmp irq_common_stub
 
 _irq2:
     cli
-    pushb $0
-    pushb $34
+    push $0
+    push $34
     jmp irq_common_stub
 
 _irq3:
     cli
-    pushb $0
-    pushb $35
+    push $0
+    push $35
     jmp irq_common_stub
 
 _irq4:
     cli
-    pushb $0
-    pushb $36
+    push $0
+    push $36
     jmp irq_common_stub
 
 _irq5:
     cli
-    pushb $0
-    pushb $37
+    push $0
+    push $37
     jmp irq_common_stub
 
 _irq6:
     cli
-    pushb $0
-    pushb $38
+    push $0
+    push $38
     jmp irq_common_stub
 
 _irq7:
     cli
-    pushb $0
-    pushb $39
+    push $0
+    push $39
     jmp irq_common_stub
 
 _irq8:
     cli
-    pushb $0
-    pushb $40
+    push $0
+    push $40
     jmp irq_common_stub
 
 _irq9:
     cli
-    pushb $0
-    pushb $41
+    push $0
+    push $41
     jmp irq_common_stub
 
 _irq10:
     cli
-    pushb $0
-    pushb $42
+    push $0
+    push $42
     jmp irq_common_stub
 
 _irq11:
     cli
-    pushb $0
-    pushb $43
+    push $0
+    push $43
     jmp irq_common_stub
 
 _irq12:
     cli
-    pushb $0
-    pushb $44
+    push $0
+    push $44
     jmp irq_common_stub
 
 _irq13:
     cli
-    pushb $0
-    pushb $45
+    push $0
+    push $45
     jmp irq_common_stub
 
 _irq14:
     cli
-    pushb $0
-    pushb $46
+    push $0
+    push $46
     jmp irq_common_stub
 
 _irq15:
     cli
-    pushb $0
-    pushb $47
+    push $0
+    push $47
     jmp irq_common_stub
 
 .extern _irq_handler
@@ -126,8 +126,7 @@ irq_common_stub:
     mov %ax, %gs
     mov %esp, %eax
     push %eax
-    mov _irq_handler, %eax
-    call *%eax
+    call _irq_handler
     pop %eax
     pop %gs
     pop %fs
