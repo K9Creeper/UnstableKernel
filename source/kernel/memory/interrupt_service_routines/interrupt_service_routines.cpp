@@ -37,7 +37,7 @@ extern "C" void _isr29();
 extern "C" void _isr30();
 extern "C" void _isr31();
 
-char *itoa(int num, char *str, int base)
+void itoa(int num, char *str, int base)
 {
     int i = 0;
     int isNegative = 0;
@@ -47,7 +47,7 @@ char *itoa(int num, char *str, int base)
     {
         str[i++] = '0';
         str[i] = '\0';
-        return str;
+        return;
     }
 
     // Handle negative numbers only if base is 10
@@ -81,7 +81,7 @@ char *itoa(int num, char *str, int base)
         str[end] = temp;
     }
 
-    return str;
+    return;
 }
 
 extern "C" void _fault_handler(Kernel::Memory::ISR::Regs *r)

@@ -24,6 +24,8 @@ namespace Kernel
       bool bInitialized = false;
 
       uint32_t placementAddress = reinterpret_cast<uint32_t>(&linkerld_endofkernel);
+
+      Heap *heap = nullptr;
     }
   }
 }

@@ -37,7 +37,7 @@ namespace Kernel{
                 uint16_t iomap_base;
             } __attribute__((packed));
 
-            static TSSEntry entry;
+            extern TSSEntry entry;
 
             void Install();
         }

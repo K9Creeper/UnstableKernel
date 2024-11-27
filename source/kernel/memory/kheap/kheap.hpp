@@ -42,7 +42,7 @@ namespace Kernel
                 Header* header;
             };
 
-            static Heap *heap = nullptr;
+            extern Heap *heap;
 
             extern bool bInitialized;
 

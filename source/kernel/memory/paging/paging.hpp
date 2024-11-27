@@ -41,10 +41,10 @@ namespace Kernel
                 uint32_t count;
             };
 
-            static PageDirectory *kernelDirectory = nullptr;
-            static PageDirectory *currentDirectory = nullptr;
+            extern PageDirectory *kernelDirectory;
+            extern PageDirectory *currentDirectory;
 
-            static Frames frames;
+            extern Frames frames;
 
             extern void Init();
 

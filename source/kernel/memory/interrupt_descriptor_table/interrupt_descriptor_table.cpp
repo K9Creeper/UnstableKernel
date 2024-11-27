@@ -9,6 +9,8 @@ namespace Kernel
         namespace IDT
         {
             bool bInitialized = false;
+
+            IDTEntry pIDT[256];
         }
     }
 }

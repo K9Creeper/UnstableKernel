@@ -11,6 +11,17 @@
 
 extern "C" uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress);
 
+namespace Kernel{
+	namespace Memory{
+		namespace Paging{
+			PageDirectory *kernelDirectory = nullptr;
+            PageDirectory *currentDirectory = nullptr;
+
+			Frames frames;
+		}
+	}
+}
+
 Kernel::Memory::Paging::PageEntry *Kernel::Memory::Paging::GetPageEntry(uint32_t address, Kernel::Memory::Paging::PageDirectory *dir, bool sMake)
 {
 	// Turn the address into an index
@@ -123,10 +134,55 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 	}
 }
 
+void itoa(uint32_t num, char *str, int base)
+{
+    int i = 0;
+    int isNegative = 0;
+
+    // Handle 0 explicitly
+    if (num == 0)
+    {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    // Handle negative numbers only if base is 10
+    if (num < 0 && base == 10)
+    {
+        isNegative = 1;
+        num = -num;
+    }
+
+    // Process individual digits
+    while (num != 0)
+    {
+        int rem = num % base;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        num = num / base;
+    }
+
+    // Append negative sign for negative numbers
+    if (isNegative)
+    {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0'; // Null-terminate the string
+
+    // Reverse the string
+    for (int start = 0, end = i - 1; start < end; start++, end--)
+    {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+    }
+
+    return;
+}
+
 void Kernel::Memory::Paging::Init()
 {
-	uint32_t tmp;
-
 	// Size of physical memory. For the moment we assume it is 16MB
 	uint32_t mem_size = 0x1000000;
 	frames.count = mem_size / PAGE_SIZE;
@@ -136,9 +192,11 @@ void Kernel::Memory::Paging::Init()
 	memset(reinterpret_cast<unsigned char*>(frames.bitmap), 0, INDEX_FROM_BIT( frames.count ) );  // fill with zeros
 
 	// Make a page directory
-	tmp = kmalloc_( sizeof( PageDirectory ), 1, 0);
+	uint32_t tmp = kmalloc_( sizeof( PageDirectory ), 1, 0);
+	
 	memset( reinterpret_cast<unsigned char*>(tmp), 0, sizeof( PageDirectory ) );  // fill with zeros
-	kernelDirectory = ( PageDirectory * ) tmp;
+	
+	kernelDirectory =reinterpret_cast<PageDirectory *> (tmp);
 
 	currentDirectory = kernelDirectory;
 
@@ -148,7 +206,7 @@ void Kernel::Memory::Paging::Init()
 	{
 		MakePageEntry( i, Kernel::Memory::Paging::kernelDirectory );
 	}
-	
+
 	// identity map from 0x0 to the end of used memory 
 	for (uint32_t i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
 	{

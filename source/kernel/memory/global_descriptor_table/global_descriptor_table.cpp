@@ -7,6 +7,8 @@ namespace Kernel
         namespace GDT
         {
             bool bInitialized = false;
+
+            GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
         }
     }
 }

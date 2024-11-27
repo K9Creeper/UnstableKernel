@@ -7,7 +7,7 @@
 namespace Kernel{
     namespace Memory {
         namespace TSS{
-            
+            TSSEntry entry;
         }
     }
 }

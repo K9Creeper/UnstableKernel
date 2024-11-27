@@ -23,7 +23,7 @@ namespace Kernel
 
             extern bool bInitialized;
 
-            static IDTEntry pIDT[256];
+            extern IDTEntry pIDT[256];
 
             void Init();
 

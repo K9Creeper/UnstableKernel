@@ -28,7 +28,7 @@ namespace Kernel
 
             extern bool bInitialized;
 
-            static GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
+            extern GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
 
             void Init();
 

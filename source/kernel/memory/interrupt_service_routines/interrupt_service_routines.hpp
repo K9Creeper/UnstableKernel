@@ -32,7 +32,7 @@ namespace Kernel{
                 uint16_t eflags;
             };
 
-            void Install();
+            extern void Install();
         }
     }
 }

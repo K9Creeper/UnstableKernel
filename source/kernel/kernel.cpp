@@ -10,8 +10,6 @@
 #include "memory/physical_memory_manager/physical_memory_manager.hpp"
 #include "memory/paging/paging.hpp"
 
-#include "memory/kheap/heap.hpp"
-
 extern "C" void jump_usermode(void);
 
 extern "C" void switch_to_real_mode(void);
@@ -34,7 +32,7 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::GDT::Install();
 
 	Kernel::Memory::TSS::Install();
-	
+
 	Kernel::Memory::IDT::Init();
 	Kernel::Memory::IDT::Install();
 
@@ -42,6 +40,27 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::ISR::Install();
 
 	Kernel::Memory::Paging::Init();
+
+	uint32_t cr0;
+	asm volatile("mov %%cr0, %0" : "=r"(cr0));
+	if (!(cr0 & 0x80000000))
+	{
+		Kernel::Terminal::WriteString("Paging not enabled!\n");
+	}
+	else
+	{
+		Kernel::Terminal::WriteString("Paging enabled successfully!\n");
+	}
+
+	// Check if kernelDirectory is non-null
+	if (Kernel::Memory::Paging::kernelDirectory)
+	{
+		Kernel::Terminal::WriteString("Page directory initialized.\n");
+	}
+	else
+	{
+		Kernel::Terminal::WriteString("Failed to initialize page directory.\n");
+	}
 
 	for (;;)
 		asm volatile("hlt");
