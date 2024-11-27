@@ -32,7 +32,7 @@ void IRQInstallHandler(int irq, Kernel::Memory::IRQ::fHandle handler){
 }
 
 void IRQUninstallHandler(int irq){
-    irq_routines[irq] = 0;
+    irq_routines[irq] = nullptr;
 }
 
 void IRQRemap(void)

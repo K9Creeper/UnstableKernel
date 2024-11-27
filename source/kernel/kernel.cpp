@@ -9,14 +9,16 @@
 
 #include "memory/physical_memory_manager/physical_memory_manager.hpp"
 #include "memory/paging/paging.hpp"
-#include "memory/kheap/kheap.hpp"
+
+#include "memory/kheap/heap.hpp"
 
 extern "C" void jump_usermode(void);
 
 extern "C" void switch_to_real_mode(void);
 extern "C" void switch_to_protected_mode(void);
 
-extern "C" void real_mode_handle(void){
+extern "C" void real_mode_handle(void)
+{
 	Kernel::Terminal::WriteString("The most unstable kernel you'll ever see.");
 }
 
@@ -24,10 +26,10 @@ extern uint32_t linkerld_startofkernel;
 
 // Look here: https://github.com/JetStarBlues/JamesM-Kernel-Tutorial
 
-extern "C" void kernel_main(void) 
+extern "C" void kernel_main(void)
 {
 	Kernel::Terminal::Init();
-	
+
 	Kernel::Memory::GDT::Init();
 	Kernel::Memory::GDT::Install();
 
@@ -37,8 +39,12 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::IRQ::Install();
 	Kernel::Memory::ISR::Install();
 
+	Kernel::Terminal::WriteString("Hello ");
+
 	Kernel::Memory::Paging::Init();
 
-	for(;;)
+	Kernel::Terminal::WriteString("world\n");
+
+	for (;;)
 		asm volatile("hlt");
 }
