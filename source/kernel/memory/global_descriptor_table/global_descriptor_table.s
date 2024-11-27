@@ -10,7 +10,8 @@ _gdt_flush:
     mov    %ax, %gs
     mov    %ax, %ss
 
-    jmp    flush2
+    jmp *0x08:flush2
+
 
 flush2:
     ret
