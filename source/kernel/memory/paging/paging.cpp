@@ -108,7 +108,8 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 			void** nu = (void**)0x0;
 			for (;;)
 			{
-				
+				// lets just fault it for now lmao
+				*nu = 0;
 			}
 		}
 

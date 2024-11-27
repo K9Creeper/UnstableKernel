@@ -27,11 +27,11 @@ void* irq_routines[16] =
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void IRQInstallHandler(int irq, Kernel::Memory::IRQ::fHandle handler){
+void Kernel::Memory::IRQ::InstallHandler(int irq, Kernel::Memory::IRQ::fHandle handler){
     irq_routines[irq] = reinterpret_cast<void*>(handler);
 }
 
-void IRQUninstallHandler(int irq){
+void Kernel::Memory::IRQ::UninstallHandler(int irq){
     irq_routines[irq] = nullptr;
 }
 
@@ -52,16 +52,19 @@ void IRQRemap(void)
 extern "C" void _irq_handler(Kernel::Memory::ISR::Regs *r){
     Kernel::Memory::IRQ::fHandle handler;
 
-    handler = reinterpret_cast<Kernel::Memory::IRQ::fHandle>(irq_routines[r->int_no - 32]);
+    if (r->int_no >= 32 && r->int_no <= 47) {
+        handler = reinterpret_cast<Kernel::Memory::IRQ::fHandle>(irq_routines[r->int_no - 32]);
 
-    if (handler)
-        handler(r);
+        if (handler) {
+            handler(r);
+        }
+    }
 
-    /* send an EOI to the slave controller */
+    // slave controllers
     if (r->int_no >= 40)
         outportb(0xA0, 0x20);
 
-    /* send an EOI to the master interrupt controller */
+    // master controllers
     outportb(0x20, 0x20);
 }
 

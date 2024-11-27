@@ -33,17 +33,15 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::GDT::Init();
 	Kernel::Memory::GDT::Install();
 
+	Kernel::Memory::TSS::Install();
+	
 	Kernel::Memory::IDT::Init();
 	Kernel::Memory::IDT::Install();
 
 	Kernel::Memory::IRQ::Install();
 	Kernel::Memory::ISR::Install();
 
-	Kernel::Terminal::WriteString("Hello ");
-
 	Kernel::Memory::Paging::Init();
-
-	Kernel::Terminal::WriteString("world\n");
 
 	for (;;)
 		asm volatile("hlt");
