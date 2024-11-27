@@ -37,7 +37,10 @@ extern "C" void kernel_main(void)
 	Kernel::Memory::ISR::Install();
 	Kernel::Memory::IRQ::Install();
 
+    // causes fault 13
+	// asm volatile("sti");
 
+	Kernel::Memory::Paging::Init();
 
 	for(;;)
 		asm volatile("hlt");
