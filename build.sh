@@ -17,9 +17,14 @@ cleanBuild(){
 # Compile Assembly files
 asmCompile(){
     for file in "$@"; do
-        echo -e "ASSEMBLY: Compiling \033[1m$file\033[0m to build/bin/AS_$(basename "$file" .s).o"
-        $TARGET-as "$file" -o "build/bin/AS_$(basename "$file" .s).o"
-        if ! [ -f "build/bin/AS_$(basename "$file" .s).o" ]; then
+        # Extract the relative path from the file (excluding the extension)
+        relative_path=$(dirname "$file")
+        filename=$(basename "$file" .s)
+        output_file="build/bin/AS_${relative_path//\//_}_$filename.o"
+
+        echo -e "ASSEMBLY: Compiling \033[1m$file\033[0m to $output_file"
+        $TARGET-as "$file" -o "$output_file"
+        if ! [ -f "$output_file" ]; then
             export COMP_ERROR="1"
         fi
     done
@@ -28,9 +33,14 @@ asmCompile(){
 # Compile C++ files
 cppCompile(){
     for file in "$@"; do
-        echo -e "G++: Compiling \033[1m$file\033[0m to build/bin/G++_$(basename "$file" .cpp).o"
-        $TARGET-g++ -c "$file" -o "build/bin/G++_$(basename "$file" .cpp).o" -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
-        if ! [ -f "build/bin/G++_$(basename "$file" .cpp).o" ]; then
+        # Extract the relative path from the file (excluding the extension)
+        relative_path=$(dirname "$file")
+        filename=$(basename "$file" .cpp)
+        output_file="build/bin/G++_${relative_path//\//_}_$filename.o"
+
+        echo -e "G++: Compiling \033[1m$file\033[0m to $output_file"
+        $TARGET-g++ -c "$file" -o "$output_file" -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
+        if ! [ -f "$output_file" ]; then
             export COMP_ERROR="1"
         fi
     done
@@ -39,13 +49,19 @@ cppCompile(){
 # Compile C files
 cCompile(){
     for file in "$@"; do
-        echo -e "GCC: Compiling \033[1m$file\033[0m to build/bin/GCC_$(basename "$file" .c).o"
-        $TARGET-gcc -c "$file" -o "build/bin/GCC_$(basename "$file" .c).o" -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-        if ! [ -f "build/bin/GCC_$(basename "$file" .c).o" ]; then
+        # Extract the relative path from the file (excluding the extension)
+        relative_path=$(dirname "$file")
+        filename=$(basename "$file" .c)
+        output_file="build/bin/GCC_${relative_path//\//_}_$filename.o"
+
+        echo -e "GCC: Compiling \033[1m$file\033[0m to $output_file"
+        $TARGET-gcc -c "$file" -o "$output_file" -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+        if ! [ -f "$output_file" ]; then
             export COMP_ERROR="1"
         fi
     done
 }
+
 
 clear
 ./clean.sh
