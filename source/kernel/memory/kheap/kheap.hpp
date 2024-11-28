@@ -53,3 +53,6 @@ namespace Kernel
         }
     }
 }
+
+extern "C" uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress);
+extern "C" void kfree_(void* ptr);

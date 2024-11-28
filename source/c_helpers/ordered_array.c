@@ -1,6 +1,8 @@
 #include "ordered_array.h"
 
+// kheap.hpp
 extern uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t* physAddress);
+extern void kfree_(void*);
 
 char standard_lessthan_predicate ( type_t a, type_t b )
 {
@@ -82,7 +84,7 @@ void orderedArray_insert ( type_t item, ordered_array_t *array )
 
 void orderedArray_destroy ( ordered_array_t *array )
 {
-	// kfree( array -> array );
+	kfree_( array -> array );
 }
 
 type_t orderedArray_lookup ( uint32_t i, ordered_array_t *array )
