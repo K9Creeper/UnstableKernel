@@ -10,6 +10,7 @@ namespace Kernel
 {
     namespace Memory
     {
+        /// 1:1 Paging Structure
         namespace Paging
         {
             struct PageEntry
@@ -49,9 +50,10 @@ namespace Kernel
             extern void Init();
 
             extern void Enable();
+            extern void Disable();
 
             extern void SwitchPageDirectory(PageDirectory *dir);
-            extern PageEntry *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false);
+            extern PageEntry *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);
             extern PageEntry *MakePageEntry(uint32_t address, PageDirectory *dir);
             extern void AllocateFrame(PageEntry *page, bool is_kernel, bool is_writeable);
             extern void FreeFrame(PageEntry *page);

@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-    . = 2M;  /* Start address of the program */
+    . = 1M;  /* Start address of the program */
     linkerld_startofkernel = .;
 
     .text BLOCK(4K) : ALIGN(4K)

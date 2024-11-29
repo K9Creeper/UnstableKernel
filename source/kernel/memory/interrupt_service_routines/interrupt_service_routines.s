@@ -128,7 +128,6 @@ _isr16:
 
 _isr17:
   cli
-  push $0
   push $17
   jmp isr_common_stub
 
@@ -152,7 +151,6 @@ _isr20:
 
 _isr21:
   cli
-  push $0
   push $21
   jmp isr_common_stub
 
@@ -240,6 +238,6 @@ isr_common_stub:
     popa
     add $8, %esp     
 
-    sti # enable interrupts
-
+    # iret loads the eflags value from the stack, which contains a bit telling whether interrupts are on or off; 
+    # in other words the interrupt handler automatically restores interrupts whether or not interrupts were enabled before this interrupt
     iret             

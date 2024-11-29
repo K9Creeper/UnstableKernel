@@ -1,17 +1,11 @@
 #include "kheap.hpp"
 
 #include "../../../c_helpers/memory.h"
+#include "../../../c_helpers/ordered_array.h"
 
 #include "../paging/paging.hpp"
 
 extern uint32_t linkerld_endofkernel;
-
-extern "C" ordered_array_t orderedArray_create(uint32_t max_size, lessthan_predicate_t less_than);
-extern "C" ordered_array_t orderedArray_place(void *addr, uint32_t max_size, lessthan_predicate_t less_than);
-extern "C" void orderedArray_destroy(ordered_array_t *array);
-extern "C" void orderedArray_insert(type_t item, ordered_array_t *array);
-extern "C" type_t orderedArray_lookup(uint32_t i, ordered_array_t *array);
-extern "C" void orderedArray_remove(uint32_t i, ordered_array_t *array);
 
 namespace Kernel
 {
@@ -42,19 +36,19 @@ static int FindSmallestHole(uint32_t size, int8_t page_align)
     {
       uint32_t location = reinterpret_cast<uint32_t>(header);
       uint32_t hole_start = location + sizeof(Kernel::Memory::KHeap::Header);
-      int offset = 0;
+      uint32_t offset = 0;
 
       // calculate the offset to align
-      if ((hole_start & PAGE_ALIGN_MASK) != 0)
+      if ((location + sizeof(Kernel::Memory::KHeap::Header) & 0xFFFFF000) != 0)
       {
         offset = PAGE_SIZE - (hole_start % PAGE_SIZE);
       }
 
       // calculate the available hole size after alignment
-      int hole_size = static_cast<int>(header->size) - offset;
+      uint32_t hole_size = header->size - offset;
 
       // if the hole size is sufficient for the requested size, stop the search
-      if (hole_size >= static_cast<int>(size))
+      if (hole_size >= size)
         break;
     }
     else if (header->size >= size) // if no alignment is needed, just check if the block is large enough
@@ -409,8 +403,9 @@ uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
     // if the heap is not initialized, manually handle allocation using placement address
 
     // if requested page-align
-    if (align == 1 && ((Kernel::Memory::KHeap::placementAddress & PAGE_ALIGN_MASK) != 0))
+    if (align == 1 && (Kernel::Memory::KHeap::placementAddress & 0x00000FFF))
     {
+      // #define PAGE_ALIGN_MASK 0xFFFFF000
       Kernel::Memory::KHeap::placementAddress &= PAGE_ALIGN_MASK; // Align the address down
       Kernel::Memory::KHeap::placementAddress += PAGE_SIZE;       // Move to the next page boundary
     }

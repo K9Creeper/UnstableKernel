@@ -1,5 +1,6 @@
 #include "interrupt_service_routines.hpp"
 
+#include "../../../c_helpers/string.h"
 #include "../../terminal/terminal.hpp"
 
 extern void IDTSetGate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
@@ -37,86 +38,18 @@ extern "C" void _isr29();
 extern "C" void _isr30();
 extern "C" void _isr31();
 
-void itoa(int num, char *str, int base)
-{
-    int i = 0;
-    int isNegative = 0;
-
-    // Handle 0 explicitly
-    if (num == 0)
-    {
-        str[i++] = '0';
-        str[i] = '\0';
-        return;
-    }
-
-    // Handle negative numbers only if base is 10
-    if (num < 0 && base == 10)
-    {
-        isNegative = 1;
-        num = -num;
-    }
-
-    // Process individual digits
-    while (num != 0)
-    {
-        int rem = num % base;
-        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        num = num / base;
-    }
-
-    // Append negative sign for negative numbers
-    if (isNegative)
-    {
-        str[i++] = '-';
-    }
-
-    str[i] = '\0'; // Null-terminate the string
-
-    // Reverse the string
-    for (int start = 0, end = i - 1; start < end; start++, end--)
-    {
-        char temp = str[start];
-        str[start] = str[end];
-        str[end] = temp;
-    }
-
-    return;
-}
-
 extern "C" void _fault_handler(Kernel::Memory::ISR::Regs *r)
 {
     static char buffer[32];
     if (r->int_no < 32)
     {
-        if (r->int_no == 14)
-        {
-            uint32_t faulting_address;
-            asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
-
-            itoa(faulting_address, buffer, 16);
-            Kernel::Terminal::WriteString("\nPage fault at address: ");
-            Kernel::Terminal::WriteString(buffer);
-
-            itoa(r->err_code, buffer, 10);
-            Kernel::Terminal::WriteString("\nError code: ");
-            Kernel::Terminal::WriteString(buffer);
-            Kernel::Terminal::WriteString("\n");
-
-            for (;;)
-            {
-            }
-        }
-        else
+        itoa(r->int_no, buffer, 10);
+        Kernel::Terminal::WriteString("| Fault ");
+        Kernel::Terminal::WriteString(buffer);
+        Kernel::Terminal::WriteString(" |\n");
+        for (;;)
         {
 
-            itoa(r->int_no, buffer, 10);
-            Kernel::Terminal::WriteString("\nFault ");
-            Kernel::Terminal::WriteString(buffer);
-            Kernel::Terminal::WriteString("\n");
-            for (;;)
-            {
-            }
         }
     }
 }

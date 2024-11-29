@@ -101,8 +101,8 @@ echo -e "Compilation Ended"
 echo -e "-------------------------------\n"
 
 if [ -f "build/build.bin" ] && [ $COMP_ERROR == "0" ]; then
-    # Check whether if the file has a valid Multiboot header.
-if grub-file --is-x86-multiboot build/build.bin; then
+    # Check whether if the file has a valid Multiboot2 header.
+if grub-file --is-x86-multiboot2 build/build.bin; then
     echo -e "File has a valid Multiboot header.\n"
 
     # Copy the build to the USB boot directory

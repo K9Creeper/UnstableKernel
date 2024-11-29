@@ -24,7 +24,6 @@ void ZeroTSS(uint32_t limit){
 }
 
 void TSS_Write(int index, uint16_t ss0, uint32_t esp0){
-  /* https://wiki.osdev.org/Getting_to_Ring_3 */
   uint32_t eip = _get_eip();
   uint32_t base = reinterpret_cast<uint32_t>(&Kernel::Memory::TSS::entry);
   uint32_t limit = base + sizeof(Kernel::Memory::TSS::entry);

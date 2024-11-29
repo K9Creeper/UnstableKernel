@@ -4,36 +4,39 @@
 
 #include "../../../c_helpers/memory.h"
 
-#include "../../terminal/terminal.hpp"
+#define INDEX_FROM_BIT(a) (a / 32)
+#define OFFSET_FROM_BIT(a) (a % 32)
 
-#define INDEX_FROM_BIT( a ) ( a / 32 )
-#define OFFSET_FROM_BIT( a ) ( a % 32 )
-
-namespace Kernel{
-	namespace Memory{
-		namespace Paging{
+namespace Kernel
+{
+	namespace Memory
+	{
+		namespace Paging
+		{
 			PageDirectory *kernelDirectory = nullptr;
-            PageDirectory *currentDirectory = nullptr;
+			PageDirectory *currentDirectory = nullptr;
 
 			Frames frames;
 		}
 	}
 }
 
-Kernel::Memory::Paging::PageEntry *Kernel::Memory::Paging::GetPageEntry(uint32_t address, Kernel::Memory::Paging::PageDirectory *dir, bool sMake)
+Kernel::Memory::Paging::PageEntry *Kernel::Memory::Paging::GetPageEntry(uint32_t address, Kernel::Memory::Paging::PageDirectory *dir, bool sMake, uint32_t *out_physical_address)
 {
 	// turn the address into an index
 	uint32_t frame = address / PAGE_SIZE;
 
 	// Find the page table containing this address
 	uint32_t table_idx = frame / PAGING_COUNTS;
-	
+
 	if (dir->tables[table_idx]) // page-table is already assigned
 	{
 		uint32_t page_idx = frame % PAGING_COUNTS;
 
 		return &dir->tables[table_idx]->pages[page_idx];
-	}else if(sMake){
+	}
+	else if (sMake)
+	{
 		return MakePageEntry(address, dir);
 	}
 
@@ -48,7 +51,7 @@ Kernel::Memory::Paging::PageEntry *Kernel::Memory::Paging::MakePageEntry(uint32_
 	// find the page table
 	uint32_t table_idx = frame / PAGING_COUNTS;
 	uint32_t page_idx = frame % PAGING_COUNTS;
-	
+
 	uint32_t physical_address;
 
 	// retrieve a memory block which is page aligned, aswell as its physical address
@@ -82,22 +85,22 @@ static void ClearFrame(uint32_t frame_address)
 	Kernel::Memory::Paging::frames.bitmap[index] &= ~(0x1 << offset);
 }
 
-static bool FirstFrame(uint32_t& out)
+static bool FirstFrame(uint32_t &out)
 {
 	// loop through bitmap
-	for (uint32_t i = 0; i < ( INDEX_FROM_BIT(Kernel::Memory::Paging::frames.count) ); i += 1 )
+	for (uint32_t i = 0; i < (INDEX_FROM_BIT(Kernel::Memory::Paging::frames.count)); i += 1)
 	{
 		// exit if nothing free
-		if (Kernel::Memory::Paging::frames.bitmap[ i ] != 0xFFFFFFFF )  
-		{	
+		if (Kernel::Memory::Paging::frames.bitmap[i] != 0xFFFFFFFF)
+		{
 			// loop through bits
-			for (uint32_t j = 0; j < 32; j += 1 )
+			for (uint32_t j = 0; j < 32; j += 1)
 			{
 				uint32_t test = 0x1 << j;
 
 				// if its free yoink it, huzzah!
-				if ( ! ( Kernel::Memory::Paging::frames.bitmap[ i ] & test ) )  
-				{	
+				if (!(Kernel::Memory::Paging::frames.bitmap[i] & test))
+				{
 					out = i * 32 + j;
 					return true;
 				}
@@ -111,14 +114,14 @@ static bool FirstFrame(uint32_t& out)
 
 void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *page, bool is_kernel, bool is_writeable)
 {
-	if(page->frame == 0)
+	if (page->frame == 0)
 	{
 		uint32_t index = 0;
 
 		if (!FirstFrame(index))
 		{
 			// no free pages. hang it.
-			void** nu = (void**)0x0;
+			void **nu = (void **)0x0;
 			for (;;)
 			{
 				// lets just fault for now lmao
@@ -139,59 +142,66 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 
 void Kernel::Memory::Paging::Init()
 {
-	// size of physical memory
-	// assume it is 16MB, like freak automation
-	// to lazy for that
-	uint32_t mem_size = 0x1000000;
-	frames.count = mem_size / PAGE_SIZE;
+	// ngl idk how big this is.
+	uint32_t physicalMemSize = 0x1000000;
 
-	// holds allocated frames 
-	frames.bitmap = reinterpret_cast<uint32_t*>( kmalloc_( INDEX_FROM_BIT( frames.count ), 0, 0) );
-	memset(reinterpret_cast<unsigned char*>(frames.bitmap), 0, INDEX_FROM_BIT( frames.count ) );  // fill with zeros
+	frames.count = physicalMemSize / PAGE_SIZE;
 
-	// make a page directory
-	uint32_t tmp = kmalloc_( sizeof( PageDirectory ), 1, 0);
-	
-	memset( reinterpret_cast<unsigned char*>(tmp), 0, sizeof( PageDirectory ) );  // fill with zeros
-	
-	kernelDirectory =reinterpret_cast<PageDirectory *> (tmp);
+	// track allocated frames
+	frames.bitmap = reinterpret_cast<uint32_t *>(kmalloc_(INDEX_FROM_BIT(frames.count), 0, 0));
+	memset(reinterpret_cast<uint8_t *>(frames.bitmap), 0, INDEX_FROM_BIT(frames.count)); // fill with zeros
+
+	// create a page directory and set it to zero
+	uint32_t tmp = kmalloc_(sizeof(PageDirectory), 1, 0);
+	memset(reinterpret_cast<uint8_t *>(tmp), 0, sizeof(PageDirectory)); // fill with zeros
+	kernelDirectory = reinterpret_cast<PageDirectory *>(tmp);
 
 	currentDirectory = kernelDirectory;
 
-
-	/// set the pages up
-	for (uint32_t i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	uint32_t i;
+	// spawn in our heap.
+	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
 	{
-		MakePageEntry( i, Kernel::Memory::Paging::kernelDirectory );
+		GetPageEntry( i, kernelDirectory, 1 );
 	}
 
-	// identity map from 0x0 to the end of used memory 
-	for (uint32_t i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
+	// identity map our kernel.
+	for (i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
 	{
-		// Kernel code is readable but not writeable from userspace
-		AllocateFrame( GetPageEntry( i, Kernel::Memory::Paging::kernelDirectory, true), 0, 0 );
+		AllocateFrame( GetPageEntry( i, kernelDirectory, 1 ), 0, 0 );
 	}
 
-	// now allocate all pages
-	for (uint32_t i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	// identity map our heap.
+	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
 	{
-		AllocateFrame( GetPageEntry( i, Kernel::Memory::Paging::kernelDirectory, true), 0, 0 );
+		AllocateFrame( GetPageEntry( i, kernelDirectory, 1 ), 0, 0 );
 	}
 
-	SwitchPageDirectory(Kernel::Memory::Paging::kernelDirectory);
+	SwitchPageDirectory(kernelDirectory);
 	Enable();
 
+	// initialize kernel heap
 	Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
 }
 
 void Kernel::Memory::Paging::Enable()
 {
 	uint32_t cr0;
-	
+
 	// enable paging
 	asm volatile("mov %%cr0, %0" : "=r"(cr0));
 	cr0 |= 0x80000000; // set paging bit
 	asm volatile("mov %0, %%cr0" : : "r"(cr0));
+}
+
+void Kernel::Memory::Paging::Disable()
+{
+	uint32_t cr0;
+
+	// Disable paging by clearing the paging bit (bit 31 in CR0)
+	asm volatile("mov %%cr0, %0" : "=r"(cr0));	// Read CR0 into cr0
+	cr0 &= ~0x80000000;							// Clear the paging bit (bit 31) in CR0
+	asm volatile("mov %0, %%cr0" : : "r"(cr0)); // Write back to CR0
 }
 
 void Kernel::Memory::Paging::SwitchPageDirectory(Kernel::Memory::Paging::PageDirectory *dir)
