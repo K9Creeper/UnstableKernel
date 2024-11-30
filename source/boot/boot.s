@@ -10,8 +10,8 @@ _start:
 
     mov $stack_top, %esp
 
-    push %eax
-    push %ebx
+    pushl   %ebx
+    pushl   %eax
 
     call kernel_main
 

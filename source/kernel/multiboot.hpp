@@ -48,6 +48,6 @@ namespace Kernel
             FramebufferInfo framebuffer;
         };
 
-        extern ParsedMultibootInfo ParseTags(unsigned addr);
+        extern ParsedMultibootInfo ParseTags(uint32_t addr);
     }
 }

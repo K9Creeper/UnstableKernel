@@ -3,6 +3,7 @@
 #include "../../c_helpers/memory.h"
 #include "../../c_helpers/string.h"
 
+#include <stdarg.h>
 ///
 /// Defs..
 ///
@@ -146,4 +147,81 @@ void Kernel::Terminal::RemoveLastChar()
 void Kernel::Terminal::WriteString(const char *data)
 {
   Terminal_Write(data, strlen(data));
+}
+
+void printf(const char *format, ...)
+{
+    char buffer[256]; // Output buffer
+    int buffer_index = 0;
+
+    va_list args; // To handle variable arguments
+    va_start(args, format);
+
+    for (const char *ptr = format; *ptr != '\0'; ++ptr)
+    {
+        if (*ptr == '%')
+        {
+            ++ptr; // Move past '%'
+            switch (*ptr)
+            {
+            case 'd': // Integer
+            {
+                int num = va_arg(args, int);
+                char num_str[32];
+                itoa(num, num_str, 10);
+                for (char *c = num_str; *c != '\0'; ++c)
+                {
+                    buffer[buffer_index++] = *c;
+                }
+                break;
+            }
+            case 'x': // Hexadecimal
+            {
+                int num = va_arg(args, int);
+                char num_str[32];
+                itoa(num, num_str, 16);
+                for (char *c = num_str; *c != '\0'; ++c)
+                {
+                    buffer[buffer_index++] = *c;
+                }
+                break;
+            }
+            case 's': // String
+            {
+                const char *str = va_arg(args, const char *);
+                for (const char *c = str; *c != '\0'; ++c)
+                {
+                    buffer[buffer_index++] = *c;
+                }
+                break;
+            }
+            case '%': // Literal '%'
+                buffer[buffer_index++] = '%';
+                break;
+            default:
+                // Unknown specifier, just print it
+                buffer[buffer_index++] = '%';
+                buffer[buffer_index++] = *ptr;
+                break;
+            }
+        }
+        else
+        {
+            buffer[buffer_index++] = *ptr;
+        }
+
+        // Flush the buffer if nearly full
+        if (buffer_index >= sizeof(buffer) - 1)
+        {
+            buffer[buffer_index] = '\0';
+            Kernel::Terminal::WriteString(buffer);
+            buffer_index = 0;
+        }
+    }
+
+    // Null-terminate and flush the remaining buffer
+    buffer[buffer_index] = '\0';
+    Kernel::Terminal::WriteString(buffer);
+
+    va_end(args);
 }

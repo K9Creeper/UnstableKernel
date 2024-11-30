@@ -1,7 +1,8 @@
 #include "interrupt_service_routines.hpp"
 
 #include "../../../c_helpers/string.h"
-#include "../../terminal/terminal.hpp"
+
+extern void printf(const char *format, ...);
 
 extern void IDTSetGate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 
@@ -43,10 +44,7 @@ extern "C" void _fault_handler(Kernel::Memory::ISR::Regs *r)
     static char buffer[32];
     if (r->int_no < 32)
     {
-        itoa(r->int_no, buffer, 10);
-        Kernel::Terminal::WriteString("| Fault ");
-        Kernel::Terminal::WriteString(buffer);
-        Kernel::Terminal::WriteString(" |\n");
+        printf("| Fault %d |", r->int_no);
         for (;;)
         {
 
