@@ -1,30 +1,22 @@
 #ifndef IRQ_H
 #define IRQ_H
 
-#include "../interrupt_service_routines/interrupt_service_routines.h"
+#include "../interrupt_service/interrupt_service.h"
 
-typedef void (*Kernel_Memory_IRQ_fHandle)(struct Kernel_Memory_ISR_Regs *r);
+#include <stdint.h>
+
+typedef void(*Kernel_Memory_IRQ_Handle)(struct Registers regs);
 
 #ifdef __cplusplus
 
-extern "C" void Kernel_Memory_IRQ_Install();
-
-extern "C" void Kernel_Memory_IRQ_InstallHandler(int irq, void* handler);
-
-extern "C" void Kernel_Memory_IRQ_UninstallHandler(int irq);
+extern "C" void Kernel_Memory_IRQ_AddHandle(int num, void* handle);
+extern "C" void Kernel_Memory_IRQ_RemoveHandle(int num);
 
 #else
 
-extern void Kernel_Memory_IRQ_Install();
-
-extern void Kernel_Memory_IRQ_InstallHandler(int irq, void* handler);
-
-extern void Kernel_Memory_IRQ_UninstallHandler(int irq);
-
+extern void Kernel_Memory_IRQ_AddHandle(int num, void* handle);
+extern void Kernel_Memory_IRQ_RemoveHandle(int num);
 
 #endif
 
 #endif
-
-
-

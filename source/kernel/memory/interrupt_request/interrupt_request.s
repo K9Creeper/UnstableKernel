@@ -1,138 +1,142 @@
-.extern _irq_handler
+.global irq0
+irq0:
+    cli
+    pushl $0
+    pushl $32
+    jmp irq_common_stub
 
-.global _irq0
-.global _irq1
-.global _irq2
-.global _irq3
-.global _irq4
-.global _irq5
-.global _irq6
-.global _irq7
-.global _irq8
-.global _irq9
-.global _irq10
-.global _irq11
-.global _irq12
-.global _irq13
-.global _irq14
-.global _irq15
+.global irq1
+irq1:
+    cli
+    pushl $0
+    pushl $33
+    jmp irq_common_stub
 
-_irq0:
-  cli
-  push $0
-  push $32
-  jmp irq_common_stub
+.global irq2
+irq2:
+    cli
+    pushl $0
+    pushl $34
+    jmp irq_common_stub
 
-_irq1:
-  cli
-  push $0
-  push $33
-  jmp irq_common_stub
+.global irq3
+irq3:
+    cli
+    pushl $0
+    pushl $35
+    jmp irq_common_stub
 
-_irq2:
-  cli
-  push $0
-  push $34
-  jmp irq_common_stub
+.global irq4
+irq4:
+    cli
+    pushl $0
+    pushl $36
+    jmp irq_common_stub
 
-_irq3:
-  cli
-  push $0
-  push $35
-  jmp irq_common_stub
+.global irq5
+irq5:
+    cli
+    pushl $0
+    pushl $37
+    jmp irq_common_stub
 
-_irq4:
-  cli
-  push $0
-  push $36
-  jmp irq_common_stub
+.global irq6
+irq6:
+    cli
+    pushl $0
+    pushl $38
+    jmp irq_common_stub
 
-_irq5:
-  cli
-  push $0
-  push $37
-  jmp irq_common_stub
+.global irq7
+irq7:
+    cli
+    pushl $0
+    pushl $39
+    jmp irq_common_stub
 
-_irq6:
-  cli
-  push $0
-  push $38
-  jmp irq_common_stub
+.global irq8
+irq8:
+    cli
+    pushl $0
+    pushl $40
+    jmp irq_common_stub
 
-_irq7:
-  cli
-  push $0
-  push $39
-  jmp irq_common_stub
+.global irq9
+irq9:
+    cli
+    pushl $0
+    pushl $41
+    jmp irq_common_stub
 
-_irq8:
-  cli
-  push $0
-  push $40
-  jmp irq_common_stub
+.global irq10
+irq10:
+    cli
+    pushl $0
+    pushl $42
+    jmp irq_common_stub
 
-_irq9:
-  cli
-  push $0
-  push $41
-  jmp irq_common_stub
+.global irq11
+irq11:
+    cli
+    pushl $0
+    pushl $43
+    jmp irq_common_stub
 
-_irq10:
-  cli
-  push $0
-  push $42
-  jmp irq_common_stub
+.global irq12
+irq12:
+    cli
+    pushl $0
+    pushl $44
+    jmp irq_common_stub
 
-_irq11:
-  cli
-  push $0
-  push $43
-  jmp irq_common_stub
+.global irq13
+irq13:
+    cli
+    pushl $0
+    pushl $45
+    jmp irq_common_stub
 
-_irq12:
-  cli
-  push $0
-  push $44
-  jmp irq_common_stub
+.global irq14
+irq14:
+    cli
+    pushl $0
+    pushl $46
+    jmp irq_common_stub
 
-_irq13:
-  cli
-  push $0
-  push $45
-  jmp irq_common_stub
+.global irq15
+irq15:
+    cli
+    pushl $0
+    pushl $47
+    jmp irq_common_stub
 
-_irq14:
-  cli
-  push $0
-  push $46
-  jmp irq_common_stub
-
-_irq15:
-  cli
-  push $0
-  push $47
-  jmp irq_common_stub
+.extern irq_handler           
 
 irq_common_stub:
-  pusha
-  push %ds
-  push %es
-  push %fs
-  push %gs
-  mov $0x10, %ax
-  mov %ax, %ds
-  mov %ax, %es
-  mov %ax, %fs
-  mov %ax, %gs
-  mov %esp, %eax
-  push %eax
-  mov _irq_handler, %eax
-  call %eax
-  pop %eax
-  pop %gs
-  pop %fs
-  pop %es
-  pop %ds
-  popa
-  add $8, %esp
-  iret
+    pusha                    
+
+    movw %ds, %ax            
+    pushl %eax               
+
+    movw $0x10, %ax          
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+
+    call irq_handler
+
+    popl %eax                
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+
+    popa                     
+
+    addl $8, %esp            
+
+    sti                     
+
+    iret                     
+    

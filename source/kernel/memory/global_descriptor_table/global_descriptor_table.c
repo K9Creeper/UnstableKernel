@@ -41,9 +41,6 @@ void Kernel_Memory_GDT_Init()
 {
     _pGDT.limit = (sizeof(struct GDTEntry) * KERNEL_MEMORY_GDT_ENTRYCOUNT) - 1;
     _pGDT.base = (unsigned int)(&pGDT);
-
-    printf("GDT limit: %d. GDT base: %x\n", _pGDT.limit, _pGDT.base);
-
 }
 
 void Kernel_Memory_GDT_Install()
@@ -59,6 +56,13 @@ void Kernel_Memory_GDT_Install()
 
         /* Data Segment. Same as the code segment, but different access byte */
         GDTSetGate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
+    }
+
+    {
+        /* Code Segment */
+        GDTSetGate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); 
+        /* Data Segment */
+        GDTSetGate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
     }
 
     /* Flush */

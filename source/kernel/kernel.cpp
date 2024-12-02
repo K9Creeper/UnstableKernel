@@ -3,9 +3,6 @@
 #include "memory/global_descriptor_table/global_descriptor_table.h"
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.h"
 
-#include "memory/interrupt_service_routines/interrupt_service_routines.h"
-#include "memory/interrupt_request/interrupt_request.h"
-
 #include "memory/kheap/kheap.hpp"
 #include "memory/paging/paging.hpp"
 
@@ -38,13 +35,15 @@ extern "C" void kernel_main(void)
     Kernel_Memory_IDT_Init();
     printf("IDT Init\n");
 
-	Kernel_Memory_ISR_Install();
-    printf("ISRS Init\n");
-    Kernel_Memory_IRQ_Install();
-    printf("IRQ Init\n");
+    Kernel_Memory_IDT_Install();
+	printf("Interrupts Init\n");
+
+    Kernel::Input::Keyboard::Init();
 
     // Enable interrupts
-    //asm volatile("sti");
+    asm volatile("sti");
+
+    Kernel::Input::Keyboard::AddHandle((void*)test);
 
     for (;;)
         asm volatile("hlt");

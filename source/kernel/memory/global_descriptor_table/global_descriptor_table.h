@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define KERNEL_MEMORY_GDT_ENTRYCOUNT 3
+#define KERNEL_MEMORY_GDT_ENTRYCOUNT 5
 
 #ifdef __cplusplus
 

@@ -2,89 +2,96 @@
 
 #include "../../../c_helpers/memory.h"
 
-extern void IDTSetGate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
 
-extern void _irq0();
-extern void _irq1();
-extern void _irq2();
-extern void _irq3();
-extern void _irq4();
-extern void _irq5();
-extern void _irq6();
-extern void _irq7();
-extern void _irq8();
-extern void _irq9();
-extern void _irq10();
-extern void _irq11();
-extern void _irq12();
-extern void _irq13();
-extern void _irq14();
-extern void _irq15();
+extern void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned char flags);
 
-extern void printf(const char *format, ...);
+void *irq_handles[16];
 
-void *irq_routines[16] = {
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0};
-
-void Kernel_Memory_IRQ_InstallHandler(int irq, void *handler)
+void irq_handler(struct Registers regs)
 {
-    irq_routines[irq] = handler;
+	if (regs.int_no >= 40)
+	{
+		outportb(0xA0, 0x20);
+	}
+	outportb(0x20, 0x20);
+
+	// exec
+	if (regs.int_no >= 16 && regs.int_no - 32 < 16)
+	{
+		if (irq_handles[regs.int_no - 32])
+		{
+			Kernel_Memory_IRQ_Handle handler = (Kernel_Memory_IRQ_Handle)(irq_handles[regs.int_no - 32]);
+			if (handler)
+			{
+				handler(regs);
+			}
+		}
+	}
 }
 
-void Kernel_Memory_IRQ_UninstallHandler(int irq)
+void Kernel_Memory_IRQ_AddHandle(int num, void *handle)
 {
-    irq_routines[irq] = 0;
+	if (num >= 0 && num < 16)
+	{
+		irq_handles[num] = handle;
+	}
 }
 
-void IRQRemap(void)
+void Kernel_Memory_IRQ_RemoveHandle(int num)
 {
-    outportb(0x20, 0x11);
-    outportb(0xA0, 0x11);
-    outportb(0x21, 0x20);
-    outportb(0xA1, 0x28);
-    outportb(0x21, 0x04);
-    outportb(0xA1, 0x02);
-    outportb(0x21, 0x01);
-    outportb(0xA1, 0x01);
-    outportb(0x21, 0x0);
-    outportb(0xA1, 0x0);
+	if (num >= 0 && num < 16)
+	{
+		irq_handles[num] = 0;
+	}
 }
 
-extern void _irq_handler(struct Kernel_Memory_ISR_Regs *r)
+void Kernel_Memory_IRQ_Remap()
 {
-    Kernel_Memory_IRQ_fHandle handler = (Kernel_Memory_IRQ_fHandle)(irq_routines[r->int_no - 32]);
-    if (handler)
-    {
-        handler(r);
-    }
-
-    // slave controllers
-    if (r->int_no >= 40)
-        outportb(0xA0, 0x20);
-
-    // master controllers
-    outportb(0x20, 0x20);
+	// Remap the irq table
+	outportb(0x20, 0x11);
+	outportb(0xA0, 0x11);
+	outportb(0x21, 0x20);
+	outportb(0xA1, 0x28);
+	outportb(0x21, 0x04);
+	outportb(0xA1, 0x02);
+	outportb(0x21, 0x01);
+	outportb(0xA1, 0x01);
+	outportb(0x21, 0x00);
+	outportb(0xA1, 0x00);
 }
 
-void Kernel_Memory_IRQ_Install()
+void Kernel_Memory_IRQ_AddGates()
 {
-    IRQRemap();
-
-    IDTSetGate(32, (unsigned)_irq0, 0x08, 0x8E);
-    IDTSetGate(33, (unsigned)_irq1, 0x08, 0x8E);
-    IDTSetGate(34, (unsigned)_irq2, 0x08, 0x8E);
-    IDTSetGate(35, (unsigned)_irq3, 0x08, 0x8E);
-    IDTSetGate(36, (unsigned)_irq4, 0x08, 0x8E);
-    IDTSetGate(37, (unsigned)_irq5, 0x08, 0x8E);
-    IDTSetGate(38, (unsigned)_irq6, 0x08, 0x8E);
-    IDTSetGate(39, (unsigned)_irq7, 0x08, 0x8E);
-    IDTSetGate(40, (unsigned)_irq8, 0x08, 0x8E);
-    IDTSetGate(41, (unsigned)_irq9, 0x08, 0x8E);
-    IDTSetGate(42, (unsigned)_irq10, 0x08, 0x8E);
-    IDTSetGate(43, (unsigned)_irq11, 0x08, 0x8E);
-    IDTSetGate(44, (unsigned)_irq12, 0x08, 0x8E);
-    IDTSetGate(45, (unsigned)_irq13, 0x08, 0x8E);
-    IDTSetGate(46, (unsigned)_irq14, 0x08, 0x8E);
-    IDTSetGate(47, (unsigned)_irq15, 0x08, 0x8E);
+	IDTSetGate(32, (uint32_t)irq0, 0x08, 0x8E);
+	IDTSetGate(33, (uint32_t)irq1, 0x08, 0x8E);
+	IDTSetGate(34, (uint32_t)irq2, 0x08, 0x8E);
+	IDTSetGate(35, (uint32_t)irq3, 0x08, 0x8E);
+	IDTSetGate(36, (uint32_t)irq4, 0x08, 0x8E);
+	IDTSetGate(37, (uint32_t)irq5, 0x08, 0x8E);
+	IDTSetGate(38, (uint32_t)irq6, 0x08, 0x8E);
+	IDTSetGate(39, (uint32_t)irq7, 0x08, 0x8E);
+	IDTSetGate(40, (uint32_t)irq8, 0x08, 0x8E);
+	IDTSetGate(41, (uint32_t)irq9, 0x08, 0x8E);
+	IDTSetGate(42, (uint32_t)irq10, 0x08, 0x8E);
+	IDTSetGate(43, (uint32_t)irq11, 0x08, 0x8E);
+	IDTSetGate(44, (uint32_t)irq12, 0x08, 0x8E);
+	IDTSetGate(45, (uint32_t)irq13, 0x08, 0x8E);
+	IDTSetGate(46, (uint32_t)irq14, 0x08, 0x8E);
+	IDTSetGate(47, (uint32_t)irq15, 0x08, 0x8E);
 }

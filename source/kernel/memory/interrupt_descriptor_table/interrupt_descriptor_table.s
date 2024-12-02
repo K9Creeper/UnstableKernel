@@ -4,3 +4,4 @@
 _idt_load:
     lidt [ _pIDT ]
     ret
+    

@@ -24,6 +24,10 @@
         "new": "cpp",
         "stdexcept": "cpp",
         "tuple": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "interrupt_descriptor_table.h": "c",
+        "memory.h": "c",
+        "interrupt_service.h": "c",
+        "interrupt_request.h": "c"
     }
 }

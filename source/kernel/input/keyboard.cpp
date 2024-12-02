@@ -173,10 +173,11 @@ void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
     }
 }
 
+extern 
 void Kernel::Input::Keyboard::Init()
 {
     bInitialized = true;
-    Kernel_Memory_IRQ_InstallHandler(1, reinterpret_cast<void*>(KeyboardHandler_));
+    Kernel_Memory_IRQ_AddHandle(1, (void*)KeyboardHandler_);
 }
 
 int Kernel::Input::Keyboard::AddHandle(void* handle){
