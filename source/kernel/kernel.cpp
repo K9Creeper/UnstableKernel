@@ -1,7 +1,7 @@
 #include "../c_helpers/multiboot.h"
 
-#include "memory/global_descriptor_table/global_descriptor_table.h"
-#include "memory/interrupt_descriptor_table/interrupt_descriptor_table.h"
+#include "memory/global_descriptor_table/global_descriptor_table.hpp"
+#include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 
 #include "memory/kheap/kheap.hpp"
 #include "memory/paging/paging.hpp"
@@ -20,7 +20,7 @@ extern "C" void printf(const char *format, ...);
 
 void test(const Kernel::Input::Keyboard::Key& k)
 {
-	printf("Pressed %s %d %d->%d\n", k.keyname, (int)k.value, k.bPressed, k.bPressed);
+	printf("Pressed %s %d %d->%d\n", k.keyname, (int)k.value, k.bPressedPrev, k.bPressed);
 }
 
 extern "C" void kernel_main(void)
@@ -28,15 +28,18 @@ extern "C" void kernel_main(void)
     Kernel::Terminal::Init();
     printf("Terminal Init\n");
 
-    Kernel_Memory_GDT_Init();
-    Kernel_Memory_GDT_Install();
+    Kernel::Memory::GDT::Init();
+    Kernel::Memory::GDT::Install();
     printf("GDT Init\n");
 
-    Kernel_Memory_IDT_Init();
+    Kernel::Memory::IDT::Init();
     printf("IDT Init\n");
 
-    Kernel_Memory_IDT_Install();
+    Kernel::Memory::IDT::Install();
 	printf("Interrupts Init\n");
+
+    Kernel::Memory::Paging::Init(0xC0000000);
+    Kernel::Memory::KHeap::Init(0xC0000000, 0xC0000000+KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
 
     Kernel::Input::Keyboard::Init();
 

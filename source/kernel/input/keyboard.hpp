@@ -23,10 +23,6 @@ namespace Kernel
             
             typedef void(*keyboard_input_handle)(const Key& k);
 
-            namespace US_QWETY{
-                extern Key keymap[128];
-            }
-
             extern void* handles[64];
 
             extern bool bInitialized;
@@ -35,6 +31,8 @@ namespace Kernel
             
             extern int AddHandle(void* handle);
             extern void RemoveHandle(int i);
+
+            extern const Key* GetKeyMap();
         }
     }
 }

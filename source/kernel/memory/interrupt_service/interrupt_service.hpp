@@ -1,5 +1,4 @@
-#ifndef ISRS_H
-#define ISRS_H
+#pragma once
 
 #include <stdint.h>
 
@@ -10,5 +9,3 @@ struct Registers
 	uint32_t int_no, err_code;                        // Interrupt number and error code (if applicable)
 	uint32_t eip, cs, eflags, useresp, ss;            // Pushed by the processor automatically.
 };
-
-#endif

@@ -1,4 +1,4 @@
-#include "global_descriptor_table.h"
+#include "global_descriptor_table.hpp"
 
 struct GDTEntry
 {
@@ -16,11 +16,11 @@ struct GDTPtr
     unsigned int base;
 } __attribute__((packed));
 
-struct GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
+GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
 
-extern void _gdt_flush();
+extern "C" void _gdt_flush();
 
-struct GDTPtr _pGDT;
+GDTPtr _pGDT;
 
 void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran)
 {
@@ -35,15 +35,15 @@ void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned cha
     pGDT[index].access = access;
 }
 
-extern void printf(const char *format, ...);
+extern "C" void printf(const char *format, ...);
 
-void Kernel_Memory_GDT_Init()
+void Kernel::Memory::GDT::Init()
 {
     _pGDT.limit = (sizeof(struct GDTEntry) * KERNEL_MEMORY_GDT_ENTRYCOUNT) - 1;
     _pGDT.base = (unsigned int)(&pGDT);
 }
 
-void Kernel_Memory_GDT_Install()
+void Kernel::Memory::GDT::Install()
 {
     /* Set Gates */
     {

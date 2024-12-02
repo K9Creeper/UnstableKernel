@@ -1,9 +1,9 @@
-#include "interrupt_descriptor_table.h"
+#include "interrupt_descriptor_table.hpp"
 
 #include "../../../c_helpers/memory.h"
 
-#include "../interrupt_request/interrupt_request.h"
-#include "../interrupt_service/interrupt_service.h"
+#include "../interrupt_request/interrupt_request.hpp"
+#include "../interrupt_service/interrupt_service.hpp"
 
 #include <stdint.h>
 
@@ -22,10 +22,10 @@ struct IDTPtr
     unsigned int base;    // Base address of the IDT
 } __attribute__((packed));
 
-struct IDTEntry pIDT[256];
-struct IDTPtr _pIDT;
+IDTEntry pIDT[256];
+IDTPtr _pIDT;
 
-extern void _idt_load();
+extern "C" void _idt_load();
 
 void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned char flags)
 {
@@ -36,24 +36,33 @@ void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned c
     pIDT[num].flags = flags;
 }
 
-extern void printf(const char *format, ...);
+extern "C" void printf(const char *format, ...);
 
-void Kernel_Memory_IDT_Init()
+void Kernel::Memory::IDT::Init()
 {
     _pIDT.limit = (sizeof(struct IDTEntry) * 256) - 1;
     _pIDT.base = (unsigned int)(&pIDT);
     memset((unsigned char *)(&pIDT), 0, sizeof(struct IDTEntry) * 256);
 }
 
-extern void Kernel_Memory_IRQ_Remap();
-extern void Kernel_Memory_IRQ_AddGates();
-extern void Kernel_Memory_ISRS_AddGates();
+namespace Kernel{
+    namespace Memory{
+        namespace IRQ{
+            extern void Remap();
+            extern void AddGates();
+        }
 
-void Kernel_Memory_IDT_Install()
+        namespace ISRS{
+            extern void AddGates();
+        }
+    }
+}
+
+void Kernel::Memory::IDT::Install()
 {
-    Kernel_Memory_IRQ_Remap();
-    Kernel_Memory_ISRS_AddGates();
-    Kernel_Memory_IRQ_AddGates();
+    Kernel::Memory::IRQ::Remap();
+    Kernel::Memory::ISRS::AddGates();
+    Kernel::Memory::IRQ::AddGates();
 
     _idt_load();
 }

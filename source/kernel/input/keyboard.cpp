@@ -1,7 +1,7 @@
 #include "keyboard.hpp"
 
 #include "../../c_helpers/memory.h"
-#include "../memory/interrupt_request/interrupt_request.h"
+#include "../memory/interrupt_request/interrupt_request.hpp"
 
 namespace Kernel
 {
@@ -154,18 +154,17 @@ extern "C" void printf(const char *format, ...);
 
 void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 {
-    static uint8_t prevScancode = 0;
     const uint8_t scancode = inportb(0x60);
 
-    Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressedPrev = Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressed;
     if ((scancode & 128) == 128)
     {
-        Kernel::Input::Keyboard::US_QWETY::keymap[prevScancode].bPressed = false;
+        Kernel::Input::Keyboard::US_QWETY::keymap[scancode-128].bPressedPrev = Kernel::Input::Keyboard::US_QWETY::keymap[scancode-128].bPressed;
+        Kernel::Input::Keyboard::US_QWETY::keymap[scancode-128].bPressed = false;
     }
     else
     {
+        Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressedPrev = Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressed;
         Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressed = true;
-        prevScancode = scancode;
     }
 
     for (int i = 0; i < 64; i++)
@@ -175,7 +174,7 @@ void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 
         if ((scancode & 128) == 128)
         {
-            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[prevScancode]);
+            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[scancode-128]);
         }
         else
         {
@@ -187,7 +186,7 @@ void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 extern void Kernel::Input::Keyboard::Init()
 {
     bInitialized = true;
-    Kernel_Memory_IRQ_AddHandle(1, (void *)KeyboardHandler_);
+    Kernel::Memory::IRQ::AddHandle(1, (void *)KeyboardHandler_);
 }
 
 int Kernel::Input::Keyboard::AddHandle(void *handle)
@@ -209,4 +208,8 @@ void Kernel::Input::Keyboard::RemoveHandle(int i)
         return;
 
     handles[i] = nullptr;
+}
+
+const Kernel::Input::Keyboard::Key* Kernel::Input::Keyboard::GetKeyMap(){
+    return US_QWETY::keymap;
 }
