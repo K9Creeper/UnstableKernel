@@ -149,7 +149,7 @@ void Kernel::Terminal::WriteString(const char *data)
   Terminal_Write(data, strlen(data));
 }
 
-void printf(const char *format, ...)
+extern "C" void printf(const char *format, ...)
 {
     char buffer[256]; // Output buffer
     int buffer_index = 0;

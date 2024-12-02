@@ -1,42 +1,41 @@
-    .global _isr0
-    .global _isr1
-    .global _isr2
-    .global _isr3
-    .global _isr4
-    .global _isr5
-    .global _isr6
-    .global _isr7
-    .global _isr8
-    .global _isr9
-    .global _isr10
-    .global _isr11
-    .global _isr12
-    .global _isr13
-    .global _isr14
-    .global _isr15
-    .global _isr16
-    .global _isr17
-    .global _isr18
-    .global _isr19
-    .global _isr20
-    .global _isr21
-    .global _isr22
-    .global _isr23
-    .global _isr24
-    .global _isr25
-    .global _isr26
-    .global _isr27
-    .global _isr28
-    .global _isr29
-    .global _isr30
-    .global _isr31
+.global _isr0
+.global _isr1
+.global _isr2
+.global _isr3
+.global _isr4
+.global _isr5
+.global _isr6
+.global _isr7
+.global _isr8
+.global _isr9
+.global _isr10
+.global _isr11
+.global _isr12
+.global _isr13
+.global _isr14
+.global _isr15
+.global _isr16
+.global _isr17
+.global _isr18
+.global _isr19
+.global _isr20
+.global _isr21
+.global _isr22
+.global _isr23
+.global _isr24
+.global _isr25
+.global _isr26
+.global _isr27
+.global _isr28
+.global _isr29
+.global _isr30
+.global _isr31
 
 _isr0:
   cli
   push $0
   push $0
   jmp isr_common_stub
-
 _isr1:
   cli
   push $0
@@ -117,7 +116,7 @@ _isr14:
 _isr15:
   cli
   push $0
-  push $15
+  push $14
   jmp isr_common_stub
 
 _isr16:
@@ -198,13 +197,11 @@ _isr28:
 
 _isr29:
   cli
-  push $0
   push $29
   jmp isr_common_stub
 
 _isr30:
   cli
-  push $0
   push $30
   jmp isr_common_stub
 
@@ -217,27 +214,25 @@ _isr31:
 .extern _fault_handler
 
 isr_common_stub:
-    pusha
-    push %ds
-    push %es
-    push %fs
-    push %gs
-    mov $0x10, %ax  
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    mov %esp, %eax   
-    push %eax
-    call _fault_handler
-    pop %eax
-    pop %gs
-    pop %fs
-    pop %es
-    pop %ds
-    popa
-    add $8, %esp     
-
-    # iret loads the eflags value from the stack, which contains a bit telling whether interrupts are on or off; 
-    # in other words the interrupt handler automatically restores interrupts whether or not interrupts were enabled before this interrupt
-    iret             
+  pusha
+  push %ds
+  push %es
+  push %fs
+  push %gs
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  mov %ax, %fs
+  mov %ax, %gs
+  mov %esp, %eax
+  push %eax
+  mov _fault_handler, %eax
+  call %eax       
+  pop %eax
+  pop %gs
+  pop %fs
+  pop %es
+  pop %ds
+  popa
+  add $8, %esp
+  iret           

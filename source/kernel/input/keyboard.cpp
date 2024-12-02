@@ -1,7 +1,7 @@
 #include "keyboard.hpp"
 
 #include "../../c_helpers/memory.h"
-#include "../memory/interrupt_request/interrupt_request.hpp"
+#include "../memory/interrupt_request/interrupt_request.h"
 
 namespace Kernel
 {
@@ -143,14 +143,16 @@ namespace Kernel
                 };
             }
 
-            keyboard_input_handle handles[64];
+            void* handles[64];
 
             bool bInitialized = false;
         }
     }
 }
 
-void KeyboardHandler(Kernel::Memory::ISR::Regs *reg)
+extern void printf(const char *format, ...);
+
+void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 {
     const uint16_t scancode = inportb(0x60);
 
@@ -163,20 +165,21 @@ void KeyboardHandler(Kernel::Memory::ISR::Regs *reg)
     {
         if (!Kernel::Input::Keyboard::handles[i])
             continue;
+
         if (scancode <= 80 && scancode)
-            (Kernel::Input::Keyboard::handles[i])(Kernel::Input::Keyboard::US_QWETY::keymap[scancode]);
+            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[scancode]);
         else if ((scancode - 0x80) > 0)
-            (Kernel::Input::Keyboard::handles[i])(Kernel::Input::Keyboard::US_QWETY::keymap[scancode - 0x80]);
+            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[scancode - 0x80]);
     }
 }
 
 void Kernel::Input::Keyboard::Init()
 {
     bInitialized = true;
-    Kernel::Memory::IRQ::InstallHandler(1, KeyboardHandler);
+    Kernel_Memory_IRQ_InstallHandler(1, reinterpret_cast<void*>(KeyboardHandler_));
 }
 
-int Kernel::Input::Keyboard::AddHandle(Kernel::Input::Keyboard::keyboard_input_handle handle){
+int Kernel::Input::Keyboard::AddHandle(void* handle){
     for(int i = 0; i < 64; i++)
     {
         if(handles[i])

@@ -47,7 +47,7 @@ namespace Kernel
 
             extern Frames frames;
 
-            extern void Init();
+            extern void Init(uint32_t heap_start);
 
             extern void Enable();
             extern void Disable();

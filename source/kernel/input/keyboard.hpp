@@ -20,19 +20,19 @@ namespace Kernel
                 bool bPressed;
             };
             
-            typedef void(*keyboard_input_handle)(const Key&);
+            typedef void(*keyboard_input_handle)(const Key& k);
 
             namespace US_QWETY{
                 extern Key keymap[128];
             }
 
-            extern keyboard_input_handle handles[64];
+            extern void* handles[64];
 
             extern bool bInitialized;
 
             extern void Init();
-
-            extern int AddHandle(keyboard_input_handle handle);
+            
+            extern int AddHandle(void* handle);
             extern void RemoveHandle(int i);
         }
     }

@@ -140,7 +140,7 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 	}
 }
 
-void Kernel::Memory::Paging::Init()
+void Kernel::Memory::Paging::Init(uint32_t heap_start)
 {
 	// ngl idk how big this is.
 	uint32_t physicalMemSize = 0x1000000;
@@ -160,7 +160,7 @@ void Kernel::Memory::Paging::Init()
 
 	uint32_t i;
 	// spawn in our heap.
-	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	for (i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
 	{
 		GetPageEntry( i, kernelDirectory, 1 );
 	}
@@ -172,16 +172,13 @@ void Kernel::Memory::Paging::Init()
 	}
 
 	// identity map our heap.
-	for (i = KHEAP_START; i < KHEAP_START + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	for (i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
 	{
 		AllocateFrame( GetPageEntry( i, kernelDirectory, 1 ), 0, 0 );
 	}
 
 	SwitchPageDirectory(kernelDirectory);
 	Enable();
-
-	// initialize kernel heap
-	Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
 }
 
 void Kernel::Memory::Paging::Enable()
@@ -192,16 +189,6 @@ void Kernel::Memory::Paging::Enable()
 	asm volatile("mov %%cr0, %0" : "=r"(cr0));
 	cr0 |= 0x80000000; // set paging bit
 	asm volatile("mov %0, %%cr0" : : "r"(cr0));
-}
-
-void Kernel::Memory::Paging::Disable()
-{
-	uint32_t cr0;
-
-	// Disable paging by clearing the paging bit (bit 31 in CR0)
-	asm volatile("mov %%cr0, %0" : "=r"(cr0));	// Read CR0 into cr0
-	cr0 &= ~0x80000000;							// Clear the paging bit (bit 31) in CR0
-	asm volatile("mov %0, %%cr0" : : "r"(cr0)); // Write back to CR0
 }
 
 void Kernel::Memory::Paging::SwitchPageDirectory(Kernel::Memory::Paging::PageDirectory *dir)
