@@ -82,3 +82,43 @@ void itoa(int num, char *str, int base)
 
   return;
 }
+
+void uitoa(uint32_t num, char *str, int base)
+{
+  int i = 0;
+  int isNegative = 0;
+
+  // Handle 0 explicitly
+  if (num == 0)
+  {
+    str[i++] = '0';
+    str[i] = '\0';
+    return;
+  }
+
+  // Process individual digits
+  while (num != 0)
+  {
+    int rem = num % base;
+    str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+    num = num / base;
+  }
+
+  // Append negative sign for negative numbers
+  if (isNegative)
+  {
+    str[i++] = '-';
+  }
+
+  str[i] = '\0'; // Null-terminate the string
+
+  // Reverse the string
+  for (int start = 0, end = i - 1; start < end; start++, end--)
+  {
+    char temp = str[start];
+    str[start] = str[end];
+    str[end] = temp;
+  }
+
+  return;
+}

@@ -18,45 +18,28 @@ extern uint32_t linkerld_startofkernel;
 
 extern "C" void printf(const char *format, ...);
 
-void test(const Kernel::Input::Keyboard::Key& k)
-{
-    if(!k.bPressedPrev && k.bPressedPrev != k.bPressed && k.bPressed)
-	    printf("Pressed %s\n", k.keyname);
-    else if(k.bPressedPrev && k.bPressedPrev != k.bPressed && !k.bPressed)
-        printf("Released %s\n", k.keyname);
-    else if(k.bPressedPrev && k.bPressed == k.bPressedPrev)
-        printf("Holding %s\n", k.keyname);
-}
-
-extern "C" void kernel_main(void)
+extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
     Kernel::Terminal::Init();
-    printf("Terminal Init\n");
-
+    
     Kernel::Memory::GDT::Init();
     Kernel::Memory::GDT::Install();
-    printf("GDT Init\n");
 
     Kernel::Memory::IDT::Init();
-    printf("IDT Init\n");
 
     Kernel::Memory::IDT::Install();
-	printf("Interrupts Init\n");
 
     Kernel::Memory::Paging::Init(KHEAP_START);
-    printf("Paging Enabled\n");
-    
-    Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
-    printf("KHeap Init\n");
 
-    Kernel::Terminal::Clear();
+    Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
 
     Kernel::Input::Keyboard::Init();
 
     // Enable interrupts
     asm volatile("sti");
 
-    Kernel::Input::Keyboard::AddHandle((void*)test);
+    multiboot_tag_framebuffer_common *fbc = Kernel::Multiboot::GetFrameBuffer(addr);
+    
 
     for (;;)
         asm volatile("hlt");

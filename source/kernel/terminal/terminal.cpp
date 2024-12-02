@@ -47,17 +47,17 @@ uint16_t Terminal_VGA_Entry(unsigned char uc, uint8_t color)
 
 void Terminal_Enable_Cursor()
 {
-	outportb(0x3D4, 0x0A);
-	outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
+  outportb(0x3D4, 0x0A);
+  outportb(0x3D5, (inportb(0x3D5) & 0xC0) | 0);
 
-	outportb(0x3D4, 0x0B);
-	outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 237);
+  outportb(0x3D4, 0x0B);
+  outportb(0x3D5, (inportb(0x3D5) & 0xE0) | 237);
 }
 
 void Terminal_Disable_Cursor()
 {
-	outportb(0x3D4, 0x0A);
-	outportb(0x3D5, 0x20);
+  outportb(0x3D4, 0x0A);
+  outportb(0x3D5, 0x20);
 }
 
 void Terminal_Cursor_Update(uint16_t x, uint16_t y)
@@ -92,7 +92,8 @@ uint8_t Kernel::Terminal::Customization::GetColor()
   return Terminal_VGA_Entry_Color(Kernel::Terminal::Customization::color_fg, Kernel::Terminal::Customization::color_bg);
 }
 
-void Kernel::Terminal::Init(){
+void Kernel::Terminal::Init()
+{
   Terminal_Disable_Cursor();
   Terminal_Enable_Cursor();
   Kernel::Terminal::Clear();
@@ -151,77 +152,99 @@ void Kernel::Terminal::WriteString(const char *data)
 
 extern "C" void printf(const char *format, ...)
 {
-    char buffer[256]; // Output buffer
-    int buffer_index = 0;
+  char buffer[256]; // Output buffer
+  int buffer_index = 0;
 
-    va_list args; // To handle variable arguments
-    va_start(args, format);
+  va_list args; // To handle variable arguments
+  va_start(args, format);
 
-    for (const char *ptr = format; *ptr != '\0'; ++ptr)
+  for (const char *ptr = format; *ptr != '\0'; ++ptr)
+  {
+    if (*ptr == '%')
     {
-        if (*ptr == '%')
+      ++ptr; // Move past '%'
+      switch (*ptr)
+      {
+      case 'd': // Integer
+      {
+        int num = va_arg(args, int);
+        char num_str[32];
+        itoa(num, num_str, 10);
+        for (char *c = num_str; *c != '\0'; ++c)
         {
-            ++ptr; // Move past '%'
-            switch (*ptr)
-            {
-            case 'd': // Integer
-            {
-                int num = va_arg(args, int);
-                char num_str[32];
-                itoa(num, num_str, 10);
-                for (char *c = num_str; *c != '\0'; ++c)
-                {
-                    buffer[buffer_index++] = *c;
-                }
-                break;
-            }
-            case 'x': // Hexadecimal
-            {
-                int num = va_arg(args, int);
-                char num_str[32];
-                itoa(num, num_str, 16);
-                for (char *c = num_str; *c != '\0'; ++c)
-                {
-                    buffer[buffer_index++] = *c;
-                }
-                break;
-            }
-            case 's': // String
-            {
-                const char *str = va_arg(args, const char *);
-                for (const char *c = str; *c != '\0'; ++c)
-                {
-                    buffer[buffer_index++] = *c;
-                }
-                break;
-            }
-            case '%': // Literal '%'
-                buffer[buffer_index++] = '%';
-                break;
-            default:
-                // Unknown specifier, just print it
-                buffer[buffer_index++] = '%';
-                buffer[buffer_index++] = *ptr;
-                break;
-            }
+          buffer[buffer_index++] = *c;
         }
-        else
+        break;
+      }
+      case 'D':
+      {
+        uint32_t num = va_arg(args, uint32_t);
+        char num_str[32];
+        uitoa(num, num_str, 10);
+        for (char *c = num_str; *c != '\0'; ++c)
         {
-            buffer[buffer_index++] = *ptr;
+          buffer[buffer_index++] = *c;
         }
-
-        // Flush the buffer if nearly full
-        if (buffer_index >= sizeof(buffer) - 1)
+        break;
+      }
+      case 'x': // Hexadecimal
+      {
+        int num = va_arg(args, int);
+        char num_str[32];
+        itoa(num, num_str, 16);
+        for (char *c = num_str; *c != '\0'; ++c)
         {
-            buffer[buffer_index] = '\0';
-            Kernel::Terminal::WriteString(buffer);
-            buffer_index = 0;
+          buffer[buffer_index++] = *c;
         }
+        break;
+      }
+      case 'X': // Hexadecimal
+      {
+        uint32_t num = va_arg(args, uint32_t);
+        char num_str[32];
+        uitoa(num, num_str, 16);
+        for (char *c = num_str; *c != '\0'; ++c)
+        {
+          buffer[buffer_index++] = *c;
+        }
+        break;
+      }
+      case 's': // String
+      {
+        const char *str = va_arg(args, const char *);
+        for (const char *c = str; *c != '\0'; ++c)
+        {
+          buffer[buffer_index++] = *c;
+        }
+        break;
+      }
+      case '%': // Literal '%'
+        buffer[buffer_index++] = '%';
+        break;
+      default:
+        // Unknown specifier, just print it
+        buffer[buffer_index++] = '%';
+        buffer[buffer_index++] = *ptr;
+        break;
+      }
+    }
+    else
+    {
+      buffer[buffer_index++] = *ptr;
     }
 
-    // Null-terminate and flush the remaining buffer
-    buffer[buffer_index] = '\0';
-    Kernel::Terminal::WriteString(buffer);
+    // Flush the buffer if nearly full
+    if (buffer_index >= sizeof(buffer) - 1)
+    {
+      buffer[buffer_index] = '\0';
+      Kernel::Terminal::WriteString(buffer);
+      buffer_index = 0;
+    }
+  }
 
-    va_end(args);
+  // Null-terminate and flush the remaining buffer
+  buffer[buffer_index] = '\0';
+  Kernel::Terminal::WriteString(buffer);
+
+  va_end(args);
 }
