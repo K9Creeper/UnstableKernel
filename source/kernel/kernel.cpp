@@ -20,7 +20,12 @@ extern "C" void printf(const char *format, ...);
 
 void test(const Kernel::Input::Keyboard::Key& k)
 {
-	printf("Pressed %s %d %d->%d\n", k.keyname, (int)k.value, k.bPressedPrev, k.bPressed);
+    if(!k.bPressedPrev && k.bPressedPrev != k.bPressed && k.bPressed)
+	    printf("Pressed %s\n", k.keyname);
+    else if(k.bPressedPrev && k.bPressedPrev != k.bPressed && !k.bPressed)
+        printf("Released %s\n", k.keyname);
+    else if(k.bPressedPrev && k.bPressed == k.bPressedPrev)
+        printf("Holding %s\n", k.keyname);
 }
 
 extern "C" void kernel_main(void)
@@ -39,7 +44,12 @@ extern "C" void kernel_main(void)
 	printf("Interrupts Init\n");
 
     Kernel::Memory::Paging::Init(0xC0000000);
+    printf("Paging Enabled\n");
+    
     Kernel::Memory::KHeap::Init(0xC0000000, 0xC0000000+KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
+    printf("KHeap Init\n");
+
+    Kernel::Terminal::Clear();
 
     Kernel::Input::Keyboard::Init();
 
