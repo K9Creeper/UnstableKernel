@@ -43,10 +43,10 @@ extern "C" void kernel_main(void)
     Kernel::Memory::IDT::Install();
 	printf("Interrupts Init\n");
 
-    Kernel::Memory::Paging::Init(0xC0000000);
+    Kernel::Memory::Paging::Init(KHEAP_START);
     printf("Paging Enabled\n");
     
-    Kernel::Memory::KHeap::Init(0xC0000000, 0xC0000000+KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
+    Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, false, false);
     printf("KHeap Init\n");
 
     Kernel::Terminal::Clear();

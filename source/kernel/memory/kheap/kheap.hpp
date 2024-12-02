@@ -4,6 +4,7 @@
 
 #include "../../../c_helpers/ordered_array.h"
 
+#define KHEAP_START         0xC0000000
 #define KHEAP_INITIAL_SIZE  0x100000    // arbitrary
 #define MAX_HEAP_SIZE       0xCFFFF000
 #define HEAP_INDEX_SIZE     0x20000     // arbitrary
