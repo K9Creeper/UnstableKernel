@@ -8,7 +8,7 @@
 
 #include "terminal/terminal.hpp"
 
-#include "multiboot.hpp"
+#include "multiboot/multiboot.hpp"
 
 #include "input/keyboard.hpp"
 

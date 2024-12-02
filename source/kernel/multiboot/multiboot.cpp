@@ -1,6 +1,6 @@
 #include "multiboot.hpp"
 
-#include "memory/kheap/kheap.hpp"
+#include "../memory/kheap/kheap.hpp"
 
 namespace Kernel
 {

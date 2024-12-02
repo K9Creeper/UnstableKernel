@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "../c_helpers/multiboot.h"
+#include "../../c_helpers/multiboot.h"
 
 namespace Kernel
 {
