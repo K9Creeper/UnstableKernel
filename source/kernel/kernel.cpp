@@ -20,7 +20,7 @@ extern "C" void printf(const char *format, ...);
 
 void test(const Kernel::Input::Keyboard::Key& k)
 {
-	printf("Test\n");
+	printf("Pressed %s %d %d->%d\n", k.keyname, (int)k.value, k.bPressed, k.bPressed);
 }
 
 extern "C" void kernel_main(void)

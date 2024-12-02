@@ -143,57 +143,69 @@ namespace Kernel
                 };
             }
 
-            void* handles[64];
+            void *handles[64];
 
             bool bInitialized = false;
         }
     }
 }
 
-extern void printf(const char *format, ...);
+extern "C" void printf(const char *format, ...);
 
 void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 {
-    const uint16_t scancode = inportb(0x60);
+    static uint8_t prevScancode = 0;
+    const uint8_t scancode = inportb(0x60);
 
-    if (scancode <= 80 && scancode)
+    Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressedPrev = Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressed;
+    if ((scancode & 128) == 128)
+    {
+        Kernel::Input::Keyboard::US_QWETY::keymap[prevScancode].bPressed = false;
+    }
+    else
+    {
         Kernel::Input::Keyboard::US_QWETY::keymap[scancode].bPressed = true;
-    else if ((scancode - 0x80) > 0)
-        Kernel::Input::Keyboard::US_QWETY::keymap[scancode - 0x80].bPressed = false; // released
+        prevScancode = scancode;
+    }
 
     for (int i = 0; i < 64; i++)
     {
         if (!Kernel::Input::Keyboard::handles[i])
             continue;
 
-        if (scancode <= 80 && scancode)
+        if ((scancode & 128) == 128)
+        {
+            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[prevScancode]);
+        }
+        else
+        {
             (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[scancode]);
-        else if ((scancode - 0x80) > 0)
-            (reinterpret_cast<Kernel::Input::Keyboard::keyboard_input_handle>(Kernel::Input::Keyboard::handles[i]))(Kernel::Input::Keyboard::US_QWETY::keymap[scancode - 0x80]);
+        }
     }
 }
 
-extern 
-void Kernel::Input::Keyboard::Init()
+extern void Kernel::Input::Keyboard::Init()
 {
     bInitialized = true;
-    Kernel_Memory_IRQ_AddHandle(1, (void*)KeyboardHandler_);
+    Kernel_Memory_IRQ_AddHandle(1, (void *)KeyboardHandler_);
 }
 
-int Kernel::Input::Keyboard::AddHandle(void* handle){
-    for(int i = 0; i < 64; i++)
+int Kernel::Input::Keyboard::AddHandle(void *handle)
+{
+    for (int i = 0; i < 64; i++)
     {
-        if(handles[i])
+        if (handles[i])
             continue;
-        
+
         handles[i] = handle;
         return i;
     }
 
     return -1;
 }
-void Kernel::Input::Keyboard::RemoveHandle(int i){
-    if(i < 0 || i >= 64)
+void Kernel::Input::Keyboard::RemoveHandle(int i)
+{
+    if (i < 0 || i >= 64)
         return;
 
     handles[i] = nullptr;

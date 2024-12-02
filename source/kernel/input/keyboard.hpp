@@ -18,6 +18,7 @@ namespace Kernel
                 char value;
 
                 bool bPressed;
+                bool bPressedPrev = false;
             };
             
             typedef void(*keyboard_input_handle)(const Key& k);
