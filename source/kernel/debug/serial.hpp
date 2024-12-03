@@ -6,7 +6,8 @@ namespace Kernel{
             extern bool bInitialized;
 
             extern void Init();
-            extern void printf(const char* format, ...);
         }
     }
 }
+
+extern "C" void printf(const char* format, ...);

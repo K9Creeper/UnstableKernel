@@ -378,7 +378,7 @@ void Free(void *p)
 
 uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
 {
-  if (Kernel::Memory::KHeap::bInitialized)
+  if (Kernel::Memory::KHeap::bInitialized || Kernel::Memory::KHeap::heap != 0 )
   {
     // if the kernel heap is initialized, allocate memory
     void *address = Alloc(size, align);
@@ -436,24 +436,21 @@ extern "C" char header_t_less_than(void *a, void *b)
   // return true if 'a' is smaller ('b' is larger).
   return ((Kernel::Memory::KHeap::Header *)a)->size < ((Kernel::Memory::KHeap::Header *)b)->size ? 1 : 0;
 }
-
+extern "C" void printf(const char* format, ...);
 void Kernel::Memory::KHeap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, bool readonly)
 {
   // allocate heap
   Kernel::Memory::KHeap::heap = reinterpret_cast<Kernel::Memory::KHeap::Heap *>(kmalloc_(sizeof(Kernel::Memory::KHeap::Heap), 0, 0));
   // make the ordered_array start at the address provided by start
   Kernel::Memory::KHeap::heap->index = orderedArray_place((void *)start, HEAP_INDEX_SIZE, &header_t_less_than);
-
   // add space to compinsate
   start += sizeof(void *) * HEAP_INDEX_SIZE;
-
   // make sure it is aligned and stuff
   if ((start & PAGE_ALIGN_MASK) != 0)
   {
     start &= PAGE_ALIGN_MASK;
     start += PAGE_SIZE;
   }
-
   // put in our funny thangs
   Kernel::Memory::KHeap::heap->startAddress = start;
   Kernel::Memory::KHeap::heap->endAddress = end;
@@ -463,14 +460,12 @@ void Kernel::Memory::KHeap::Init(uint32_t start, uint32_t end, uint32_t max, boo
 
   // make a hole at the start of the heap
   Kernel::Memory::KHeap::Header *hole = reinterpret_cast<Kernel::Memory::KHeap::Header *>(start);
-
   hole->size = end - start;
   hole->magic = HEAP_MAGIC;
   hole->is_hole = 1;
 
   // insert the hole to the index.
   orderedArray_insert((void *)hole, &Kernel::Memory::KHeap::heap->index);
-
   // oh thats right, this is a init function, and we reached the end.
   Kernel::Memory::KHeap::bInitialized = true;
 }

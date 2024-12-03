@@ -41,7 +41,7 @@ uint32_t Kernel::Graphics::GetPixel(uint32_t x, uint32_t y){
 
     uint32_t offset = y * FrameBuffer::pitch + x * (FrameBuffer::bpp / 8);
 
-    return reinterpret_cast<uint32_t>(FrameBuffer::addr + offset);
+    return *reinterpret_cast<uint32_t*>(FrameBuffer::addr + offset);
 }
 
 void Kernel::Graphics::SetPixel(uint32_t x, uint32_t y, uint32_t val){

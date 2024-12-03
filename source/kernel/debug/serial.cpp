@@ -47,9 +47,9 @@ void Kernel::Debug::COM1::Init()
     bInitialized = true;
 }
 
-void Kernel::Debug::COM1::printf(const char *format, ...)
+extern "C" void printf(const char* format, ...)
 {
-    if (!bInitialized)
+    if (!Kernel::Debug::COM1::bInitialized)
         return;
     char buffer[256]; // Output buffer
     int buffer_index = 0;

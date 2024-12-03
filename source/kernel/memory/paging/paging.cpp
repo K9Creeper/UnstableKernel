@@ -138,7 +138,9 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 	}
 }
 
-void Kernel::Memory::Paging::Init(uint32_t heap_start, uint32_t framebuffer_start, uint32_t framebuffer_size)
+extern "C" void printf(const char *format, ...);
+
+void Kernel::Memory::Paging::Init(uint32_t &framebuffer_start, uint32_t &framebuffer_size)
 {
 	// ngl idk how big this is.
 	uint32_t physicalMemSize = 0x1000000;
@@ -155,28 +157,22 @@ void Kernel::Memory::Paging::Init(uint32_t heap_start, uint32_t framebuffer_star
 	kernelDirectory = reinterpret_cast<PageDirectory *>(tmp);
 
 	currentDirectory = kernelDirectory;
-	
-	// identity map our kernel.
-	for (uint32_t i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
+
+	for (uint32_t j = KHEAP_START; j < KHEAP_START + KHEAP_INITIAL_SIZE; j += PAGE_SIZE)
 	{
-		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 0);
+		Kernel::Memory::Paging::GetPageEntry(j, Kernel::Memory::Paging::currentDirectory, 1);
 	}
 
-	for (uint32_t i = framebuffer_start; i < framebuffer_start + framebuffer_size; i += PAGE_SIZE)
-	{
-		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 1);
+	for (uint32_t j = 0; j < Kernel::Memory::KHeap::placementAddress; j += PAGE_SIZE)
+	{		
+		AllocateFrame(Kernel::Memory::Paging::GetPageEntry(j, Kernel::Memory::Paging::currentDirectory, 1), 0, 0);
 	}
 
-	// identity map our heap.
-	for (uint32_t i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE)
+	for (uint32_t j = KHEAP_START; j < KHEAP_START + KHEAP_INITIAL_SIZE; j += PAGE_SIZE)
 	{
-		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 0);
+		AllocateFrame(Kernel::Memory::Paging::GetPageEntry(j, Kernel::Memory::Paging::currentDirectory, 1), 0, 1);
 	}
 
-	SwitchPageDirectory(kernelDirectory);
-	Enable();
-
-	uint32_t test = *((uint32_t*)framebuffer_start);
 }
 
 void Kernel::Memory::Paging::Enable()

@@ -16,9 +16,9 @@ framebuffer_tag_start:
 .short 5
 .short 1
 .long framebuffer_tag_end - framebuffer_tag_start
-.long 1024
-.long 768
-.long 32
+.long 320
+.long 200
+.long 8
 framebuffer_tag_end:
 
 .align 8

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define KERNEL_MEMORY_GDT_ENTRYCOUNT 5
+#define KERNEL_MEMORY_GDT_ENTRYCOUNT 8
 
 namespace Kernel
 {

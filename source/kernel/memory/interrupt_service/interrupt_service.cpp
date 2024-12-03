@@ -38,12 +38,53 @@ extern "C"
 
 extern void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned char flags);
 
+extern "C" void printf(const char *format, ...);
 
 extern "C" void isr_handler(struct Registers r)
 {
 	if (r.int_no < 32)
 	{
-		// printf("| Fault %d |", r.int_no);
+		printf("| Fault %d |\n", r.int_no);
+
+		if (r.int_no == 14)
+		{
+			uint32_t faulting_address;
+
+			asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
+
+			// The error code gives us details of what happened
+			int present = !(r.err_code & 0x1); // Page not present
+			int rw = r.err_code & 0x2;		  // Write operation?
+			int user = r.err_code & 0x4;		  // Processor was in user-mode?
+			int reserved = r.err_code & 0x8;	  // Overwritten CPU-reserved bits of page entry?
+			int id = r.err_code & 0x10;		  // Caused by an instruction fetch?
+
+			// Output an error message.
+			printf("Page fault! ( ");
+			if (present)
+			{
+				printf("present ");
+			}
+			if (rw)
+			{
+				printf("read-only ");
+			}
+			if (user)
+			{
+				printf("user-mode ");
+			}
+			if (reserved)
+			{
+				printf("reserved ");
+			}
+			if (id)
+			{
+				printf("instruction fetch ");
+			}
+			printf(") at ");
+			printf("0x%X\n",faulting_address);
+		}
+
 		for (;;)
 		{
 		}

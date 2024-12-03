@@ -1,7 +1,12 @@
-extern "C" void userspace_entry(void){
-    
+#include "../kernel/graphics/graphics.hpp"
 
-    for(;;){
+extern "C" void printf(const char* format, ...);
+
+extern "C" void userspace_entry(void)
+{
+
+    for (;;)
+    {
 
     }
 }
