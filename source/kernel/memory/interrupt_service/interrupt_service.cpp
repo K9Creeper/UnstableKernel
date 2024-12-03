@@ -38,13 +38,12 @@ extern "C"
 
 extern void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned char flags);
 
-extern "C" void printf(const char *format, ...);
 
 extern "C" void isr_handler(struct Registers r)
 {
 	if (r.int_no < 32)
 	{
-		printf("| Fault %d |", r.int_no);
+		// printf("| Fault %d |", r.int_no);
 		for (;;)
 		{
 		}

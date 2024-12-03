@@ -150,8 +150,6 @@ namespace Kernel
     }
 }
 
-extern "C" void printf(const char *format, ...);
-
 void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 {
     const uint8_t scancode = inportb(0x60);

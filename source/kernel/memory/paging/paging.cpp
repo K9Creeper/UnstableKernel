@@ -120,12 +120,10 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 
 		if (!FirstFrame(index))
 		{
-			// no free pages. hang it.
-			void **nu = (void **)0x0;
+			// no free pages
 			for (;;)
 			{
-				// lets just fault for now lmao
-				*nu = 0;
+				asm volatile("hlt");
 			}
 		}
 
@@ -140,7 +138,7 @@ void Kernel::Memory::Paging::AllocateFrame(Kernel::Memory::Paging::PageEntry *pa
 	}
 }
 
-void Kernel::Memory::Paging::Init(uint32_t heap_start)
+void Kernel::Memory::Paging::Init(uint32_t heap_start, uint32_t framebuffer_start, uint32_t framebuffer_size)
 {
 	// ngl idk how big this is.
 	uint32_t physicalMemSize = 0x1000000;
@@ -157,28 +155,28 @@ void Kernel::Memory::Paging::Init(uint32_t heap_start)
 	kernelDirectory = reinterpret_cast<PageDirectory *>(tmp);
 
 	currentDirectory = kernelDirectory;
-
-	uint32_t i;
-	// spawn in our heap.
-	for (i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	
+	// identity map our kernel.
+	for (uint32_t i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
 	{
-		GetPageEntry( i, kernelDirectory, 1 );
+		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 0);
 	}
 
-	// identity map our kernel.
-	for (i = 0; i < Kernel::Memory::KHeap::placementAddress + PAGE_SIZE; i += PAGE_SIZE)
+	for (uint32_t i = framebuffer_start; i < framebuffer_start + framebuffer_size; i += PAGE_SIZE)
 	{
-		AllocateFrame( GetPageEntry( i, kernelDirectory, 1 ), 0, 0 );
+		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 1);
 	}
 
 	// identity map our heap.
-	for (i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE )
+	for (uint32_t i = heap_start; i < heap_start + KHEAP_INITIAL_SIZE; i += PAGE_SIZE)
 	{
-		AllocateFrame( GetPageEntry( i, kernelDirectory, 1 ), 0, 0 );
+		AllocateFrame(GetPageEntry(i, kernelDirectory, 1), 0, 0);
 	}
 
 	SwitchPageDirectory(kernelDirectory);
 	Enable();
+
+	uint32_t test = *((uint32_t*)framebuffer_start);
 }
 
 void Kernel::Memory::Paging::Enable()

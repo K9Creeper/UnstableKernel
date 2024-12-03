@@ -4,15 +4,26 @@
 .set MBOOT2_CHECKSUM, -(MBOOT2_MAGIC + MBOOT2_ARCH + MBOOT2_LENGTH)
 
 .section .multiboot
+.align 8
 
-.align 0x8
 Multiboot2Header:
 .long MBOOT2_MAGIC
 .long MBOOT2_ARCH
 .long MBOOT2_LENGTH
 .long MBOOT2_CHECKSUM
 
+framebuffer_tag_start:
+.short 5
+.short 1
+.long framebuffer_tag_end - framebuffer_tag_start
+.long 1024
+.long 768
+.long 32
+framebuffer_tag_end:
+
+.align 8
+
 .short 0
 .short 0
-.long 8
+.short 8
 Multiboot2HeaderEnd:

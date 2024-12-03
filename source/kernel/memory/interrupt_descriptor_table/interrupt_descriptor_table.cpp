@@ -36,8 +36,6 @@ void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned c
     pIDT[num].flags = flags;
 }
 
-extern "C" void printf(const char *format, ...);
-
 void Kernel::Memory::IDT::Init()
 {
     _pIDT.limit = (sizeof(struct IDTEntry) * 256) - 1;

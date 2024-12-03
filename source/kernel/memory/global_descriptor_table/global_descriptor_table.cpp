@@ -35,8 +35,6 @@ void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned cha
     pGDT[index].access = access;
 }
 
-extern "C" void printf(const char *format, ...);
-
 void Kernel::Memory::GDT::Init()
 {
     _pGDT.limit = (sizeof(struct GDTEntry) * KERNEL_MEMORY_GDT_ENTRYCOUNT) - 1;
