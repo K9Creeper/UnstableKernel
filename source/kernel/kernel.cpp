@@ -12,7 +12,7 @@
 
 #include "debug/serial.hpp"
 
-// May be a good source to look at: https://github.com/collinsmichael/spartan/
+// May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
