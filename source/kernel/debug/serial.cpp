@@ -2,8 +2,8 @@
 
 #include <stdarg.h>
 
-#include "../../c_helpers/memory.h"
-#include "../../c_helpers/string.h"
+#include "../../chelpers/memory.h"
+#include "../../chelpers/string.h"
 
 namespace Kernel
 {

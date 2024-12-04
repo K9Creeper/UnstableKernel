@@ -1,7 +1,7 @@
 #include "kheap.hpp"
 
-#include "../../../c_helpers/memory.h"
-#include "../../../c_helpers/ordered_array.h"
+#include "../../../chelpers/memory.h"
+#include "../../../chelpers/ordered_array.h"
 
 #include "../paging/paging.hpp"
 

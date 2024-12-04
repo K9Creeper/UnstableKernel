@@ -39,7 +39,7 @@ cppCompile(){
         output_file="build/bin/G++_${relative_path//\//_}_$filename.o"
 
         echo -e "G++: Compiling \033[1m$file\033[0m to $output_file"
-        $TARGET-g++ -c "$file" -o "$output_file" -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
+        $TARGET-g++ -c "$file" -o "$output_file" -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -fpermissive
         if ! [ -f "$output_file" ]; then
             export COMP_ERROR="1"
         fi
@@ -93,7 +93,7 @@ echo -e "\n"
 # Linker Compilation
 echo -e "Linking with GCC"
 echo -e "----------------"
-i686-elf-gcc -T linker.ld -o build/build.bin -ffreestanding -O2 -nostdlib build/bin/*.o -lgcc
+$TARGET-gcc -T linker.ld -o build/build.bin -ffreestanding -O2 -nostdlib build/bin/*.o -lgcc
 echo -e "\n"
 
 echo -e "-------------------------------"

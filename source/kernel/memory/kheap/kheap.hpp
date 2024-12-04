@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "../../../c_helpers/ordered_array.h"
+#include "../../../chelpers/ordered_array.h"
 
 #define KHEAP_START         0xC0000000
 #define KHEAP_MAX_END       0xCFFFF000

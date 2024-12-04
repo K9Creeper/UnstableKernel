@@ -2,7 +2,7 @@
 
 #include "../kheap/kheap.hpp"
 
-#include "../../../c_helpers/memory.h"
+#include "../../../chelpers/memory.h"
 
 #define INDEX_FROM_BIT(a) (a / 32)
 #define OFFSET_FROM_BIT(a) (a % 32)

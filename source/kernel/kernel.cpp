@@ -1,11 +1,9 @@
-#include "../c_helpers/multiboot.h"
+#include "../chelpers/multiboot.h"
+
+#include "memory/memory.hpp"
 
 #include "memory/global_descriptor_table/global_descriptor_table.hpp"
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
-#include "memory/task_state_segment/task_state_segment.hpp"
-
-#include "memory/kheap/kheap.hpp"
-#include "memory/paging/paging.hpp"
 
 #include "multiboot/multiboot.hpp"
 
@@ -15,59 +13,36 @@
 
 #include "graphics/graphics.hpp"
 
-extern "C" void jump_usermode(void);
-
-extern "C" uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress);
-extern "C" void kfree_(void *ptr);
+// May be a good source to look at: https://github.com/collinsmichael/spartan/
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
+    asm volatile("cli");
+
+    Kernel::Multiboot::mb_info = addr;
+    Kernel::Multiboot::mb_magic = magic;
+
     Kernel::Debug::COM1::Init();
+    printf("In kernel_main!\n");
 
-    multiboot_tag_framebuffer_common *fbc = Kernel::Multiboot::GetFrameBuffer(addr);
+    Kernel::Memory::InitMemInfo();
 
-    Kernel::Graphics::Init(0xA00000, fbc->framebuffer_height * fbc->framebuffer_width * (fbc->framebuffer_bpp / 8), fbc->framebuffer_width, fbc->framebuffer_height, fbc->framebuffer_pitch, fbc->framebuffer_bpp);
+    printf("Basic mem info, lower: 0x%X | upper: 0x%X\n", Kernel::Memory::Info::mem_lower, Kernel::Memory::Info::mem_upper);
 
-    printf("Framebuffer at 0x%X\n", Kernel::Graphics::FrameBuffer::addr);
-
-    // shows on screen
-    for (int i = 50; i < 100; i++)
-    {
-        Kernel::Graphics::SetPixel(i, i, 1);
-    }
+    multiboot_tag_framebuffer_common *fbc = Kernel::Multiboot::GetFrameBuffer();
+    printf("Framebuffer located at 0x%X\n", fbc->framebuffer_addr);
 
     Kernel::Memory::GDT::Init();
-    Kernel::Memory::GDT::Install();
+    printf("Initialized GDT\n");
 
-    // Kernel::Memory::TSS::Install();
+    Kernel::Memory::GDT::Install();
+    printf("Installed GDT\n");
 
     Kernel::Memory::IDT::Init();
+    printf("Initialized IDT\n");
 
     Kernel::Memory::IDT::Install();
-
-    Kernel::Memory::Paging::Init(Kernel::Graphics::FrameBuffer::addr, Kernel::Graphics::FrameBuffer::size);
-
-    for (int i = 100; i < 150; i++)
-    {
-        Kernel::Graphics::SetPixel(i, i, 7);
-    }
-
-    Kernel::Memory::Paging::SwitchPageDirectory(Kernel::Memory::Paging::kernelDirectory);
-    Kernel::Memory::Paging::Enable();
-    printf("TEST1\n");
-    Kernel::Memory::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, false, false);
-    printf("TEST2\n");
-    Kernel::Input::Keyboard::Init();
-
-    // Enable interrupts
-    asm volatile("sti");
-
-    printf("TEST3\n");
-    for (int i = 0; i < 50; i++)
-    {
-        Kernel::Graphics::SetPixel(i, i, 4);
-    }
-    printf("TEST4\n");
+    printf("Installed IDT\n");
 
     for (;;)
         asm volatile("hlt");

@@ -1,6 +1,6 @@
 #include "interrupt_descriptor_table.hpp"
 
-#include "../../../c_helpers/memory.h"
+#include "../../../chelpers/memory.h"
 
 #include "../interrupt_request/interrupt_request.hpp"
 #include "../interrupt_service/interrupt_service.hpp"

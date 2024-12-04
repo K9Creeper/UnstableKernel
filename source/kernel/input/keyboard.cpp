@@ -1,6 +1,6 @@
 #include "keyboard.hpp"
 
-#include "../../c_helpers/memory.h"
+#include "../../chelpers/memory.h"
 #include "../memory/interrupt_request/interrupt_request.hpp"
 
 namespace Kernel
