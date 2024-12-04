@@ -2,18 +2,17 @@
 
 #include <stdint.h>
 
-#define PAGING_COUNTS 1024
-#define PAGE_SIZE 0x1000
-#define PAGE_ALIGN_MASK 0xFFFFF000
+//
+// Target: Bitmap System
+//
 
 namespace Kernel
 {
     namespace Memory
     {
-        /// 1:1 Paging Structure
         namespace Paging
         {
-            struct PageEntry
+            struct Page
             {
                 uint32_t present : 1;  // present in memory
                 uint32_t rw : 1;       // read-only / readwrite
@@ -22,41 +21,28 @@ namespace Kernel
                 uint32_t dirty : 1;    // been written to since last refresh?
                 uint32_t unused : 7;   // unused and reserved bits
                 uint32_t frame : 20;   // frame address (shifted right 12 bits)
-            };
+            } __attribute__((packed, align(4)));
 
-            struct PageEntryTable
+            struct PageTable
             {
-                PageEntry pages[PAGING_COUNTS];
-            };
+                Page pages[1024];
+            } __attribute__((packed, align(4)));
 
             struct PageDirectory
             {
-                PageEntryTable *tables[PAGING_COUNTS];
-                uint32_t tablePhysicals[PAGING_COUNTS];
-                uint32_t physicalAddress;
-            };
+                PageTable *tables[1024];
+                uint32_t physicals[1024];
+            } __attribute__((packed, align(4)));
 
-            struct Frames
-            {
-                uint32_t *bitmap;
-                uint32_t count;
-            };
+            extern PageDirectory* kernelDirectory;
+            extern PageDirectory* currentDirectory;
 
-            extern PageDirectory *kernelDirectory;
-            extern PageDirectory *currentDirectory;
+            extern void Init();
 
-            extern Frames frames;
-
-            extern void Init(uint32_t& framebuffer_start, uint32_t& framebuffer_size);
-
-            extern void Enable();
-            extern void Disable();
-
-            extern void SwitchPageDirectory(PageDirectory *dir);
-            extern PageEntry *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);
-            extern PageEntry *MakePageEntry(uint32_t address, PageDirectory *dir);
-            extern void AllocateFrame(PageEntry *page, bool is_kernel, bool is_writeable);
-            extern void FreeFrame(PageEntry *page);
+            extern Page *GetPage(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);
+            extern Page *MakePage(uint32_t address, PageDirectory *dir);
+            extern void AllocateFrame(Page *page, bool is_kernel, bool is_writeable);
+            extern void FreeFrame(Page *page);
         }
     }
 }

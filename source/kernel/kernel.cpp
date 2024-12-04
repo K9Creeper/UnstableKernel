@@ -5,13 +5,12 @@
 #include "memory/global_descriptor_table/global_descriptor_table.hpp"
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 
+#include "memory/paging/paging.hpp"
+#include "memory/kheap/kheap.hpp"
+
 #include "multiboot/multiboot.hpp"
 
-#include "input/keyboard.hpp"
-
 #include "debug/serial.hpp"
-
-#include "graphics/graphics.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/
 
@@ -27,10 +26,10 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Memory::InitMemInfo();
 
-    printf("Basic mem info, lower: 0x%X | upper: 0x%X\n", Kernel::Memory::Info::mem_lower, Kernel::Memory::Info::mem_upper);
+    printf("Basic Multiboot Memory Info | Lower: 0x%X | Upper: 0x%X\n", Kernel::Memory::Info::mem_lower, Kernel::Memory::Info::mem_upper);
+    printf("Kernel Memory Info | Start: 0x%X | end: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
 
-    multiboot_tag_framebuffer_common *fbc = Kernel::Multiboot::GetFrameBuffer();
-    printf("Framebuffer located at 0x%X\n", fbc->framebuffer_addr);
+    Kernel::Memory::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);
 
     Kernel::Memory::GDT::Init();
     printf("Initialized GDT\n");
@@ -43,6 +42,8 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Memory::IDT::Install();
     printf("Installed IDT\n");
+
+    Kernel::Memory::Paging::Init();
 
     for (;;)
         asm volatile("hlt");

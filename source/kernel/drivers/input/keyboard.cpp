@@ -1,7 +1,7 @@
 #include "keyboard.hpp"
 
-#include "../../chelpers/memory.h"
-#include "../memory/interrupt_request/interrupt_request.hpp"
+#include "../../../chelpers/memory.h"
+#include "../../memory/interrupt_request/interrupt_request.hpp"
 
 namespace Kernel
 {

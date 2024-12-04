@@ -1,11 +1,15 @@
 #include "kheap.hpp"
 
-#include "../../../chelpers/memory.h"
-#include "../../../chelpers/ordered_array.h"
+#define KHEAP_MAX_END 0xCFFFF000
+#define KHEAP_INITIAL_SIZE 0x100000 // arbitrary
+#define MAX_HEAP_SIZE 0xCFFFF000
+#define HEAP_INDEX_SIZE 0x20000 // arbitrary
+#define HEAP_MAGIC 0xDEADBEEF   // unusual number that will stand out from others
+#define HEAP_MIN_SIZE 0x70000   // arbitrary
+
+#include "../memory.hpp"
 
 #include "../paging/paging.hpp"
-
-extern uint32_t linkerld_endofkernel;
 
 namespace Kernel
 {
@@ -15,21 +19,69 @@ namespace Kernel
     {
       bool bInitialized = false;
 
-      uint32_t placementAddress = reinterpret_cast<uint32_t>(&linkerld_endofkernel);
+      namespace Early
+      {
+        uint32_t nextPlacementAddress = 0;
+      }
 
-      Heap *heap = nullptr;
     }
   }
+}
+
+class HeapIndexOrderedArray : public OrderedArray<void *>
+{
+private:
+  bool lessthan_(void *a, void *b)
+  {
+    return (a < b);
+  }
+};
+
+HeapIndexOrderedArray heapIndex;
+uint32_t heapMax;
+bool heapSupervisor;
+bool heapReadOnly;
+
+void Kernel::Memory::KHeap::Early::PreInit(uint32_t kernel_end)
+{
+  nextPlacementAddress = kernel_end;
+}
+uint32_t Kernel::Memory::KHeap::Early::pkmalloc_(uint32_t size, bool shouldAlign, uint32_t *physAddress)
+{
+  if (!Kernel::Memory::KHeap::bInitialized)
+  {
+    // if the heap is not initialized, manually handle allocation using placement address
+
+    if (shouldAlign && (nextPlacementAddress & 0x00000FFF))
+    {
+      // #define PAGE_ALIGN_MASK 0xFFFFF000
+      nextPlacementAddress &= 0xFFFFF000; // Align the address down
+      nextPlacementAddress += 0x1000;     // Move to the next page boundary
+    }
+
+    // the current placement address
+    uint32_t base = nextPlacementAddress;
+
+    // the physical address is requested, return the base address
+    if (physAddress != nullptr)
+      *physAddress = base;
+
+    // update the placement address due to the newly the yoinked space
+    nextPlacementAddress += size;
+
+    // return the base address of the allocation
+    return base;
+  }
+  return 0;
 }
 
 static int FindSmallestHole(uint32_t size, int8_t page_align)
 {
   uint32_t i = 0;
-  for (; i < Kernel::Memory::KHeap::heap->index.size; i++)
+  for (; i < heapIndex.GetSize(); i++)
   {
     // get the header of the current block in the ordered array
-    Kernel::Memory::KHeap::Header *header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(
-        orderedArray_lookup(i, &Kernel::Memory::KHeap::heap->index));
+    Kernel::Memory::KHeap::Header *header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(heapIndex.Get(i));
 
     // check if we need to align
     if (page_align > 0)
@@ -41,7 +93,7 @@ static int FindSmallestHole(uint32_t size, int8_t page_align)
       // calculate the offset to align
       if ((location + sizeof(Kernel::Memory::KHeap::Header) & 0xFFFFF000) != 0)
       {
-        offset = PAGE_SIZE - (hole_start % PAGE_SIZE);
+        offset = 0x1000 - (hole_start % 0x1000);
       }
 
       // calculate the available hole size after alignment
@@ -56,7 +108,7 @@ static int FindSmallestHole(uint32_t size, int8_t page_align)
   }
 
   // return the index if found
-  if (i == Kernel::Memory::KHeap::heap->index.size)
+  if (i == heapIndex.GetSize())
     return -1; // no suitable block
 
   return i; // found a suitable block
@@ -65,37 +117,37 @@ static int FindSmallestHole(uint32_t size, int8_t page_align)
 static void Expand(uint32_t new_size)
 {
   // get the nearest following page boundary
-  if ((new_size & PAGE_ALIGN_MASK) != 0)
+  if ((new_size & 0xFFFFF000) != 0)
   {
-    new_size &= PAGE_ALIGN_MASK;
-    new_size += PAGE_SIZE;
+    new_size &= 0xFFFFF000;
+    new_size += 0x1000;
   }
 
   // this should always be on a page boundary
-  uint32_t old_size = Kernel::Memory::KHeap::heap->endAddress - Kernel::Memory::KHeap::heap->startAddress;
+  uint32_t old_size = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
-  for (uint32_t i = old_size; i < new_size; i += PAGE_SIZE)
+  for (uint32_t i = old_size; i < new_size; i += 0x1000)
   {
     // allocate a frame at the current address
     Kernel::Memory::Paging::AllocateFrame(
-        Kernel::Memory::Paging::MakePageEntry(
-            Kernel::Memory::KHeap::heap->startAddress + i,
+        Kernel::Memory::Paging::MakePage(
+            Kernel::Memory::Info::kheap_start + i,
             Kernel::Memory::Paging::kernelDirectory),
-        Kernel::Memory::KHeap::heap->supervisor ? 1 : 0,
-        Kernel::Memory::KHeap::heap->readonly ? 0 : 1);
+        heapSupervisor ? 1 : 0,
+        heapReadOnly ? 0 : 1);
   }
 
   // update the heap end address
-  Kernel::Memory::KHeap::heap->endAddress = Kernel::Memory::KHeap::heap->startAddress + new_size;
+  Kernel::Memory::Info::kheap_end = Kernel::Memory::Info::kheap_start + new_size;
 }
 
 uint32_t Contract(uint32_t new_size)
 {
   // get the nearest following page boundary
-  if (new_size & PAGE_SIZE)
+  if (new_size & 0x1000)
   {
-    new_size &= PAGE_SIZE;
-    new_size += PAGE_SIZE;
+    new_size &= 0x1000;
+    new_size += 0x1000;
   }
 
   // make sure we are not overreaching
@@ -105,19 +157,19 @@ uint32_t Contract(uint32_t new_size)
   }
 
   // this should always be on a page boundary
-  uint32_t old_size = Kernel::Memory::KHeap::heap->endAddress - Kernel::Memory::KHeap::heap->startAddress;
+  uint32_t old_size = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
-  for (uint32_t i = old_size - PAGE_SIZE; new_size < i; i -= PAGE_SIZE)
+  for (uint32_t i = old_size - 0x1000; new_size < i; i -= 0x1000)
   {
     // free the page
     Kernel::Memory::Paging::FreeFrame(
-        Kernel::Memory::Paging::GetPageEntry(
-            Kernel::Memory::KHeap::heap->startAddress + i,
+        Kernel::Memory::Paging::GetPage(
+            Kernel::Memory::Info::kheap_start + i,
             Kernel::Memory::Paging::kernelDirectory));
   }
 
   // update the heap end address
-  Kernel::Memory::KHeap::heap->endAddress = Kernel::Memory::KHeap::heap->startAddress + new_size;
+  Kernel::Memory::Info::kheap_end = Kernel::Memory::Info::kheap_start + new_size;
 
   return new_size;
 }
@@ -134,22 +186,22 @@ void *Alloc(uint32_t size, uint8_t page_align)
   if (i == -1)
   {
     // save previous data to expand the heap
-    uint32_t old_length = Kernel::Memory::KHeap::heap->endAddress - Kernel::Memory::KHeap::heap->startAddress;
-    uint32_t old_end_address = Kernel::Memory::KHeap::heap->endAddress;
+    uint32_t old_length = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
+    uint32_t old_end_address = Kernel::Memory::Info::kheap_end;
 
     // allocate more space for the heap
     Expand(old_length + new_size);
 
-    uint32_t new_length = Kernel::Memory::KHeap::heap->endAddress - Kernel::Memory::KHeap::heap->startAddress;
+    uint32_t new_length = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
     i = 0;
     uint32_t idx = -1;
     uint32_t value = 0;
 
     // find the last header in the heap
-    while (i < Kernel::Memory::KHeap::heap->index.size)
+    while (i < heapIndex.GetSize())
     {
-      uint32_t tmp = reinterpret_cast<uint32_t>(orderedArray_lookup(i, &Kernel::Memory::KHeap::heap->index));
+      uint32_t tmp = reinterpret_cast<uint32_t>(heapIndex.Get(i));
 
       if (tmp > value)
       {
@@ -174,13 +226,13 @@ void *Alloc(uint32_t size, uint8_t page_align)
       footer->magic = HEAP_MAGIC;
 
       // insert the new header/footer pair
-      orderedArray_insert((void *)header, &Kernel::Memory::KHeap::heap->index);
+      heapIndex.Insert((void *)header);
     }
     else
     {
       // if found
       // adjust the last found header to include the newly allocated space
-      Kernel::Memory::KHeap::Header *header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(orderedArray_lookup(idx, &Kernel::Memory::KHeap::heap->index));
+      Kernel::Memory::KHeap::Header *header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(heapIndex.Get(idx));
       header->size += new_length - old_length;
 
       // update the footer to match the new header size
@@ -195,7 +247,7 @@ void *Alloc(uint32_t size, uint8_t page_align)
   }
 
   // Retrieve the original header of the found hole
-  Kernel::Memory::KHeap::Header *orig_hole_header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(orderedArray_lookup(i, &Kernel::Memory::KHeap::heap->index));
+  Kernel::Memory::KHeap::Header *orig_hole_header = reinterpret_cast<Kernel::Memory::KHeap::Header *>(heapIndex.Get(i));
   uint32_t orig_hole_pos = (uint32_t)orig_hole_header;
   uint32_t orig_hole_size = orig_hole_header->size;
 
@@ -208,12 +260,12 @@ void *Alloc(uint32_t size, uint8_t page_align)
   }
 
   // If page alignment is requested, adjust the position and create a new hole
-  if (page_align && ((orig_hole_pos & PAGE_ALIGN_MASK) != 0))
+  if (page_align && ((orig_hole_pos & 0xFFFFF000) != 0))
   {
     uint32_t size2, footer_pos;
 
     // Calculate the size needed to align the hole
-    size2 = PAGE_SIZE - (orig_hole_pos & 0xFFF) - sizeof(Kernel::Memory::KHeap::Header);
+    size2 = 0x1000 - (orig_hole_pos & 0xFFF) - sizeof(Kernel::Memory::KHeap::Header);
 
     // Create a new header for the aligned hole
     Kernel::Memory::KHeap::Header *hole_header = (Kernel::Memory::KHeap::Header *)orig_hole_pos;
@@ -234,7 +286,7 @@ void *Alloc(uint32_t size, uint8_t page_align)
   else
   {
     // If no page alignment is needed, remove the hole from the index
-    orderedArray_remove(i, &Kernel::Memory::KHeap::heap->index);
+    heapIndex.Remove(i);
   }
 
   // Overwrite the original hole header and footer with the new block allocation
@@ -258,14 +310,14 @@ void *Alloc(uint32_t size, uint8_t page_align)
     Kernel::Memory::KHeap::Footer *hole_footer = (Kernel::Memory::KHeap::Footer *)((uint32_t)hole_header + orig_hole_size - new_size - sizeof(Kernel::Memory::KHeap::Footer));
 
     // If the footer is within the heap's end address, update it
-    if ((uint32_t)hole_footer < Kernel::Memory::KHeap::heap->endAddress)
+    if ((uint32_t)hole_footer < Kernel::Memory::Info::kheap_end)
     {
       hole_footer->header = hole_header;
       hole_footer->magic = HEAP_MAGIC;
     }
 
     // Insert the new hole into the ordered array
-    orderedArray_insert((void *)hole_header, &Kernel::Memory::KHeap::heap->index);
+    heapIndex.Insert((void *)hole_header);
   }
 
   // Return the allocated memory address, skipping the header
@@ -321,22 +373,22 @@ void Free(void *p)
 
     // find and remove header from the index
     i = 0;
-    while ((i < Kernel::Memory::KHeap::heap->index.size) &&
-           (reinterpret_cast<void *>(orderedArray_lookup(i, &Kernel::Memory::KHeap::heap->index)) != (void *)test_header))
+    while ((i < heapIndex.GetSize()) &&
+           (reinterpret_cast<void *>(heapIndex.Get(i)) != (void *)test_header))
     {
       i += 1;
     }
 
     // bye bye it
-    orderedArray_remove(i, &Kernel::Memory::KHeap::heap->index);
+    heapIndex.Remove(i);
   }
 
   // if the footer location is the end address, we can contract
-  if ((uint32_t)footer + sizeof(Kernel::Memory::KHeap::Footer) == Kernel::Memory::KHeap::heap->endAddress)
+  if ((uint32_t)footer + sizeof(Kernel::Memory::KHeap::Footer) == Kernel::Memory::Info::kheap_end)
   {
-    uint32_t old_length = Kernel::Memory::KHeap::heap->endAddress - Kernel::Memory::KHeap::heap->startAddress;
+    uint32_t old_length = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
-    uint32_t new_length = Contract((uint32_t)header - Kernel::Memory::KHeap::heap->startAddress);
+    uint32_t new_length = Contract((uint32_t)header - Kernel::Memory::Info::kheap_start);
 
     // ned to check how big after resizing
 
@@ -356,15 +408,15 @@ void Free(void *p)
       // if it will not exist. bye bye it
 
       // search for it
-      while ((i < Kernel::Memory::KHeap::heap->index.size) && (reinterpret_cast<void *>(orderedArray_lookup(i, &Kernel::Memory::KHeap::heap->index)) != (void *)test_header))
+      while ((i < heapIndex.GetSize()) && (reinterpret_cast<void *>(heapIndex.Get(i)) != (void *)test_header))
       {
         i += 1;
       }
 
       // if no find, no remove
-      if (i < Kernel::Memory::KHeap::heap->index.size)
+      if (i < heapIndex.GetSize())
       {
-        orderedArray_remove(i, &Kernel::Memory::KHeap::heap->index);
+        heapIndex.Remove(i);
       }
     }
   }
@@ -372,13 +424,13 @@ void Free(void *p)
   // erm we still want to add it to the index, so do it
   if (do_add == 1)
   {
-    orderedArray_insert((void *)header, &Kernel::Memory::KHeap::heap->index);
+    heapIndex.Insert((void *)header);
   }
 }
 
 uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
 {
-  if (Kernel::Memory::KHeap::bInitialized || Kernel::Memory::KHeap::heap != 0 )
+  if (Kernel::Memory::KHeap::bInitialized)
   {
     // if the kernel heap is initialized, allocate memory
     void *address = Alloc(size, align);
@@ -387,12 +439,12 @@ uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
     if (physAddress != nullptr)
     {
       // retrieve the page entry
-      Kernel::Memory::Paging::PageEntry *page = Kernel::Memory::Paging::GetPageEntry(
+      Kernel::Memory::Paging::Page *page = Kernel::Memory::Paging::GetPage(
           reinterpret_cast<uint32_t>(address), Kernel::Memory::Paging::kernelDirectory);
 
       // calculate the physical address based on the page frame and the offset
       // and manipulate the addr
-      *physAddress = page->frame * PAGE_SIZE + (reinterpret_cast<uint32_t>(address) & 0xFFF);
+      *physAddress = page->frame * 0x1000 + (reinterpret_cast<uint32_t>(address) & 0xFFF);
     }
 
     // return the virtual address of the newly allocated memory
@@ -403,15 +455,15 @@ uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
     // if the heap is not initialized, manually handle allocation using placement address
 
     // if requested page-align
-    if (align == 1 && (Kernel::Memory::KHeap::placementAddress & 0x00000FFF))
+    if (align == 1 && (Kernel::Memory::KHeap::Early::nextPlacementAddress & 0x00000FFF))
     {
       // #define PAGE_ALIGN_MASK 0xFFFFF000
-      Kernel::Memory::KHeap::placementAddress &= PAGE_ALIGN_MASK; // Align the address down
-      Kernel::Memory::KHeap::placementAddress += PAGE_SIZE;       // Move to the next page boundary
+      Kernel::Memory::KHeap::Early::nextPlacementAddress &= 0xFFFFF000; // Align the address down
+      Kernel::Memory::KHeap::Early::nextPlacementAddress += 0x1000;     // Move to the next page boundary
     }
 
     // the current placement address
-    uint32_t base = Kernel::Memory::KHeap::placementAddress;
+    uint32_t base = Kernel::Memory::KHeap::Early::nextPlacementAddress;
 
     // the physical address is requested, return the base address
     if (physAddress != nullptr)
@@ -420,52 +472,40 @@ uint32_t kmalloc_(uint32_t size, uint8_t align, uint32_t *physAddress)
     }
 
     // update the placement address due to the newly the yoinked space
-    Kernel::Memory::KHeap::placementAddress += size;
+    Kernel::Memory::KHeap::Early::nextPlacementAddress += size;
 
     // return the base address of the allocation
     return base;
   }
 }
 
-void kfree_(void* ptr){
+void kfree_(void *ptr)
+{
   Free(ptr);
 }
 
-extern "C" char header_t_less_than(void *a, void *b)
-{
-  // return true if 'a' is smaller ('b' is larger).
-  return ((Kernel::Memory::KHeap::Header *)a)->size < ((Kernel::Memory::KHeap::Header *)b)->size ? 1 : 0;
-}
-extern "C" void printf(const char* format, ...);
 void Kernel::Memory::KHeap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, bool readonly)
 {
-  // allocate heap
-  Kernel::Memory::KHeap::heap = reinterpret_cast<Kernel::Memory::KHeap::Heap *>(kmalloc_(sizeof(Kernel::Memory::KHeap::Heap), 0, 0));
-  // make the ordered_array start at the address provided by start
-  Kernel::Memory::KHeap::heap->index = orderedArray_place((void *)start, HEAP_INDEX_SIZE, &header_t_less_than);
-  // add space to compinsate
+  heapIndex.RePlace(reinterpret_cast<void *>(start), HEAP_INDEX_SIZE);
   start += sizeof(void *) * HEAP_INDEX_SIZE;
-  // make sure it is aligned and stuff
-  if ((start & PAGE_ALIGN_MASK) != 0)
-  {
-    start &= PAGE_ALIGN_MASK;
-    start += PAGE_SIZE;
-  }
-  // put in our funny thangs
-  Kernel::Memory::KHeap::heap->startAddress = start;
-  Kernel::Memory::KHeap::heap->endAddress = end;
-  Kernel::Memory::KHeap::heap->maxAddress = max;
-  Kernel::Memory::KHeap::heap->supervisor = supervisor;
-  Kernel::Memory::KHeap::heap->readonly = readonly;
 
-  // make a hole at the start of the heap
-  Kernel::Memory::KHeap::Header *hole = reinterpret_cast<Kernel::Memory::KHeap::Header *>(start);
+  if ((start & 0xFFFFF000) != 0)
+  {
+    start &= 0xFFFFF000;
+    start += 0x1000;
+  }
+
+  Memory::Info::kheap_start = start;
+  Memory::Info::kheap_end = end;
+
+  heapMax = max;
+  heapSupervisor = supervisor;
+  heapReadOnly = readonly;
+
+  Header *hole = reinterpret_cast<Header *>(start);
   hole->size = end - start;
   hole->magic = HEAP_MAGIC;
   hole->is_hole = 1;
 
-  // insert the hole to the index.
-  orderedArray_insert((void *)hole, &Kernel::Memory::KHeap::heap->index);
-  // oh thats right, this is a init function, and we reached the end.
-  Kernel::Memory::KHeap::bInitialized = true;
+  heapIndex.Insert(reinterpret_cast<void *>(hole));
 }

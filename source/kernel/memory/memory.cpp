@@ -24,8 +24,8 @@ extern uint32_t linkerld_startofkernel;
 extern uint32_t linkerld_endofkernel;
 
 void Kernel::Memory::InitMemInfo(){
-    Info::kernel_start = linkerld_startofkernel;
-    Info::kernel_end = linkerld_endofkernel;
+    Info::kernel_start = reinterpret_cast<uint32_t>(&linkerld_startofkernel);
+    Info::kernel_end =  reinterpret_cast<uint32_t>(&linkerld_endofkernel);
     
     multiboot_tag_basic_meminfo* basic_mem_info = Kernel::Multiboot::GetBasicMemInfo();
 
