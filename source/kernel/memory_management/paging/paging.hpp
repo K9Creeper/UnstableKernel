@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "paging_bitmap.hpp"
+
 //
 // Target: Bitmap System
 //
@@ -12,55 +14,49 @@ namespace Kernel
     {
         namespace Paging
         {
-            struct PageDirectoryEntry
+            extern bool bIntialized;
+            extern bool bEnabled;
+
+            struct Page
             {
-                unsigned int present : 1;
-                unsigned int rw : 1;
-                unsigned int user : 1;
-                unsigned int w_through : 1;
-                unsigned int cache : 1;
-                unsigned int access : 1;
-                unsigned int reserved : 1;
-                unsigned int page_size : 1;
-                unsigned int global : 1;
-                unsigned int available : 3;
-                unsigned int frame : 20; // ( stores physical address)
+                uint32_t present : 1;  // present in memory
+                uint32_t rw : 1;       // read-only / readwrite
+                uint32_t user : 1;     // supervisor level
+                uint32_t accessed : 1; // been accessed since last refresh?
+                uint32_t dirty : 1;    // been written to since last refresh?
+                uint32_t unused : 7;   // unused and reserved bits
+                uint32_t frame : 20;   // frame address (shifted right 12 bits)
             };
 
-             struct Page
-            {
-                unsigned int present : 1;
-                unsigned int rw : 1;
-                unsigned int user : 1;
-                unsigned int reserved : 2;
-                unsigned int accessed : 1;
-                unsigned int dirty : 1;
-                unsigned int reserved2 : 2;
-                unsigned int available : 3;
-                unsigned int frame : 20;
-            };
-
-             struct PageTable
+            struct PageTable
             {
                 Page pages[1024];
             };
 
             struct PageDirectory
             {
-                // The actual page directory entries
-                PageDirectoryEntry tables[1024];
-
-                // contains virtual address in order to get to table
-                PageTable *ref_tables[1024];
+                PageTable *tables[1024];
+                uint32_t tablePhysicals[1024];
+                uint32_t physicalAddress;
             };
-
-            extern bool bIntialized;
-            extern bool bEnabled;
 
             extern PageDirectory *kernelDirectory;
             extern PageDirectory *currentDirectory;
+            
+            extern uint32_t* bitmap;
+            extern uint32_t  bitmapCount;
 
             extern void Init(uint32_t mem_size);
+
+            extern void Enable();
+            extern void Disable();
+
+            extern void SwitchPageDirectory(PageDirectory *dir);
+            extern Page *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);
+            extern Page *MakePageEntry(uint32_t address, PageDirectory *dir);
+            extern void AllocateFrame(Page *page, bool is_kernel, bool is_writeable);
+            extern void FreeFrame(Page *page);
+
         }
     }
 }

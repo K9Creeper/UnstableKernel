@@ -13,6 +13,7 @@ namespace Kernel{
 
             extern uint32_t kheap_start;
             extern uint32_t kheap_end;
+            extern uint32_t kheap_max_address;
         }
 
         extern void InitMemInfo();

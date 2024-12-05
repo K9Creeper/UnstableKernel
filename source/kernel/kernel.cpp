@@ -5,7 +5,6 @@
 #include "memory/global_descriptor_table/global_descriptor_table.hpp"
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 
-#include "memory_management/pmm/pmm.hpp"
 #include "memory_management/paging/paging.hpp"
 #include "memory_management/kheap/kheap.hpp"
 
@@ -44,9 +43,24 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Memory::IDT::Install();
     printf("Installed IDT\n");
 
-    Kernel::MemoryManagement::PMM::Init();
-
     Kernel::MemoryManagement::Paging::Init(0x1000000);
+    printf("Init Paging\n");
+    
+    Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
+
+    printf("Init KHeap\n");
+
+    char* buffer = reinterpret_cast<char*>(Kernel::MemoryManagement::KHeap::kmalloc_(256));
+
+    buffer[0] = 'K';
+    buffer[1] = 'H';
+    buffer[2] = 'E';
+    buffer[3] = 'A';
+    buffer[4] = 'P';
+    buffer[5] = '\n';
+    buffer[6] = 0;
+
+    printf(buffer);
 
     for (;;)
         asm volatile("hlt");

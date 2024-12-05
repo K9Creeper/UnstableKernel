@@ -13,6 +13,7 @@ namespace Kernel{
 
             uint32_t kheap_start = 0;
             uint32_t kheap_end = 0;
+            uint32_t kheap_max_address = 0;
         }
 
         
