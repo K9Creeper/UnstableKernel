@@ -23,5 +23,5 @@ class OrderedArray{
 		uint32_t GetMaxSize()const;
 
 	private:
-		virtual bool lessthan_(type_t, type_t);
+		virtual bool lessthan_(type_t, type_t) = 0;
 };

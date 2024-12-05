@@ -3,7 +3,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
 
     char inportb(unsigned short _port);
 
@@ -19,8 +18,25 @@ extern "C" {
 
     unsigned short * memsetw(unsigned short * dest, unsigned short val, int count);
 
-#ifdef __cplusplus
+
 }
+
+#else
+
+    extern char inportb(unsigned short _port);
+
+    extern void outportb(unsigned short _port, unsigned char _data);
+
+    extern void call_asm(void* fn, void* arg);
+
+    extern void swap(int *p1, int *p2);
+
+    extern unsigned char * memcpy(unsigned char * dest, const unsigned char * src, int count);
+
+    extern unsigned char * memset(unsigned char * dest, unsigned char val, int count);
+
+    extern unsigned short * memsetw(unsigned short * dest, unsigned short val, int count);
+
 #endif
 
 #endif // MEMORY_H
