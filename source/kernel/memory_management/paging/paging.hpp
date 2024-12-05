@@ -43,8 +43,7 @@ namespace Kernel
             extern PageDirectory *kernelDirectory;
             extern PageDirectory *currentDirectory;
             
-            extern uint32_t* bitmap;
-            extern uint32_t  bitmapCount;
+            extern PagingBitmap bitmap;
 
             extern void Init(uint32_t mem_size);
 

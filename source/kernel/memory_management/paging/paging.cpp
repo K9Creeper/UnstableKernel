@@ -8,12 +8,9 @@
 
 extern "C" void printf(const char *format, ...);
 
-#define INDEX_FROM_BIT(a) (a / 32)
-#define OFFSET_FROM_BIT(a) (a % 32)
-
 void PagingBitmap::Clear()
 {
-    memset(reinterpret_cast<uint8_t *>(array), 0, INDEX_FROM_BIT(size)); // fill with zeros
+    memset(reinterpret_cast<uint8_t *>(array), 0, memSize); // fill with zeros
 }
 
 namespace Kernel
@@ -28,8 +25,7 @@ namespace Kernel
             PageDirectory *currentDirectory;
             PageDirectory *kernelDirectory;
 
-            uint32_t *bitmap;
-            uint32_t bitmapCount;
+            PagingBitmap bitmap;
         }
     }
 }
@@ -85,23 +81,23 @@ Kernel::MemoryManagement::Paging::Page *Kernel::MemoryManagement::Paging::MakePa
 static void SetFrame(uint32_t frame_address)
 {
     uint32_t frame = frame_address / 0x1000;
-    uint32_t index = (INDEX_FROM_BIT(frame));
-    uint32_t offset = (OFFSET_FROM_BIT(frame));
+    uint32_t index = Kernel::MemoryManagement::Paging::bitmap.IndexFromBit(frame);
+    uint32_t offset = Kernel::MemoryManagement::Paging::bitmap.OffsetFromBit(frame);
     Kernel::MemoryManagement::Paging::bitmap[index] |= 0x1 << offset;
 }
 
 static void ClearFrame(uint32_t frame_address)
 {
     uint32_t frame = frame_address / 0x1000;
-    uint32_t index = (INDEX_FROM_BIT(frame));
-    uint32_t offset = (OFFSET_FROM_BIT(frame));
+    uint32_t index = Kernel::MemoryManagement::Paging::bitmap.IndexFromBit(frame);
+    uint32_t offset = Kernel::MemoryManagement::Paging::bitmap.OffsetFromBit(frame);
     Kernel::MemoryManagement::Paging::bitmap[index] &= ~(0x1 << offset);
 }
 
 static bool FirstFrame(uint32_t &out)
 {
     // loop through bitmap
-    for (uint32_t i = 0; i < (INDEX_FROM_BIT(Kernel::MemoryManagement::Paging::bitmapCount)); i += 1)
+    for (uint32_t i = 0; i < Kernel::MemoryManagement::Paging::bitmap.GetMemSize(); i += 1)
     {
         // exit if nothing free
         if (Kernel::MemoryManagement::Paging::bitmap[i] != 0xFFFFFFFF)
@@ -154,11 +150,15 @@ void Kernel::MemoryManagement::Paging::AllocateFrame(Kernel::MemoryManagement::P
 
 void SetupPMM(uint32_t mem_size)
 {
-    Kernel::MemoryManagement::Paging::bitmapCount = mem_size / 0x1000;
+    Kernel::MemoryManagement::Paging::bitmap.Create();
 
-    Kernel::MemoryManagement::Paging::bitmap = reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::KHeap::kmalloc_(INDEX_FROM_BIT(Kernel::MemoryManagement::Paging::bitmapCount)));
+    const int count = mem_size / 0x1000;
+    
+    const int size = (count / Kernel::MemoryManagement::Paging::bitmap.GetBytesPerEntry());
+    Kernel::MemoryManagement::Paging::bitmap.RePlace(reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::KHeap::kmalloc_(size)), 0);
+    Kernel::MemoryManagement::Paging::bitmap.SetCount(count);
 
-    memset(reinterpret_cast<uint8_t *>(Kernel::MemoryManagement::Paging::bitmap), 0, INDEX_FROM_BIT(Kernel::MemoryManagement::Paging::bitmapCount)); // fill with zeros
+    Kernel::MemoryManagement::Paging::bitmap.Clear();
 }
 
 void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)

@@ -22,7 +22,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Multiboot::mb_magic = magic;
 
     Kernel::Debug::COM1::Init();
-    printf("In kernel_main!\n");
 
     Kernel::Memory::InitMemInfo();
 
@@ -32,35 +31,23 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::MemoryManagement::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);
 
     Kernel::Memory::GDT::Init();
-    printf("Initialized GDT\n");
+    printf("Initialized | GDT\n");
 
     Kernel::Memory::GDT::Install();
-    printf("Installed GDT\n");
+    printf("Installed | GDT\n");
 
     Kernel::Memory::IDT::Init();
-    printf("Initialized IDT\n");
+    printf("Initialized | IDT\n");
 
     Kernel::Memory::IDT::Install();
-    printf("Installed IDT\n");
+    printf("Installed | Interrupts & IDT\n");
 
     Kernel::MemoryManagement::Paging::Init(0x1000000);
-    printf("Init Paging\n");
+    printf("Initialized & Installed | PMM & Paging\n");
     
     Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
+    printf("Initialized & Installed |  KHeap\n");
 
-    printf("Init KHeap\n");
-
-    char* buffer = reinterpret_cast<char*>(Kernel::MemoryManagement::KHeap::kmalloc_(256));
-
-    buffer[0] = 'K';
-    buffer[1] = 'H';
-    buffer[2] = 'E';
-    buffer[3] = 'A';
-    buffer[4] = 'P';
-    buffer[5] = '\n';
-    buffer[6] = 0;
-
-    printf(buffer);
 
     for (;;)
         asm volatile("hlt");

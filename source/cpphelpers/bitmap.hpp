@@ -8,18 +8,29 @@ class Bitmap
 protected:
     type_t *array;
 
-    uint32_t size;
+    uint32_t count;
     uint32_t memSize;
-
+    
     uint32_t sizeof_type_t;
+    uint32_t bytePerEntry;
+    
 public:
-    Bitmap() : array{nullptr}, size{0}, sizeof_type_t{sizeof(type_t)} {}
-    ~Bitmap();
+    Bitmap() {}
+    ~Bitmap() {}
 
-    void RePlace(void *addr, uint32_t size = 0);
+    void Create(){
+        array = nullptr;
+        count = 0;
+        memSize = 0;
+    
+        sizeof_type_t = sizeof(type_t);
+        bytePerEntry = sizeof_type_t * 8;
+    }
 
-    void SetSize(uint32_t size);
-    void SetMemSize(uint32_t memcSize);
+    void RePlace(void *addr, uint32_t memSize = 0);
+
+    void SetCount(uint32_t count);
+    void SetMemSize(uint32_t memSize);
 
     type_t& operator[](uint32_t i);
 
@@ -27,10 +38,14 @@ public:
 
     void Set(uint32_t i, type_t val);
 
-    uint32_t GetSize()const;
+    uint32_t GetCount()const;
     uint32_t GetMemSize()const;
 
     uint32_t GetTypeSize() const;
+    uint32_t GetBytesPerEntry() const;
+
+    uint32_t IndexFromBit(uint32_t i)const;
+    uint32_t OffsetFromBit(uint32_t i)const;
 
     virtual void Clear();
 };
