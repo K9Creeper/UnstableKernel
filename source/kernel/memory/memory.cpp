@@ -11,13 +11,12 @@ namespace Kernel{
             uint32_t mem_lower = 0;
             uint32_t mem_upper = 0;
 
+            uint32_t pmm_size = 0;
+
             uint32_t kheap_start = 0;
             uint32_t kheap_end = 0;
             uint32_t kheap_max_address = 0;
         }
-
-        
-
     }
 }
 
@@ -36,4 +35,6 @@ void Kernel::Memory::InitMemInfo(){
     // amount of upper memory available; starts just above the 1 MB mark and excludes reserved areas
     Info::mem_upper = basic_mem_info->mem_upper;
 
+    // For now a set of 1 GB
+    Info::pmm_size = 0x40000000;
 }

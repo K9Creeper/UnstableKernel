@@ -12,7 +12,7 @@
 
 #include "multiboot/multiboot.hpp"
 
-#include "debug/serial.hpp"
+#include "drivers/debug/serial.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -38,21 +38,22 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Memory::GDT::Install();
     printf("Installed | GDT\n");
 
+    Kernel::Memory::TSS::Init(5, 0x10, 0);
+    printf("Installed | TSS\n");
+
     Kernel::Memory::IDT::Init();
     printf("Initialized | IDT\n");
 
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
 
-    Kernel::Memory::TSS::Init(5, 0x10, 0);
-    printf("Initialized | TSS\n");
-
-    Kernel::MemoryManagement::Paging::Init(0x1000000);
-    printf("Initialized & Installed | PMM & Paging\n");
+    Kernel::MemoryManagement::Paging::Init(Kernel::Memory::Info::pmm_size);
+    printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
     
     Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
     printf("Initialized & Installed |  KHeap\n");
 
+    
 
     for (;;)
         asm volatile("hlt");

@@ -153,10 +153,9 @@ void SetupPMM(uint32_t mem_size)
     Kernel::MemoryManagement::Paging::bitmap.Create();
 
     const int count = mem_size / 0x1000;
-    
     const int size = (count / Kernel::MemoryManagement::Paging::bitmap.GetBytesPerEntry());
-    Kernel::MemoryManagement::Paging::bitmap.RePlace(reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::KHeap::kmalloc_(size)), 0);
-    Kernel::MemoryManagement::Paging::bitmap.SetCount(count);
+
+    Kernel::MemoryManagement::Paging::bitmap.RePlace(reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::KHeap::kmalloc_(size)), size);
 
     Kernel::MemoryManagement::Paging::bitmap.Clear();
 }

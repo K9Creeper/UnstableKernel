@@ -4,35 +4,38 @@
 
 namespace Kernel
 {
-    namespace Input
+    namespace Drivers
     {
-        namespace Keyboard
+        namespace Input
         {
-            struct Key
+            namespace Keyboard
             {
-                uint16_t index;
+                struct Key
+                {
+                    uint16_t index;
 
-                char* keyname;
-                
-                bool bhHasValue;
-                char value;
+                    char *keyname;
 
-                bool bPressed;
-                bool bPressedPrev = false;
-            };
-            
-            typedef void(*keyboard_input_handle)(const Key& k);
+                    bool bhHasValue;
+                    char value;
 
-            extern void* handles[64];
+                    bool bPressed;
+                    bool bPressedPrev = false;
+                };
 
-            extern bool bInitialized;
+                typedef void (*keyboard_input_handle)(const Key &k);
 
-            extern void Init();
-            
-            extern int AddHandle(void* handle);
-            extern void RemoveHandle(int i);
+                extern void *handles[64];
 
-            extern const Key* GetKeyMap();
+                extern bool bInitialized;
+
+                extern void Init();
+
+                extern int AddHandle(void *handle);
+                extern void RemoveHandle(int i);
+
+                extern const Key *GetKeyMap();
+            }
         }
     }
 }

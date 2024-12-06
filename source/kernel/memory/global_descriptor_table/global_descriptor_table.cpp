@@ -1,5 +1,7 @@
 #include "global_descriptor_table.hpp"
 
+#include "../task_state_segment/task_state_segment.hpp"
+
 struct GDTEntry
 {
     unsigned short limit_low;
@@ -26,7 +28,7 @@ void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned cha
 {
     pGDT[index].base_low = (base & 0xFFFF);
     pGDT[index].base_middle = (base >> 16) & 0xFF;
-    pGDT[index].base_high = (base >> 24) & 0xFF;
+    pGDT[index].base_high = (base >> 24 & 0xFF);
 
     pGDT[index].limit_low = (limit & 0xFFFF);
     pGDT[index].granularity = ((limit >> 16) & 0x0F);
