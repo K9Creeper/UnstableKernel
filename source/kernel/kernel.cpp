@@ -4,6 +4,8 @@
 
 #include "memory/global_descriptor_table/global_descriptor_table.hpp"
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
+#include "memory/task_state_segment/task_state_segment.hpp"
+
 
 #include "memory_management/paging/paging.hpp"
 #include "memory_management/kheap/kheap.hpp"
@@ -41,6 +43,9 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
+
+    Kernel::Memory::TSS::Init(5, 0x10, 0);
+    printf("Initialized | TSS\n");
 
     Kernel::MemoryManagement::Paging::Init(0x1000000);
     printf("Initialized & Installed | PMM & Paging\n");
