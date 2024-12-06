@@ -1,3 +1,7 @@
+/// ---------------------------
+/// global_descriptor_table.cpp
+/// @brief This file defines core functions for the Global Descritor Table.
+
 #include "global_descriptor_table.hpp"
 
 #include "../task_state_segment/task_state_segment.hpp"

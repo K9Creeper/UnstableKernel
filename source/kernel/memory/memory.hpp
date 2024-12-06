@@ -1,3 +1,8 @@
+/// ----------
+/// memory.hpp
+/// @brief This file declares the variables for holding kernel memory information, aswell as declareing
+/// the function to retrive some kernel memory information.
+
 #pragma once
 
 #include <stdint.h>

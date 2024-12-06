@@ -1,3 +1,8 @@
+/// ------------------------------
+/// interrupt_descriptor_table.hpp
+/// @brief This file defines core functions to setup the Interrupt Descriptor Table, 
+/// aswell as setting up all interrupt gates.
+
 #include "interrupt_descriptor_table.hpp"
 
 #include "../../../chelpers/memory.h"

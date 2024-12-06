@@ -1,3 +1,7 @@
+### -------------------------
+### interrupt_descriptor_table.s
+### @brief This file defines a core function for the Interrupt Descriptor Table.
+
 .global _idt_load
 .extern _pIDT
   

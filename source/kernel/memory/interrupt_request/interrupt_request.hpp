@@ -1,3 +1,7 @@
+/// ---------------------
+/// interrupt_request.hpp
+/// @brief This file declares the needed functions to add handles to external (device) interrupts.
+
 #pragma once
 
 #include "../interrupt_service/interrupt_service.hpp"

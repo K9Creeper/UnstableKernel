@@ -1,3 +1,7 @@
+### -------------------------
+### global_descriptor_table.s
+### @brief This file defines a core function for the Global Descriptor Table.
+
 .global _gdt_flush
 .extern _pGDT
 

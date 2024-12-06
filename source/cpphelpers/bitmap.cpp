@@ -1,3 +1,7 @@
+/// -----------
+/// bitmap.cpp
+/// @brief This file defines the core functions of the template based Bitmap class.
+
 #include "bitmap.hpp"
 
 #include "../chelpers/memory.h"

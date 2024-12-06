@@ -1,3 +1,7 @@
+/// -----------------
+/// ordered_array.hpp
+/// @brief This file declares the template based OrderedArray class.
+
 #pragma once
 
 #include <stdint.h>

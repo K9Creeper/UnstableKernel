@@ -1,3 +1,8 @@
+/// ---------------------
+/// interrupt_service.hpp
+/// @brief This file declares the 'Register' structure. It does
+/// not declare any functions directly related to interrupt_service.cpp
+
 #pragma once
 
 #include <stdint.h>

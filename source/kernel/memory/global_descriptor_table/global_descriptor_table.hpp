@@ -1,3 +1,7 @@
+/// ---------------------------
+/// global_descriptor_table.hpp
+/// @brief This file declares the needed function to setup the Global Descriptor Table.
+
 #pragma once
 
 #include <stdint.h>

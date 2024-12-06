@@ -1,3 +1,8 @@
+/// ----------
+/// memory.cpp
+/// @brief This file defines the variables for holding kernel memory information, aswell as defining
+/// the function to retrive some kernel memory information.
+
 #include "memory.hpp"
 
 #include "../multiboot/multiboot.hpp"

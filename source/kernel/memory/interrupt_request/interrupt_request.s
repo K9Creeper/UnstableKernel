@@ -1,4 +1,6 @@
-
+### ---------------------
+### interrupt_request.s
+### @brief This file defines core functions to handle external (device) interrupts.
 
 .global irq0
 irq0:

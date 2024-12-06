@@ -1,3 +1,7 @@
+/// -----------
+/// bitmap.hpp
+/// @brief This file declares the template based Bitmap class.
+
 #pragma once
 
 #include <stdint.h>

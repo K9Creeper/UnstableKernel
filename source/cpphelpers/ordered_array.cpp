@@ -1,3 +1,7 @@
+/// -----------------
+/// ordered_array.cpp
+/// @brief This file defines core functions of the template based OrderedArray class.
+
 #include "ordered_array.hpp"
 
 #include "../chelpers/memory.h"

@@ -1,3 +1,8 @@
+/// ---------------------
+/// interrupt_service.cpp
+/// @brief This file defines the core functions for handling and setting up 
+/// internal interrupts.
+
 #include "interrupt_service.hpp"
 
 extern "C"
@@ -87,6 +92,7 @@ extern "C" void isr_handler(struct Registers r)
 
 		for (;;)
 		{
+			asm volatile("hlt");
 		}
 	}
 }

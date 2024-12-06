@@ -1,3 +1,8 @@
+/// ---------------------
+/// interrupt_request.hpp
+/// @brief This file defines the core functions to handle external (device) interrupts,
+/// and allow for the call to handles.
+
 #include "interrupt_request.hpp"
 
 #include "../../../chelpers/memory.h"

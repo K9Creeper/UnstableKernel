@@ -1,3 +1,8 @@
+/// ----------
+/// serial.cpp
+/// @brief This file defines the needed function(s) to setup the COM1 serial port,
+/// aswell as debuging through said port.
+
 #include "serial.hpp"
 
 #include <stdarg.h>
