@@ -187,6 +187,7 @@ void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)
     }
 
     SwitchPageDirectory(kernelDirectory);
+
     Enable();
 }
 
@@ -196,10 +197,10 @@ void Kernel::MemoryManagement::Paging::Enable()
         return;
     uint32_t cr0;
 
-    // enable paging
     asm volatile("mov %%cr0, %0" : "=r"(cr0));
-    cr0 |= 0x80000000; // set paging bit
-    asm volatile("mov %0, %%cr0" : : "r"(cr0));
+    cr0 |= 0x80000000;
+    asm volatile("mov %0, %%cr0" ::"r"(cr0));
+
     bEnabled = true;
 }
 

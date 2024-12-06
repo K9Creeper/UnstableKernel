@@ -48,7 +48,6 @@ namespace Kernel
             extern void Init(uint32_t mem_size);
 
             extern void Enable();
-            extern void Disable();
 
             extern void SwitchPageDirectory(PageDirectory *dir);
             extern Page *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);

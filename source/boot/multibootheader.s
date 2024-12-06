@@ -1,9 +1,7 @@
-
-
-.set MBOOT2_MAGIC, 0xE85250D6
-.set MBOOT2_ARCH, 0
-.set MBOOT2_LENGTH, (Multiboot2HeaderEnd - Multiboot2Header)
-.set MBOOT2_CHECKSUM, -(MBOOT2_MAGIC + MBOOT2_ARCH + MBOOT2_LENGTH)
+.equ MBOOT2_MAGIC, 0xE85250D6
+.equ MBOOT2_ARCH, 0
+.equ MBOOT2_LENGTH, (Multiboot2HeaderEnd - Multiboot2Header)
+.equ MBOOT2_CHECKSUM, -(MBOOT2_MAGIC + MBOOT2_ARCH + MBOOT2_LENGTH)
 
 .section .multiboot.data, "aw"
 .align 8

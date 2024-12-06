@@ -25,9 +25,9 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Debug::COM1::Init();
 
+    printf("In C Kernel\n");
     Kernel::Memory::InitMemInfo();
 
-    printf("Basic Multiboot Memory Info | Lower: 0x%X | Upper: 0x%X\n", Kernel::Memory::Info::mem_lower, Kernel::Memory::Info::mem_upper);
     printf("Kernel Memory Info | Start: 0x%X | end: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
 
     Kernel::MemoryManagement::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);

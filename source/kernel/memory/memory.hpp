@@ -2,12 +2,11 @@
 
 #include <stdint.h>
 
+#define LOADED_ADDRESS 0x100000// 0xC0000000
+
 namespace Kernel{
     namespace Memory{
         namespace Info{
-            extern uint32_t mem_lower;
-            extern uint32_t mem_upper;
-
             extern uint32_t kernel_start;
             extern uint32_t kernel_end;
 
