@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-#include "paging_bitmap.hpp"
-
 //
 // Target: Bitmap System
 //
@@ -42,8 +40,6 @@ namespace Kernel
 
             extern PageDirectory *kernelDirectory;
             extern PageDirectory *currentDirectory;
-            
-            extern PagingBitmap bitmap;
 
             extern void Init(uint32_t mem_size);
 

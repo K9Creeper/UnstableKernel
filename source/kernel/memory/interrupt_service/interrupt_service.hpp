@@ -1,7 +1,7 @@
 /// ---------------------
 /// interrupt_service.hpp
-/// @brief This file declares the 'Register' structure. It does
-/// not declare any functions directly related to interrupt_service.cpp
+/// @brief This file declares the 'Register' structure, aswell as functions
+/// relating to the handling of ISRS interrupts.
 
 #pragma once
 
@@ -14,3 +14,14 @@ struct Registers
 	uint32_t int_no, err_code;                        // Interrupt number and error code (if applicable)
 	uint32_t eip, cs, eflags, useresp, ss;            // Pushed by the processor automatically.
 };
+
+namespace Kernel{
+	namespace Memory{
+		namespace ISRS{
+			typedef void(*Handle)(Registers regs);
+
+			extern void AddHandle(uint16_t num, void* handle);
+			extern void RemoveHandle(uint16_t num);
+		}
+	}
+}

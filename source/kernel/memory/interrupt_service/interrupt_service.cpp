@@ -45,14 +45,15 @@ extern void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, uns
 
 extern "C" void printf(const char *format, ...);
 
+void* isrs_handles[32];
+
 extern "C" void isr_handler(struct Registers r)
 {
 	if (r.int_no < 32)
 	{
 		printf("| Fault %d |\n", r.int_no);
 
-		if (r.int_no == 14)
-		{
+		if (r.int_no == 14){
 			uint32_t faulting_address;
 
 			asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
@@ -90,11 +91,14 @@ extern "C" void isr_handler(struct Registers r)
 			printf("0x%X\n",faulting_address);
 		}
 
-		for (;;)
-		{
-			asm volatile("hlt");
-		}
+		for (;;) { asm volatile("hlt"); }
 	}
+
+	Kernel::Memory::ISRS::Handle handler = reinterpret_cast<Kernel::Memory::ISRS::Handle>(isrs_handles[r.int_no]);
+	if (handler){
+		handler(r);
+	}
+
 }
 
 namespace Kernel
@@ -137,6 +141,12 @@ namespace Kernel
 				IDTSetGate(29, (uint32_t)isr29, 0x08, 0x8E);
 				IDTSetGate(30, (uint32_t)isr30, 0x08, 0x8E);
 				IDTSetGate(31, (uint32_t)isr31, 0x08, 0x8E);
+			}
+			void AddHandle(uint16_t num, void* handle){
+				isrs_handles[num] = handle;
+			}
+			void RemoveHandle(uint16_t num){
+				isrs_handles[num] = nullptr;
 			}
 		}
 	}

@@ -6,6 +6,8 @@
 
 #include "../kheap/kheap.hpp"
 
+#include "paging_bitmap.hpp"
+
 extern "C" void printf(const char *format, ...);
 
 void PagingBitmap::Clear()

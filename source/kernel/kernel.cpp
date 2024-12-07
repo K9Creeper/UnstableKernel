@@ -13,6 +13,7 @@
 #include "multiboot/multiboot.hpp"
 
 #include "drivers/debug/serial.hpp"
+#include "drivers/timer/timer.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -53,7 +54,8 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
     printf("Initialized & Installed |  KHeap\n");
 
-    
+    Kernel::Drivers::Timer::Init(100);
+    printf("Initialized & Installed |  Timer\n");
 
     for (;;)
         asm volatile("hlt");
