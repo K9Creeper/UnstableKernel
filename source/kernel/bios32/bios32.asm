@@ -1,4 +1,7 @@
-; ya im copying this. and i am going to compile with nasm :skull:
+;;; ----------
+;;; bios32.asm
+;;; @brief This file handles the switch from protected mode to real mode, to call BIOS interrupts given by the C/C++ code. 
+;;; This code came from https://github.com/szhou42/osdev/tree/master, sorry!.
 
 [bits 32]
 
