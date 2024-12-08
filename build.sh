@@ -20,10 +20,25 @@ asmCompile(){
         # Extract the relative path from the file (excluding the extension)
         relative_path=$(dirname "$file")
         filename=$(basename "$file" .s)
-        output_file="build/bin/AS_${relative_path//\//_}_$filename.o"
+        output_file="build/bin/GAS_${relative_path//\//_}_$filename.o"
 
         echo -e "ASSEMBLY: Compiling \033[1m$file\033[0m to $output_file"
         $TARGET-as "$file" -o "$output_file"
+        if ! [ -f "$output_file" ]; then
+            export COMP_ERROR="1"
+        fi
+    done
+}
+
+nasmCompile(){
+    for file in "$@"; do
+        # Extract the relative path from the file (excluding the extension)
+        relative_path=$(dirname "$file")
+        filename=$(basename "$file" .asm)
+        output_file="build/bin/NASM_${relative_path//\//_}_$filename.o"
+
+        echo -e "NASSEMBLY: Compiling \033[1m$file\033[0m to $output_file"
+        nasm -f elf32 "$file" -o "$output_file"
         if ! [ -f "$output_file" ]; then
             export COMP_ERROR="1"
         fi
@@ -76,6 +91,7 @@ echo -e "-------------------------------\n"
 echo -e "\033[1mASSEMBLY Compilation\033[0m"
 echo -e "---------------------"
 asmCompile $(find source/ -name "*.s")
+nasmCompile $(find source/ -name "*.asm")
 echo -e "\n"
 
 # GCC Compilation
