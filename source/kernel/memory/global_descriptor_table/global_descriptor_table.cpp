@@ -6,27 +6,10 @@
 
 #include "../task_state_segment/task_state_segment.hpp"
 
-struct GDTEntry
-{
-    unsigned short limit_low;
-    unsigned short base_low;
-    unsigned char base_middle;
-    unsigned char access;
-    unsigned char granularity;
-    unsigned char base_high;
-} __attribute__((packed));
-
-struct GDTPtr
-{
-    unsigned short limit;
-    unsigned int base;
-} __attribute__((packed));
-
-GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
-
 extern "C" void _gdt_flush();
 
-GDTPtr _pGDT;
+Kernel::Memory::GDT::GDTEntry pGDT[KERNEL_MEMORY_GDT_ENTRYCOUNT];
+Kernel::Memory::GDT::GDTPtr _pGDT;
 
 void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran)
 {
@@ -43,7 +26,7 @@ void GDTSetGate(int index, unsigned long base, unsigned long limit, unsigned cha
 
 void Kernel::Memory::GDT::Init()
 {
-    _pGDT.limit = (sizeof(struct GDTEntry) * KERNEL_MEMORY_GDT_ENTRYCOUNT) - 1;
+    _pGDT.limit = (sizeof(GDTEntry) * KERNEL_MEMORY_GDT_ENTRYCOUNT) - 1;
     _pGDT.base = (unsigned int)(&pGDT);
 }
 

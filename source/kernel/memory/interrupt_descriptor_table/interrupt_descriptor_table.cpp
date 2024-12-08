@@ -12,23 +12,8 @@
 
 #include <stdint.h>
 
-struct IDTEntry
-{
-    unsigned short base_lo;
-    unsigned short sel;
-    unsigned char always0;     
-    unsigned char flags;
-    unsigned short base_hi;
-} __attribute__((packed));
-
-struct IDTPtr
-{
-    unsigned short limit; // Size of the IDT in bytes
-    unsigned int base;    // Base address of the IDT
-} __attribute__((packed));
-
-IDTEntry pIDT[256];
-IDTPtr _pIDT;
+Kernel::Memory::IDT::IDTEntry pIDT[256];
+Kernel::Memory::IDT::IDTPtr _pIDT;
 
 extern "C" void _idt_load();
 
@@ -43,9 +28,9 @@ void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, unsigned c
 
 void Kernel::Memory::IDT::Init()
 {
-    _pIDT.limit = (sizeof(struct IDTEntry) * 256) - 1;
+    _pIDT.limit = (sizeof(IDTEntry) * 256) - 1;
     _pIDT.base = (unsigned int)(&pIDT);
-    memset((unsigned char *)(&pIDT), 0, sizeof(struct IDTEntry) * 256);
+    memset((unsigned char *)(&pIDT), 0, sizeof(IDTEntry) * 256);
 }
 
 namespace Kernel{

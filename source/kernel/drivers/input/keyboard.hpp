@@ -1,3 +1,8 @@
+/// ------------
+/// keyboard.hpp
+/// @brief This file declares the structures, functions and variables to
+/// setup the keyboard and get readable input.
+
 #pragma once
 
 #include <stdint.h>
@@ -24,8 +29,6 @@ namespace Kernel
                 };
 
                 typedef void (*keyboard_input_handle)(const Key &k);
-
-                extern void *handles[64];
 
                 extern bool bInitialized;
 

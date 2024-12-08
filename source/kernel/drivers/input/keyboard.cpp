@@ -1,3 +1,7 @@
+/// ------------
+/// keyboard.hpp
+/// @brief This file defines the functions to setup the keyboard and get readable input.
+
 #include "keyboard.hpp"
 
 #include "../../../chelpers/memory.h"
