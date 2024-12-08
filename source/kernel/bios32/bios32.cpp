@@ -64,9 +64,7 @@ void Kernel::Bios32::Call(uint8_t int_num, Registers16 * in_reg, Registers16 * o
     uint32_t size = reinterpret_cast<uint32_t>(Bios32HelperEnd) - reinterpret_cast<uint32_t>(Bios32Helper);
     memcpy(reinterpret_cast<unsigned char*>(new_code_base), reinterpret_cast<unsigned char*>(Bios32Helper), size);
 
-    printf("calling that boi\n");
     RebasedBios32Helper();
-    printf("done calling that boi\n");
 
     t = REBASE(&asm_out_reg_ptr);
     memcpy(reinterpret_cast<unsigned char*>(out_reg), reinterpret_cast<unsigned char*>(t), sizeof(Registers16));
