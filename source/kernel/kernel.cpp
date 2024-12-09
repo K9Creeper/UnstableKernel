@@ -6,14 +6,17 @@
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 #include "memory/task_state_segment/task_state_segment.hpp"
 
-
 #include "memory_management/paging/paging.hpp"
 #include "memory_management/kheap/kheap.hpp"
+
+#include "bios32/bios32.hpp"
 
 #include "multiboot/multiboot.hpp"
 
 #include "drivers/debug/serial.hpp"
 #include "drivers/timer/timer.hpp"
+
+#include "drivers/vesa/vesa.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -52,10 +55,17 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
     
     Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
-    printf("Initialized & Installed |  KHeap\n");
+    printf("Initialized & Installed | KHeap\n");
+
+    Kernel::Bios32::Init();
+    printf("Initialized | Bios32 Service\n");
 
     Kernel::Drivers::Timer::Init(100);
-    printf("Initialized & Installed |  Timer\n");
+    printf("Initialized & Installed | Timer\n");
+
+    Kernel::Drivers::VESA::Init();
+    printf("Initialized | VESA\n");
+
 
     for (;;)
         asm volatile("hlt");
