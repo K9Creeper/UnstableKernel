@@ -443,7 +443,7 @@ uint32_t Kernel::MemoryManagement::KHeap::kmalloc_(uint32_t size, bool align, ui
     return Kernel::MemoryManagement::KHeap::Early::pkmalloc_(size, align, physAddress);
 }
 
-void kfree_(void *ptr)
+void Kernel::MemoryManagement::KHeap::kfree_(void *ptr)
 {
   Free(ptr);
 }

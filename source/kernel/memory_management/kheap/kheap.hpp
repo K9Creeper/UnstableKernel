@@ -51,6 +51,7 @@ namespace Kernel
 
             extern void Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, bool readonly);
             extern uint32_t kmalloc_(uint32_t size, bool align = false, uint32_t *physAddress = nullptr);
+            extern void kfree_(void* ptr);
         }
     }
 }
