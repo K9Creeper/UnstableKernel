@@ -68,7 +68,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Drivers::VESA::SetMode(800, 600, 32);
     printf("VESA (0x%X) --- Set to 800x600x32\n", Kernel::Drivers::VESA::currentMode.info.physbase);
-
+    
     for (;;)
         asm volatile("hlt");
 }

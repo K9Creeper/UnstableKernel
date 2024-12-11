@@ -79,8 +79,18 @@ void VESASetMode(uint32_t mode)
     Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
 }
 
-void Kernel::Drivers::VESA::SetMode(uint32_t mode){
+void Kernel::Drivers::VESA::SetMode(uint32_t mode)
+{
     VESASetMode(mode);
+    // not the most efficent thing.
+    for (uint8_t i = 0; i < 64; i++)
+    {
+        if (Kernel::Drivers::VESA::vesaModes[i].number != mode)
+            continue;
+        currentMode = Kernel::Drivers::VESA::vesaModes[i];
+        break;
+    }
+    
 }
 
 bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bpp)
@@ -95,9 +105,7 @@ bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bp
         if (m[i].info.width != width || m[i].info.height != height || m[i].info.bpp != bpp)
             continue;
 
-        VESASetMode(m[i].number);
-
-        currentMode = m[i];
+        Kernel::Drivers::VESA::SetMode(m[i].number);
 
         return true;
     }

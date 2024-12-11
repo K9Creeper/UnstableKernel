@@ -188,6 +188,11 @@ void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)
         AllocateFrame(GetPageEntry(j, currentDirectory, 1), 0, 1);
     }
 
+    for(uint32_t a = 0xe0000000; a < 0xe0000000 + 1920000 * 5; a += 0x1000)
+    {
+        AllocateFrame(GetPageEntry(a, currentDirectory, 1), 0, 1);
+    }
+
     SwitchPageDirectory(kernelDirectory);
 
     Enable();
