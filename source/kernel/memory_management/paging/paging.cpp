@@ -162,7 +162,7 @@ void SetupPMM(uint32_t mem_size)
     Kernel::MemoryManagement::Paging::bitmap.Clear();
 }
 
-void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)
+void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size, uint32_t lfb, uint32_t lfb_size)
 {
     SetupPMM(mem_size);
 
@@ -186,11 +186,6 @@ void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)
     for (uint32_t j = KHEAP_START; j < KHEAP_START + KHEAP_INITIAL_SIZE; j += 0x1000)
     {
         AllocateFrame(GetPageEntry(j, currentDirectory, 1), 0, 1);
-    }
-
-    for(uint32_t a = 0xe0000000; a < 0xe0000000 + 1920000 * 5; a += 0x1000)
-    {
-        AllocateFrame(GetPageEntry(a, currentDirectory, 1), 0, 1);
     }
 
     SwitchPageDirectory(kernelDirectory);

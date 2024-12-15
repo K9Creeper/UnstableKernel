@@ -51,24 +51,26 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
 
-    Kernel::MemoryManagement::Paging::Init(Kernel::Memory::Info::pmm_size);
-    printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
-    
-    Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
-    printf("Initialized & Installed | KHeap\n");
-
     Kernel::Bios32::Init();
     printf("Initialized | Bios32 Service\n");
-
-    Kernel::Drivers::Timer::Init(100);
-    printf("Initialized & Installed | Timer\n");
 
     Kernel::Drivers::VESA::Init();
     printf("Initialized | VESA\n");
 
     Kernel::Drivers::VESA::SetMode(800, 600, 32);
-    printf("VESA (0x%X) --- Set to 800x600x32\n", Kernel::Drivers::VESA::currentMode.info.physbase);
+    printf("SetMode | VESA\n");
     
+    Kernel::MemoryManagement::Paging::Init(Kernel::Memory::Info::pmm_size, 0xe0000000, 800 * 600 * (32/8));
+    printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
+
+    Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
+    printf("Initialized & Installed | KHeap\n");
+
+    Kernel::Drivers::Timer::Init(100);
+    printf("Initialized & Installed | Timer\n");
+    
+    asm volatile("sti");
+
     for (;;)
         asm volatile("hlt");
 }

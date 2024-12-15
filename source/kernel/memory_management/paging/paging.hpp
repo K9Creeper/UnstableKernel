@@ -41,7 +41,7 @@ namespace Kernel
             extern PageDirectory *kernelDirectory;
             extern PageDirectory *currentDirectory;
 
-            extern void Init(uint32_t mem_size);
+            extern void Init(uint32_t mem_size, uint32_t lfb, uint32_t lfb_size);
 
             extern void Enable();
 

@@ -58,7 +58,7 @@ namespace Kernel
                 VbeModeInfoStruct info;
             };
 
-            extern VbeInfoBlock *vbeInfo;
+            extern VbeInfoBlock vbeInfo;
             extern VbeModeInfoStruct *vbeModeInfo;
 
             extern VESAMode currentMode;
