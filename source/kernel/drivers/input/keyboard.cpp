@@ -179,11 +179,11 @@ void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 
         if ((scancode & 128) == 128)
         {
-            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode - 128]);
+            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode - 128], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
         }
         else
         {
-            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode]);
+            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
         }
     }
 }

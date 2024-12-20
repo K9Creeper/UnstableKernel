@@ -124,8 +124,9 @@ bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bp
     return false;
 }
 
-void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height, uint16_t bpp)
+void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height)
 {
+    const uint16_t bpp = 32;
     LoadvbeInfo();
 
     SetMode(width, height, bpp);

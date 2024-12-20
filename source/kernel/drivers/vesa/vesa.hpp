@@ -63,7 +63,7 @@ namespace Kernel
 
             extern VESAMode currentMode;
 
-            extern void Init(uint32_t width, uint32_t height, uint16_t bpp);
+            extern void Init(uint32_t width, uint32_t height);
             extern uint32_t GetLFBAddress();
             extern void SetMode(uint32_t mode);
             extern bool SetMode(uint32_t width, uint32_t height, uint16_t bpp);

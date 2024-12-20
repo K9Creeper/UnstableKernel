@@ -28,7 +28,7 @@ namespace Kernel
                     bool bPressedPrev = false;
                 };
 
-                typedef void (*keyboard_input_handle)(const Key &k);
+                typedef void (*keyboard_input_handle)(const Key &k, const Key* keymap);
 
                 extern bool bInitialized;
 
