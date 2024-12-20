@@ -1,4 +1,4 @@
-<h1> Unstable Kernel </h1>
+<h1> Unstable Kernel (x86) </h1>
 <p> The most unstable kernel you'll know. </p>
 
 <h1> Goal </h1>

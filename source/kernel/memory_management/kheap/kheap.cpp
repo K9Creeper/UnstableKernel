@@ -80,7 +80,7 @@ void Kernel::MemoryManagement::KHeap::Init(uint32_t start, uint32_t end, uint32_
   uint32_t i = start;
   while (i < end)
   {
-    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i, 0, 1, 1);
+    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i,0, 1, 1);
     i += 0x1000;
   }
 

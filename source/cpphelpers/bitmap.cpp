@@ -20,7 +20,7 @@ type_t &Bitmap<type_t>::operator[](uint32_t i)
 }
 
 template <typename type_t>
-type_t Bitmap<type_t>::Get(uint32_t i)
+type_t& Bitmap<type_t>::Get(uint32_t i)
 {
     return this->array[i];
 }
