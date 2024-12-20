@@ -1,6 +1,6 @@
 /// ---------------------------
 /// physical_memory_manager.cpp
-/// @brief
+/// @brief This file defines the functions and structures to manage physical memory.
 
 #include "physical_memory_manager.hpp"
 

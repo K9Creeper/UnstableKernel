@@ -1,6 +1,6 @@
 /// ----------
 /// paging.cpp
-/// @brief
+/// @brief This file defines the functions for paging.
 
 #include "paging.hpp"
 

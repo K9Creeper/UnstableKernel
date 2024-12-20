@@ -1,6 +1,6 @@
 /// ----------
 /// paging.hpp
-/// @brief
+/// @brief This file declares the functions and structures for paging.
 
 
 #pragma once

@@ -82,10 +82,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0400000 + 0x100000, 0xCFFFF000);
     printf("Initialized & Installed | KHeap\n");
 
-    // printf("LFB Address 0x%X\n", Kernel::Drivers::VESA::GetLFBAddress());
-
-    draw_test_pattern(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.pitch, 32);
-
     for (;;)
         asm volatile("hlt");
 }

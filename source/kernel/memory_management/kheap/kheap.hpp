@@ -1,3 +1,7 @@
+/// ---------
+/// kheap.hpp
+/// @brief This file declares the functions and structures to handle and allow for dynamic memory allocation.
+
 #pragma once
 
 #include <stdint.h>

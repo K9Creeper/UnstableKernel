@@ -1,3 +1,7 @@
+/// ---------
+/// kheap.cpp
+/// @brief This file defines the functions and structures to handle and allow for dynamic memory allocation.
+
 #include "kheap.hpp"
 
 #include "../../memory/memory.hpp"
