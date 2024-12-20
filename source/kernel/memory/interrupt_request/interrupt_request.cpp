@@ -51,6 +51,7 @@ extern "C" void irq_handler(Registers regs)
 			}
 		}
 	}
+	
 }
 
 void Kernel::Memory::IRQ::AddHandle(int num, void *handle)

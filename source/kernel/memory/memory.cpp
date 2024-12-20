@@ -30,5 +30,5 @@ void Kernel::Memory::InitMemInfo(){
     Info::kernel_end =  reinterpret_cast<uint32_t>(&linkerld_endofkernel);
 
     // For now a set of 1 GB
-    Info::pmm_size = 0x40000000;
+    Info::pmm_size = 0x1000000;// 0x40000000;
 }

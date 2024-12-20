@@ -6,8 +6,12 @@
 
 #include "../../../chelpers/memory.h"
 
+
+#include "../../memory/memory.hpp"
+
 #include "../../bios32/bios32.hpp"
 #include "../../memory_management/kheap/kheap.hpp"
+#include "../../memory_management/paging/paging.hpp"
 
 namespace Kernel
 {
@@ -24,6 +28,15 @@ namespace Kernel
 }
 
 extern "C" void printf(const char *format, ...);
+
+void LoadvbeInfo(){
+    Registers16 reg_in = {0};
+    Registers16 reg_out = {0};
+    reg_in.ax = 0x4F00;
+    reg_in.di = 0x9500;
+    Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
+    memcpy(reinterpret_cast<unsigned char *>(&Kernel::Drivers::VESA::vbeInfo), reinterpret_cast<unsigned char *>(0x9500), sizeof(Kernel::Drivers::VESA::VbeInfoBlock));
+}
 
 void VESAGetMode(uint16_t mode, Kernel::Drivers::VESA::VbeModeInfoStruct *modeInfo)
 {
@@ -102,6 +115,8 @@ bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bp
         if (m[i].info.width != width || m[i].info.height != height || m[i].info.bpp != bpp)
             continue;
         
+        VESASetMode(m[i].number);
+
         currentMode = m[i];
 
         return true;
@@ -109,12 +124,19 @@ bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bp
     return false;
 }
 
-void Kernel::Drivers::VESA::Init()
+void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height, uint16_t bpp)
 {
-    Registers16 reg_in = {0};
-    Registers16 reg_out = {0};
-    reg_in.ax = 0x4F00;
-    reg_in.di = 0x9500;
-    Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
-    memcpy(reinterpret_cast<unsigned char *>(&vbeInfo), reinterpret_cast<unsigned char *>(0x9500), sizeof(VbeInfoBlock));
+    LoadvbeInfo();
+
+    SetMode(width, height, bpp);
+
+	outportb(0xA0, 0x20);
+
+    for(uint32_t j = currentMode.info.physbase; j < currentMode.info.physbase + width * height * (bpp/8); j+=0x1000){
+        Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, j, 0, false, true);        
+    }
+}
+
+uint32_t Kernel::Drivers::VESA::GetLFBAddress(){
+    return currentMode.info.physbase;
 }

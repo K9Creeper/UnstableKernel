@@ -44,7 +44,7 @@ void Kernel::Drivers::Timer::Init(uint16_t hz){
     
     SetFrequency(hz);
     Kernel::Memory::IRQ::AddHandle(32, TimerHandle);
-    wakeupArray.RePlace(reinterpret_cast<void*>(Kernel::MemoryManagement::KHeap::kmalloc_(ARRAY_MAX_COUNT * sizeof(void*))), ARRAY_MAX_COUNT);
+    //wakeupArray.RePlace(reinterpret_cast<void*>(Kernel::MemoryManagement::KHeap::kmalloc_(ARRAY_MAX_COUNT * sizeof(void*))), ARRAY_MAX_COUNT);
 
     bInitialized = true;
 }

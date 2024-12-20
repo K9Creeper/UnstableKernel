@@ -1,6 +1,6 @@
 /// ---------------------
 /// interrupt_service.cpp
-/// @brief This file defines the core functions for handling and setting up 
+/// @brief This file defines the core functions for handling and setting up
 /// internal interrupts.
 
 #include "interrupt_service.hpp"
@@ -45,7 +45,7 @@ extern void IDTSetGate(unsigned char num, uint32_t base, unsigned short sel, uns
 
 extern "C" void printf(const char *format, ...);
 
-void* isrs_handles[32];
+void *isrs_handles[32];
 
 extern "C" void isr_handler(struct Registers r)
 {
@@ -53,52 +53,45 @@ extern "C" void isr_handler(struct Registers r)
 	{
 		printf("| Fault %d |\n", r.int_no);
 
-		if (r.int_no == 14){
+		if (r.int_no == 14)
+		{
 			uint32_t faulting_address;
 
 			asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
 			// The error code gives us details of what happened
-			int present = !(r.err_code & 0x1); // Page not present
-			int rw = r.err_code & 0x2;		  // Write operation?
-			int user = r.err_code & 0x4;		  // Processor was in user-mode?
-			int reserved = r.err_code & 0x8;	  // Overwritten CPU-reserved bits of page entry?
-			int id = r.err_code & 0x10;		  // Caused by an instruction fetch?
+			uint32_t present = r.err_code & 0x1;
+			uint32_t rw = r.err_code & 0x2;
+			uint32_t user = r.err_code & 0x4;
+			uint32_t reserved = r.err_code & 0x8;
+			uint32_t inst_fetch = r.err_code & 0x10;
 
-			// Output an error message.
-			printf("Page fault! ( ");
-			if (present)
-			{
-				printf("present ");
-			}
+			printf("Possible causes: [ ");
+			if (!present)
+				printf("Page not present ");
 			if (rw)
-			{
-				printf("read-only ");
-			}
+				printf("Page is read only ");
 			if (user)
-			{
-				printf("user-mode ");
-			}
+				printf("Page is read only ");
 			if (reserved)
-			{
-				printf("reserved ");
-			}
-			if (id)
-			{
-				printf("instruction fetch ");
-			}
-			printf(") at ");
-			printf("0x%X\n",faulting_address);
+				printf("Overwrote reserved bits ");
+			if (inst_fetch)
+				printf("Instruction fetch ");
+			printf("] at ");
+			printf("0x%X\n", faulting_address);
 		}
 
-		for (;;) { asm volatile("hlt"); }
+		for (;;)
+		{
+			asm volatile("hlt");
+		}
 	}
 
 	Kernel::Memory::ISRS::Handle handler = reinterpret_cast<Kernel::Memory::ISRS::Handle>(isrs_handles[r.int_no]);
-	if (handler){
+	if (handler)
+	{
 		handler(r);
 	}
-
 }
 
 namespace Kernel
@@ -142,10 +135,12 @@ namespace Kernel
 				IDTSetGate(30, (uint32_t)isr30, 0x08, 0x8E);
 				IDTSetGate(31, (uint32_t)isr31, 0x08, 0x8E);
 			}
-			void AddHandle(uint16_t num, void* handle){
+			void AddHandle(uint16_t num, void *handle)
+			{
 				isrs_handles[num] = handle;
 			}
-			void RemoveHandle(uint16_t num){
+			void RemoveHandle(uint16_t num)
+			{
 				isrs_handles[num] = nullptr;
 			}
 		}

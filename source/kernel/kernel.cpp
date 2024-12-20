@@ -6,6 +6,7 @@
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 #include "memory/task_state_segment/task_state_segment.hpp"
 
+#include "memory_management/physical_memory_manager/physical_memory_manager.hpp"
 #include "memory_management/paging/paging.hpp"
 #include "memory_management/kheap/kheap.hpp"
 
@@ -19,6 +20,21 @@
 #include "drivers/vesa/vesa.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
+
+void draw_test_pattern(uint32_t lfb_base, uint32_t width, uint32_t pitch, uint32_t bpp)
+{
+    for (uint32_t i = 0; i < 500; i++)
+    {
+        for (uint32_t k = 0; k < 500; k++)
+        {
+            uint32_t pixel_offset = i * pitch + (k * (bpp / 8)) + lfb_base;
+
+            uint32_t *loc = reinterpret_cast<uint32_t *>(pixel_offset);
+
+            *loc = 0xFFFFFFFF;
+        }
+    }
+}
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
@@ -54,22 +70,21 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Bios32::Init();
     printf("Initialized | Bios32 Service\n");
 
-    Kernel::Drivers::VESA::Init();
+    Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
+    printf("Initialzied | PMM\n");
+
+    Kernel::MemoryManagement::Paging::Init();
+    printf("Initialzied | Paging\n");
+
+    Kernel::Drivers::VESA::Init(1024, 768, 32);
     printf("Initialized | VESA\n");
 
-    Kernel::Drivers::VESA::SetMode(800, 600, 32);
-    printf("SetMode | VESA\n");
-    
-    Kernel::MemoryManagement::Paging::Init(Kernel::Memory::Info::pmm_size, 0xe0000000, 800 * 600 * (32/8));
-    printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
+    // printf("LFB Address 0x%X\n", Kernel::Drivers::VESA::GetLFBAddress());
 
-    Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
+    // draw_test_pattern(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.pitch, 32);
+
+    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0400000 + 0x100000, 0xCFFFF000);
     printf("Initialized & Installed | KHeap\n");
-
-    Kernel::Drivers::Timer::Init(100);
-    printf("Initialized & Installed | Timer\n");
-    
-    asm volatile("sti");
 
     for (;;)
         asm volatile("hlt");

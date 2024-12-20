@@ -6,7 +6,6 @@
 
 #include <stdint.h>
 
-
 namespace Kernel
 {
     namespace Drivers
@@ -28,7 +27,8 @@ namespace Kernel
                 };
             };
 
-            enum DeviceType{
+            enum DeviceType
+            {
                 PCI_HEADER_TYPE_DEVICE = 0,
                 PCI_HEADER_TYPE_BRIDGE,
                 PCI_HEADER_TYPE_CARDBUS,
