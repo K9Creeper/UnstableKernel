@@ -9,8 +9,6 @@
 #include "../memory/global_descriptor_table/global_descriptor_table.hpp"
 #include "../memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 
-#include "../memory_management/paging/paging.hpp"
-
 void (*RebasedBios32Helper)() = reinterpret_cast<void(*)()>(0x7C00);
 
 extern "C" void Bios32Helper();

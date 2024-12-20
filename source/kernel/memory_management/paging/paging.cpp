@@ -29,7 +29,7 @@ namespace Kernel
 
 extern "C" Kernel::MemoryManagement::Paging::PageDirectory *pageDirectory;
 
-extern "C" void printf(const char* format, ...);
+extern "C" void printf(const char *format, ...);
 
 void Kernel::MemoryManagement::Paging::Init()
 {
@@ -42,14 +42,15 @@ void Kernel::MemoryManagement::Paging::Init()
         AllocatePage(kernelDirectory, i, 0, 1, 1);
         i += 0x1000;
     }
-    
+
     SwitchDirectory(kernelDirectory, 0);
     EnablePaging();
 
     i = 0;
     while (i < 0x10000)
     {
-        AllocatePage(kernelDirectory, i, 1, 1, 1);
+                                        // identity map
+        AllocatePage(kernelDirectory, i, i / 0x1000, 1, 1);
         i += 0x1000;
     }
 }

@@ -130,10 +130,8 @@ void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height, uint16_t bpp)
 
     SetMode(width, height, bpp);
 
-	outportb(0xA0, 0x20);
-
     for(uint32_t j = currentMode.info.physbase; j < currentMode.info.physbase + width * height * (bpp/8); j+=0x1000){
-        Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, j, 0, false, true);        
+        Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, j, (j/0x1000), false, true);        
     }
 }
 
