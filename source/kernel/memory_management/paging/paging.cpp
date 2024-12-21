@@ -1,19 +1,15 @@
+/// ----------
+/// paging.cpp
+/// @brief This file defines the functions for paging.
+
 #include "paging.hpp"
 
 #include "../../../chelpers/memory.h"
 
 #include "../../memory/memory.hpp"
 
+#include "../physical_memory_manager/physical_memory_manager.hpp"
 #include "../kheap/kheap.hpp"
-
-#include "paging_bitmap.hpp"
-
-extern "C" void printf(const char *format, ...);
-
-void PagingBitmap::Clear()
-{
-    memset(reinterpret_cast<uint8_t *>(array), 0, memSize); // fill with zeros
-}
 
 namespace Kernel
 {
@@ -21,182 +17,59 @@ namespace Kernel
     {
         namespace Paging
         {
-            bool bIntialized = false;
+            PageDirectory *kernelDirectory = nullptr;
+
+            bool bPSEEnabled = true;
+
             bool bEnabled = false;
-
-            PageDirectory *currentDirectory;
-            PageDirectory *kernelDirectory;
-
-            PagingBitmap bitmap;
+            bool bInitialzed = false;
         }
     }
 }
 
-Kernel::MemoryManagement::Paging::Page *Kernel::MemoryManagement::Paging::GetPageEntry(uint32_t address, Kernel::MemoryManagement::Paging::PageDirectory *dir, bool sMake, uint32_t *out_physical_address)
+extern "C" Kernel::MemoryManagement::Paging::PageDirectory *pageDirectory;
+
+extern "C" void printf(const char *format, ...);
+
+void Kernel::MemoryManagement::Paging::Init()
 {
-    // turn the address into an index
-    uint32_t frame = address / 0x1000;
+    kernelDirectory = reinterpret_cast<PageDirectory *>(Kernel::MemoryManagement::KHeap::Early::pkmalloc_(sizeof(PageDirectory), true));
+    memset(reinterpret_cast<uint8_t *>(kernelDirectory), reinterpret_cast<uint8_t *>(0), sizeof(PageDirectory));
 
-    // Find the page table containing this address
-    uint32_t table_idx = frame / 1024;
-
-    if (dir->tables[table_idx]) // page-table is already assigned
+    uint32_t i = 0xC0000000;
+    while (i < 0xC0000000 + 0x400000)
     {
-        uint32_t page_idx = frame % 1024;
-
-        return &dir->tables[table_idx]->pages[page_idx];
-    }
-    else if (sMake)
-    {
-        return MakePageEntry(address, dir);
+        AllocatePage(kernelDirectory, i, 0, 1, 1);
+        i += 0x1000;
     }
 
-    return 0;
-}
+    SwitchDirectory(kernelDirectory, 0);
+    EnablePaging();
 
-Kernel::MemoryManagement::Paging::Page *Kernel::MemoryManagement::Paging::MakePageEntry(uint32_t address, PageDirectory *dir)
-{
-    // address to an index
-    uint32_t frame = address / 0x1000;
-
-    // find the page table
-    uint32_t table_idx = frame / 1024;
-    uint32_t page_idx = frame % 1024;
-
-    uint32_t physical_address;
-
-    // retrieve a memory block which is page aligned, aswell as its physical address
-    uint32_t virtual_address = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(Kernel::MemoryManagement::Paging::PageTable), 1, &physical_address);
-    memset(reinterpret_cast<unsigned char *>(virtual_address), 0, 0x1000); // fill with zeros
-
-    // virtual address
-    dir->tables[table_idx] = reinterpret_cast<Kernel::MemoryManagement::Paging::PageTable *>(virtual_address);
-
-    // physical address
-    // set present, rw, and user-mode bits
-    dir->tablePhysicals[table_idx] = physical_address | 0x7;
-
-    // return what was made
-    return &dir->tables[table_idx]->pages[page_idx];
-}
-
-static void SetFrame(uint32_t frame_address)
-{
-    uint32_t frame = frame_address / 0x1000;
-    uint32_t index = Kernel::MemoryManagement::Paging::bitmap.IndexFromBit(frame);
-    uint32_t offset = Kernel::MemoryManagement::Paging::bitmap.OffsetFromBit(frame);
-    Kernel::MemoryManagement::Paging::bitmap[index] |= 0x1 << offset;
-}
-
-static void ClearFrame(uint32_t frame_address)
-{
-    uint32_t frame = frame_address / 0x1000;
-    uint32_t index = Kernel::MemoryManagement::Paging::bitmap.IndexFromBit(frame);
-    uint32_t offset = Kernel::MemoryManagement::Paging::bitmap.OffsetFromBit(frame);
-    Kernel::MemoryManagement::Paging::bitmap[index] &= ~(0x1 << offset);
-}
-
-static bool FirstFrame(uint32_t &out)
-{
-    // loop through bitmap
-    for (uint32_t i = 0; i < Kernel::MemoryManagement::Paging::bitmap.GetMemSize(); i += 1)
+    i = 0;
+    while (i < 0x10000)
     {
-        // exit if nothing free
-        if (Kernel::MemoryManagement::Paging::bitmap[i] != 0xFFFFFFFF)
-        {
-            // loop through bits
-            for (uint32_t j = 0; j < 32; j += 1)
-            {
-                uint32_t test = 0x1 << j;
-
-                // if its free yoink it, huzzah!
-                if (!(Kernel::MemoryManagement::Paging::bitmap[i] & test))
-                {
-                    out = i * 32 + j;
-                    return true;
-                }
-            }
-        }
-    }
-
-    out = -1;
-    return false;
-}
-
-void Kernel::MemoryManagement::Paging::AllocateFrame(Kernel::MemoryManagement::Paging::Page *page, bool is_kernel, bool is_writeable)
-{
-    if (page->frame == 0)
-    {
-        uint32_t index = 0;
-
-        if (!FirstFrame(index))
-        {
-            printf("Out of pages\n");
-            // no free pages
-            for (;;)
-            {
-                asm volatile("hlt");
-            }
-        }
-
-        // initialize a frame
-        SetFrame(index * 0x1000);
-
-        // add our flags
-        page->present = 1;
-        page->rw = (is_writeable) ? 1 : 0;
-        page->user = (is_kernel) ? 0 : 1;
-        page->frame = index;
+                                        // identity map
+        AllocatePage(kernelDirectory, i, i / 0x1000, 1, 1);
+        i += 0x1000;
     }
 }
 
-void SetupPMM(uint32_t mem_size)
+void DisablePSEReg()
 {
-    Kernel::MemoryManagement::Paging::bitmap.Create();
-
-    const int count = mem_size / 0x1000;
-    const int size = (count / Kernel::MemoryManagement::Paging::bitmap.GetBytesPerEntry());
-
-    Kernel::MemoryManagement::Paging::bitmap.RePlace(reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::KHeap::kmalloc_(size)), size);
-
-    Kernel::MemoryManagement::Paging::bitmap.Clear();
-}
-
-void Kernel::MemoryManagement::Paging::Init(uint32_t mem_size)
-{
-    SetupPMM(mem_size);
-
-    uint32_t tmp = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageDirectory), true);
-    memset(reinterpret_cast<uint8_t *>(tmp), 0, sizeof(PageDirectory)); // fill with zeros
-
-    kernelDirectory = reinterpret_cast<PageDirectory *>(tmp);
-
-    currentDirectory = kernelDirectory;
-
-    for (uint32_t j = KHEAP_START; j < KHEAP_START + KHEAP_INITIAL_SIZE; j += 0x1000)
-    {
-        GetPageEntry(j, currentDirectory, 1);
-    }
-
-    for (uint32_t j = 0; j < Kernel::MemoryManagement::KHeap::Early::nextPlacementAddress + 0x1000; j += 0x1000)
-    {
-        AllocateFrame(GetPageEntry(j, currentDirectory, 1), 0, 0);
-    }
-
-    for (uint32_t j = KHEAP_START; j < KHEAP_START + KHEAP_INITIAL_SIZE; j += 0x1000)
-    {
-        AllocateFrame(GetPageEntry(j, currentDirectory, 1), 0, 1);
-    }
-
-    SwitchPageDirectory(kernelDirectory);
-
-    Enable();
-}
-
-void Kernel::MemoryManagement::Paging::Enable()
-{
-    if (bEnabled)
+    if (!Kernel::MemoryManagement::Paging::bPSEEnabled)
         return;
+    uint32_t cr4;
+    asm volatile("mov %%cr4, %0" : "=r"(cr4));
+    cr4 &= 0xffffffef;
+    asm volatile("mov %0, %%cr4" ::"r"(cr4));
+}
+
+void Kernel::MemoryManagement::Paging::EnablePaging()
+{
+    // will do its thang
+    DisablePSEReg();
+
     uint32_t cr0;
 
     asm volatile("mov %%cr0, %0" : "=r"(cr0));
@@ -206,25 +79,105 @@ void Kernel::MemoryManagement::Paging::Enable()
     bEnabled = true;
 }
 
-void Kernel::MemoryManagement::Paging::SwitchPageDirectory(Kernel::MemoryManagement::Paging::PageDirectory *dir)
+void Kernel::MemoryManagement::Paging::SwitchDirectory(PageDirectory *dir, bool isPhysical)
 {
-    Kernel::MemoryManagement::Paging::currentDirectory = dir;
-
-    // CR3 = address of tablePhysicals
-    asm volatile("mov %0, %%cr3" : : "r"(&dir->tablePhysicals));
+    uint32_t t;
+    if (!isPhysical)
+        t = Virtual2Phyiscal(pageDirectory, reinterpret_cast<uint32_t>(dir));
+    else
+        t = reinterpret_cast<uint32_t>(dir);
+    asm volatile("mov %0, %%cr3" ::"r"(t));
 }
 
-void Kernel::MemoryManagement::Paging::FreeFrame(Kernel::MemoryManagement::Paging::Page *page)
+uint32_t Kernel::MemoryManagement::Paging::Virtual2Phyiscal(PageDirectory *dir, uint32_t virtual_address)
 {
-    uint32_t frame = page->frame;
+    if (!bEnabled)
+    {
+        return (virtual_address - 0xC0000000);
+    }
 
-    if (!frame)
+    uint32_t pageDirIdx = virtual_address >> 22;
+    uint32_t pageTblIdx = (virtual_address >> 12) & 0x3ff;
+    uint32_t pageFrameOffset = (virtual_address & 0xfff);
+
+    if (!dir->ref_tables[pageDirIdx])
     {
-        return; // frame was not previously allocated
+        return 0;
     }
-    else
+
+    PageTable *table = dir->ref_tables[pageDirIdx];
+    if (!table->pages[pageTblIdx].present)
     {
-        ClearFrame(frame);
-        page->frame = 0;
+        return 0;
     }
+
+    return (table->pages[pageTblIdx].frame << 12) + pageFrameOffset;
+}
+
+void Kernel::MemoryManagement::Paging::AllocatePage(PageDirectory *dir, uint32_t virtual_address, uint32_t frame, bool isKernel, int isWritable)
+{
+    PageTable *table = nullptr;
+    if (!dir)
+        return;
+
+    uint32_t pageDirIdx = virtual_address >> 22;
+    uint32_t pageTblIdx = (virtual_address >> 12) & 0x3ff;
+
+    table = dir->ref_tables[pageDirIdx];
+    if (!table)
+    {
+        table = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageTable), true);
+
+        memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t *>(0), sizeof(PageTable));
+        // Remember, dumb_kmalloc returns a virtual address, but what we put into the paging structure, MUST BE, in terms of phsical address
+        // Since we've mapped [0 to 4mb physical mem] to [0xc0000000 to 0xc0000000+4mb], we can get the physical addr by subtracting 0xc0000000
+
+        uint32_t t = Virtual2Phyiscal(kernelDirectory, table);
+        dir->tables[pageDirIdx].frame = t >> 12;
+        dir->tables[pageDirIdx].present = 1;
+        dir->tables[pageDirIdx].rw = 1;
+        dir->tables[pageDirIdx].user = 1;
+        dir->tables[pageDirIdx].page_size = 0;
+        // Leave a reference here so that later we can access this table
+        dir->ref_tables[pageDirIdx] = table;
+    }
+
+    if (!table->pages[pageTblIdx].present)
+    {
+        uint32_t t;
+        if (frame)
+            t = frame;
+        else
+            t = Kernel::MemoryManagement::PMM::AllocateBlock();
+        table->pages[pageTblIdx].frame = t;
+        table->pages[pageTblIdx].present = 1;
+        table->pages[pageTblIdx].rw = 1;
+        table->pages[pageTblIdx].user = 1;
+    }
+}
+
+void Kernel::MemoryManagement::Paging::FreePage(PageDirectory *dir, uint32_t virtual_address, bool bFree)
+{
+    if (dir == pageDirectory)
+        return;
+
+    uint32_t pageDirIdx = virtual_address >> 22;
+    uint32_t pageTblIdx = (virtual_address >> 12) & 0x3ff;
+
+    if (!dir->ref_tables[pageDirIdx])
+    {
+        return;
+    }
+
+    PageTable *table = dir->ref_tables[pageDirIdx];
+    if (!table->pages[pageTblIdx].present)
+    {
+        return;
+    }
+
+    if (bFree)
+        Kernel::MemoryManagement::PMM::FreeBlock(table->pages[pageTblIdx].frame);
+
+    table->pages[pageTblIdx].present = 0;
+    table->pages[pageTblIdx].frame = 0;
 }

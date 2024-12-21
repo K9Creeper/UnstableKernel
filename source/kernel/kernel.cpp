@@ -6,6 +6,7 @@
 #include "memory/interrupt_descriptor_table/interrupt_descriptor_table.hpp"
 #include "memory/task_state_segment/task_state_segment.hpp"
 
+#include "memory_management/physical_memory_manager/physical_memory_manager.hpp"
 #include "memory_management/paging/paging.hpp"
 #include "memory_management/kheap/kheap.hpp"
 
@@ -15,10 +16,19 @@
 
 #include "drivers/debug/serial.hpp"
 #include "drivers/timer/timer.hpp"
+#include "drivers/input/keyboard.hpp"
 
 #include "drivers/vesa/vesa.hpp"
 
+#include "../graphics/graphics.hpp"
+
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
+
+void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
+{
+    // uint32_t* pixel = reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress() + (y * Kernel::Drivers::VESA::currentMode.info.pitch + (x * (Kernel::Drivers::VESA::currentMode.info.bpp / 8))));
+    //(*pixel)++;
+}
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
@@ -51,21 +61,28 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
 
-    Kernel::MemoryManagement::Paging::Init(Kernel::Memory::Info::pmm_size);
-    printf("Initialized & Installed | PMM (size of 0x%X) & Paging\n", Kernel::Memory::Info::pmm_size);
-    
-    Kernel::MemoryManagement::KHeap::Init(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, KHEAP_MAX_END, 0, 0);
-    printf("Initialized & Installed | KHeap\n");
-
     Kernel::Bios32::Init();
     printf("Initialized | Bios32 Service\n");
 
-    Kernel::Drivers::Timer::Init(100);
-    printf("Initialized & Installed | Timer\n");
+    Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
+    printf("Initialzied | PMM\n");
 
-    Kernel::Drivers::VESA::Init();
+    Kernel::MemoryManagement::Paging::Init();
+    printf("Initialzied | Paging\n");
+
+    Kernel::Drivers::VESA::Init(1024, 768);
     printf("Initialized | VESA\n");
+    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.bpp);
 
+    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0400000 + 0x100000, 0xCFFFF000);
+    printf("Initialized & Installed | KHeap\n");
+    printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", Kernel::Memory::Info::kheap_start, Kernel::Memory::Info::kheap_end, Kernel::Memory::Info::kheap_max_address);
+
+    Kernel::Drivers::Input::Keyboard::Init();
+
+    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
+
+    asm volatile("sti");
 
     for (;;)
         asm volatile("hlt");

@@ -1,33 +1,33 @@
 ENTRY(_start)
 
+phys = 0x100000;
+offset = 0xC0000000;
+virt = offset + phys;
+
 SECTIONS
 {
-    /* Start address of the program */
-    /*. = 0xC0100000;   */
-    . = 0x100000;
+    . = virt;
     linkerld_startofkernel = .;
-
-    .text BLOCK(4K) : ALIGN(4K)
+    .text : AT(ADDR(.text)-0xC0000000)
     {
         *(.multiboot)
         *(.text)
     }
-
-    .rodata BLOCK(4K) : ALIGN(4K)
+    .rodata ALIGN (4K) : AT(ADDR(.rodata)-0xC0000000)
     {
         *(.rodata)
     }
-
-    .data BLOCK(4K) : ALIGN(4K)
+     
+    .bss ALIGN(4K) : AT(ADDR(.bss)-0xC0000000)
     {
-        *(.data)
-    }
-
-    .bss BLOCK(4K) : ALIGN(4K)
-    {
-        *(COMMON)
+        *(.COMMON)
         *(.bss)
     }
 
+    .data ALIGN(4K) : AT(ADDR(.data)-0xC0000000)
+    {
+        *(.data)
+    }
+    
     linkerld_endofkernel = .;
 }

@@ -18,6 +18,10 @@ Run: ```sudo apt-get update```.
 
 Run: ```sudo apt-get install build-essential```.
 
+<h3> NASM </h3>
+
+Run: ```sudo apt-get install nasm```.
+
 <h3> Bison </h3>
 
 Run: ```sudo apt-get install bison```.

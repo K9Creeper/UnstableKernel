@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /// -------
 /// pci.cpp
 /// @brief This file defines the functions to set up and use PCI(e) devices.

@@ -7,8 +7,6 @@
 
 #include <stdint.h>
 
-#define LOADED_ADDRESS 0x100000// 0xC0000000
-
 namespace Kernel{
     namespace Memory{
         namespace Info{

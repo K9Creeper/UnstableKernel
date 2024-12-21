@@ -1,10 +1,11 @@
+/// ----------
+/// paging.hpp
+/// @brief This file declares the functions and structures for paging.
+
+
 #pragma once
 
 #include <stdint.h>
-
-//
-// Target: Bitmap System
-//
 
 namespace Kernel
 {
@@ -12,45 +13,61 @@ namespace Kernel
     {
         namespace Paging
         {
-            extern bool bIntialized;
-            extern bool bEnabled;
-
-            struct Page
+            struct PageDirectoryEntry
             {
-                uint32_t present : 1;  // present in memory
-                uint32_t rw : 1;       // read-only / readwrite
-                uint32_t user : 1;     // supervisor level
-                uint32_t accessed : 1; // been accessed since last refresh?
-                uint32_t dirty : 1;    // been written to since last refresh?
-                uint32_t unused : 7;   // unused and reserved bits
-                uint32_t frame : 20;   // frame address (shifted right 12 bits)
+                unsigned int present : 1;
+                unsigned int rw : 1;
+                unsigned int user : 1;
+                unsigned int w_through : 1;
+                unsigned int cache : 1;
+                unsigned int access : 1;
+                unsigned int reserved : 1;
+                unsigned int page_size : 1;
+                unsigned int global : 1;
+                unsigned int available : 3;
+                unsigned int frame : 20;
+            };
+
+            struct PageEntry
+            {
+                unsigned int present : 1;
+                unsigned int rw : 1;
+                unsigned int user : 1;
+                unsigned int reserved : 2;
+                unsigned int accessed : 1;
+                unsigned int dirty : 1;
+                unsigned int reserved2 : 2;
+                unsigned int available : 3;
+                unsigned int frame : 20;
             };
 
             struct PageTable
             {
-                Page pages[1024];
+                PageEntry pages[1024];
             };
 
             struct PageDirectory
             {
-                PageTable *tables[1024];
-                uint32_t tablePhysicals[1024];
-                uint32_t physicalAddress;
+                // The actual page directory entries(note that the frame number it stores is physical address)
+                PageDirectoryEntry tables[1024];
+                // We need a table that contains virtual address, so that we can actually get to the tables
+                PageTable *ref_tables[1024];
             };
 
-            extern PageDirectory *kernelDirectory;
-            extern PageDirectory *currentDirectory;
+            extern bool bEnabled;
+            extern bool bInitialzed;
 
-            extern void Init(uint32_t mem_size);
+            extern PageDirectory* kernelDirectory;
 
-            extern void Enable();
+            extern void Init();
 
-            extern void SwitchPageDirectory(PageDirectory *dir);
-            extern Page *GetPageEntry(uint32_t address, PageDirectory *dir, bool sMake = false, uint32_t* out_physical_address = nullptr);
-            extern Page *MakePageEntry(uint32_t address, PageDirectory *dir);
-            extern void AllocateFrame(Page *page, bool is_kernel, bool is_writeable);
-            extern void FreeFrame(Page *page);
+            extern void EnablePaging();
+            extern void SwitchDirectory(PageDirectory* dir, bool isPhysical);
+        
+            extern uint32_t Virtual2Phyiscal(PageDirectory* dir, uint32_t virtual_address);
 
+            extern void AllocatePage(PageDirectory * dir, uint32_t virtual_address, uint32_t frame, bool isKernel = false, int isWritable = false);
+            extern void FreePage(PageDirectory * dir, uint32_t virtual_address, bool bFree);
         }
     }
 }

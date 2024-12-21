@@ -9,12 +9,15 @@
 template <typename type_t>
 OrderedArray<type_t>::~OrderedArray() {}
 
+extern "C" void printf(const char* format, ...);
+
 template <typename type_t>
 void OrderedArray<type_t>::RePlace(void *address, uint32_t max_size)
 {
-	array = reinterpret_cast<type_t *>(address);
-	memset(reinterpret_cast<unsigned char *>(address), 0, max_size * sizeof(type_t));
+	array = reinterpret_cast<type_t*>(address);
 
+	memset(reinterpret_cast<unsigned char *>(address), 0, max_size * sizeof(type_t));
+	
 	size = 0;
 	this->max_size = max_size;
 }

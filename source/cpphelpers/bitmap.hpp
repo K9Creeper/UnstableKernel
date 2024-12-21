@@ -38,7 +38,7 @@ public:
 
     type_t& operator[](uint32_t i);
 
-    type_t Get(uint32_t i);
+    type_t& Get(uint32_t i);
 
     void Set(uint32_t i, type_t val);
 
