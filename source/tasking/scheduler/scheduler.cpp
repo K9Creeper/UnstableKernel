@@ -6,6 +6,10 @@
 
 #include "scheduler_list.hpp"
 
+bool SchedulerList::lessthan(Tasking::Proccess* a, Tasking::Proccess* b){
+    return true;
+}
+
 namespace Tasking{
     namespace Scheduler{
         
