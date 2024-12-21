@@ -6,7 +6,9 @@
 
 #include "../../cpphelperes/ordered_array"
 
-class SchedulerList : public OrderedArray{
+#include "../proccess/proccess.hpp"
 
-
+class SchedulerList : public OrderedArray<Tasking::Proccess*>{
+    private:
+    bool lessthan(Tasking::Proccess* a, Tasking::Proccess* b);
 }
