@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /// -------
 /// pci.hpp
 /// @brief This file declares the functions to set up and use PCI(e) devices.
