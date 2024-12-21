@@ -53,5 +53,3 @@ public:
 
     virtual void Clear();
 };
-
-template class Bitmap<uint32_t>;
