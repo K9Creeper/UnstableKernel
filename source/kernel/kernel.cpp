@@ -20,8 +20,6 @@
 
 #include "drivers/vesa/vesa.hpp"
 
-#include "../graphics/graphics.hpp"
-
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
 void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)

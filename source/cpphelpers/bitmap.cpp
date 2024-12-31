@@ -84,3 +84,5 @@ void Bitmap<type_t>::Clear()
 {
     memset(reinterpret_cast<unsigned char *>(array), 0, count * sizeof(type_t));
 }
+
+template class Bitmap<uint32_t>;

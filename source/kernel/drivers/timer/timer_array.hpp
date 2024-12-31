@@ -7,7 +7,6 @@
 
 #include "../../../cpphelpers/ordered_array.hpp"
 
-
 class TimerArray : public OrderedArray<void*>{
     bool lessthan_(void *a, void *b);
 };

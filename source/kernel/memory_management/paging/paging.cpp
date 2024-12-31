@@ -36,7 +36,7 @@ void Kernel::MemoryManagement::Paging::Init()
     kernelDirectory = reinterpret_cast<PageDirectory *>(Kernel::MemoryManagement::KHeap::Early::pkmalloc_(sizeof(PageDirectory), true));
     memset(reinterpret_cast<uint8_t *>(kernelDirectory), reinterpret_cast<uint8_t *>(0), sizeof(PageDirectory));
 
-    uint32_t i = 0xC0000000;
+    uint32_t i = 0xC0000000; // + 4mb
     while (i < 0xC0000000 + 0x400000)
     {
         AllocatePage(kernelDirectory, i, 0, 1, 1);
@@ -129,8 +129,6 @@ void Kernel::MemoryManagement::Paging::AllocatePage(PageDirectory *dir, uint32_t
         table = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageTable), true);
 
         memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t *>(0), sizeof(PageTable));
-        // Remember, dumb_kmalloc returns a virtual address, but what we put into the paging structure, MUST BE, in terms of phsical address
-        // Since we've mapped [0 to 4mb physical mem] to [0xc0000000 to 0xc0000000+4mb], we can get the physical addr by subtracting 0xc0000000
 
         uint32_t t = Virtual2Phyiscal(kernelDirectory, table);
         dir->tables[pageDirIdx].frame = t >> 12;
@@ -138,7 +136,7 @@ void Kernel::MemoryManagement::Paging::AllocatePage(PageDirectory *dir, uint32_t
         dir->tables[pageDirIdx].rw = 1;
         dir->tables[pageDirIdx].user = 1;
         dir->tables[pageDirIdx].page_size = 0;
-        // Leave a reference here so that later we can access this table
+
         dir->ref_tables[pageDirIdx] = table;
     }
 
