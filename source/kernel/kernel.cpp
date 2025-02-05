@@ -42,6 +42,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Multiboot::mb_magic = magic;
 
     Kernel::Debug::COM1::Init();
+    printf("-- This is the Kernel Debug Log --\n\n");
 
     Kernel::Memory::InitMemInfo();
 
@@ -73,7 +74,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::MemoryManagement::Paging::Init();
     printf("Initialzied | Paging\n");
 
-    Kernel::Drivers::VESA::Init(1024, 768);
+    Kernel::Drivers::VESA::Init(640, 480);
     printf("Initialized | VESA\n");
     printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.bpp);
 
@@ -86,10 +87,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
     printf("Initialized | Keyboard Handle\n");
-
-    /*
-
-    */
 
     asm volatile("sti");
     
