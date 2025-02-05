@@ -15,13 +15,10 @@
 #include "multiboot/multiboot.hpp"
 
 #include "drivers/debug/serial.hpp"
-#include "drivers/timer/timer.hpp"
 #include "drivers/input/keyboard.hpp"
 
 #include "drivers/vesa/vesa.hpp"
 
-#include "../tasking/scheduler/scheduler.hpp"
-#include "../tasking/process/process.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -91,17 +88,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Initialized | Keyboard Handle\n");
 
     /*
-    Kernel::Drivers::Timer::Init(100);
-    printf("Initialized | Timer\n");
 
-    Tasking::Scheduler::Init();
-    printf("Initialized | Tasking Scheduler\n");
-
-    Tasking::Scheduler::Start();
-    printf("Starting | Tasking Scheduler\n");
-
-    Tasking::CreateProccessFromFunction(Test, "Test");
-    printf("Created a Proccess!\n");
     */
 
     asm volatile("sti");
