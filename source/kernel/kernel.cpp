@@ -29,12 +29,6 @@ void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kerne
 
 }
 
-/* void Test(){
-    printf("What did i say bro?\n");
-    
-    for(;;);
-} */
-
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
     asm volatile("cli");

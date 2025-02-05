@@ -2,6 +2,8 @@
 /// ext2.hpp
 /// @brief This file defines the structures of the ext2 filesystem.
 
+#pragma once
+
 #include <stdint.h>
 
 enum FileSystemState : uint16_t{
