@@ -140,3 +140,7 @@ void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height)
 uint32_t Kernel::Drivers::VESA::GetLFBAddress(){
     return currentMode.info.physbase;
 }
+
+uint32_t Kernel::Drivers::VESA::GetMaxLFBAddress(){
+    return currentMode.info.physbase + ((currentMode.info.height-1) * currentMode.info.pitch + ((currentMode.info.width-1) * (currentMode.info.bpp / 8)));
+}

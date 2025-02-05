@@ -1,0 +1,55 @@
+-- This is the Kernel Debug Log --
+
+Kernel Memory Info | Start: 0xc0100000 | end: 0xc0110000
+Initialized | GDT
+Installed | GDT
+Installed | TSS
+Initialized | IDT
+Installed | Interrupts & IDT
+Initialized | Bios32 Service
+Initialzied | PMM
+Initialzied | Paging
+Initialized | VESA
+Width: 640, Height: 480, Bytes Per Pixel: 32
+Initialized & Installed | KHeap
+Located at 0xc0481000, Initial End at 0xc0500000, Max Address 0xcffff000
+Initialized | Keyboard
+Initialized | Keyboard Handle
+Hey you pressed Left Alt
+Hey you pressed Tab
+Hey you released Left Alt
+Hey you released Tab
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D
+Hey you pressed D
+Hey you released D

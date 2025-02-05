@@ -1,5 +1,7 @@
 #include "../chelpers/multiboot.h"
 
+#include "../chelpers/memory.h"
+
 #include "memory/memory.hpp"
 
 #include "memory/global_descriptor_table/global_descriptor_table.hpp"
@@ -24,8 +26,7 @@
 
 void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
 {
-    // uint32_t* pixel = reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress() + (y * Kernel::Drivers::VESA::currentMode.info.pitch + (x * (Kernel::Drivers::VESA::currentMode.info.bpp / 8))));
-    //(*pixel)++;
+
 }
 
 /* void Test(){
@@ -89,7 +90,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Initialized | Keyboard Handle\n");
 
     asm volatile("sti");
-    
+
     for (;;)
         asm volatile("hlt");
 }
