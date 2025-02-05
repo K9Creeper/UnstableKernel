@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
+
 extern "C"
 {
-
     uint8_t inportb(unsigned short _port);
 
     void outportb(unsigned short _port, uint8_t _data);

@@ -1,11 +1,12 @@
 /// ----------
 /// paging.hpp
-/// @brief This file declares the functions and structures for paging.
-
+/// @brief This file declares the functions and structures for kernel paging.
 
 #pragma once
 
 #include <stdint.h>
+
+#include "../../../memory_management/paging.hpp"
 
 namespace Kernel
 {
@@ -13,47 +14,6 @@ namespace Kernel
     {
         namespace Paging
         {
-            struct PageDirectoryEntry
-            {
-                unsigned int present : 1;
-                unsigned int rw : 1;
-                unsigned int user : 1;
-                unsigned int w_through : 1;
-                unsigned int cache : 1;
-                unsigned int access : 1;
-                unsigned int reserved : 1;
-                unsigned int page_size : 1;
-                unsigned int global : 1;
-                unsigned int available : 3;
-                unsigned int frame : 20;
-            };
-
-            struct PageEntry
-            {
-                unsigned int present : 1;
-                unsigned int rw : 1;
-                unsigned int user : 1;
-                unsigned int reserved : 2;
-                unsigned int accessed : 1;
-                unsigned int dirty : 1;
-                unsigned int reserved2 : 2;
-                unsigned int available : 3;
-                unsigned int frame : 20;
-            };
-
-            struct PageTable
-            {
-                PageEntry pages[1024];
-            };
-
-            struct PageDirectory
-            {
-                // The actual page directory entries(note that the frame number it stores is physical address)
-                PageDirectoryEntry tables[1024];
-                // We need a table that contains virtual address, so that we can actually get to the tables
-                PageTable *ref_tables[1024];
-            };
-
             extern bool bEnabled;
             extern bool bInitialzed;
 
@@ -68,6 +28,8 @@ namespace Kernel
 
             extern void AllocatePage(PageDirectory * dir, uint32_t virtual_address, uint32_t frame, bool isKernel = false, int isWritable = false);
             extern void FreePage(PageDirectory * dir, uint32_t virtual_address, bool bFree);
+
+            extern void CopyDirectory(PageDirectory* in, PageDirectory* out);
         }
     }
 }

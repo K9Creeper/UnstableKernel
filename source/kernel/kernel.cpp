@@ -20,6 +20,9 @@
 
 #include "drivers/vesa/vesa.hpp"
 
+#include "../tasking/scheduler/scheduler.hpp"
+#include "../tasking/process/process.hpp"
+
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
 void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
@@ -27,6 +30,12 @@ void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kerne
     // uint32_t* pixel = reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress() + (y * Kernel::Drivers::VESA::currentMode.info.pitch + (x * (Kernel::Drivers::VESA::currentMode.info.bpp / 8))));
     //(*pixel)++;
 }
+
+/* void Test(){
+    printf("What did i say bro?\n");
+    
+    for(;;);
+} */
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
@@ -37,7 +46,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Debug::COM1::Init();
 
-    printf("In C Kernel\n");
     Kernel::Memory::InitMemInfo();
 
     printf("Kernel Memory Info | Start: 0x%X | end: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
@@ -77,11 +85,27 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", Kernel::Memory::Info::kheap_start, Kernel::Memory::Info::kheap_end, Kernel::Memory::Info::kheap_max_address);
 
     Kernel::Drivers::Input::Keyboard::Init();
+    printf("Initialized | Keyboard\n");
 
     Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
+    printf("Initialized | Keyboard Handle\n");
+
+    /*
+    Kernel::Drivers::Timer::Init(100);
+    printf("Initialized | Timer\n");
+
+    Tasking::Scheduler::Init();
+    printf("Initialized | Tasking Scheduler\n");
+
+    Tasking::Scheduler::Start();
+    printf("Starting | Tasking Scheduler\n");
+
+    Tasking::CreateProccessFromFunction(Test, "Test");
+    printf("Created a Proccess!\n");
+    */
 
     asm volatile("sti");
-
+    
     for (;;)
         asm volatile("hlt");
 }

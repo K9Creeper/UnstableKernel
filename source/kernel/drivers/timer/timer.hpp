@@ -6,12 +6,14 @@
 
 #include <stdint.h>
 
-
-
 namespace Kernel{
     namespace Drivers{
         namespace Timer{
             extern bool bInitialized;
+
+            namespace Info{
+                extern uint16_t hz;
+            }
 
             extern void Init(uint16_t hz);
             extern void SetFrequency(uint16_t hz);

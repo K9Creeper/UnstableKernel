@@ -1,6 +1,6 @@
 /// ----------
 /// paging.cpp
-/// @brief This file defines the functions for paging.
+/// @brief This file defines the functions for kernel paging.
 
 #include "paging.hpp"
 
@@ -10,6 +10,8 @@
 
 #include "../physical_memory_manager/physical_memory_manager.hpp"
 #include "../kheap/kheap.hpp"
+
+#include "page_allocater.hpp"
 
 namespace Kernel
 {
@@ -27,13 +29,14 @@ namespace Kernel
     }
 }
 
-extern "C" Kernel::MemoryManagement::Paging::PageDirectory *pageDirectory;
+extern "C" PageDirectory *pageDirectory;
 
 extern "C" void printf(const char *format, ...);
 
 void Kernel::MemoryManagement::Paging::Init()
 {
-    kernelDirectory = reinterpret_cast<PageDirectory *>(Kernel::MemoryManagement::KHeap::Early::pkmalloc_(sizeof(PageDirectory), true));
+    PageDirectoryAllocater.PreInit();
+    kernelDirectory = PageDirectoryAllocater.AllocatePageDirectory(true);
     memset(reinterpret_cast<uint8_t *>(kernelDirectory), reinterpret_cast<uint8_t *>(0), sizeof(PageDirectory));
 
     uint32_t i = 0xC0000000; // + 4mb
@@ -46,6 +49,8 @@ void Kernel::MemoryManagement::Paging::Init()
     SwitchDirectory(kernelDirectory, 0);
     EnablePaging();
 
+    Kernel::MemoryManagement::Paging::bInitialzed = true;
+
     i = 0;
     while (i < 0x10000)
     {
@@ -53,6 +58,8 @@ void Kernel::MemoryManagement::Paging::Init()
         AllocatePage(kernelDirectory, i, i / 0x1000, 1, 1);
         i += 0x1000;
     }
+
+    PageDirectoryAllocater.Init();
 }
 
 void DisablePSEReg()
@@ -128,7 +135,7 @@ void Kernel::MemoryManagement::Paging::AllocatePage(PageDirectory *dir, uint32_t
     {
         table = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageTable), true);
 
-        memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t *>(0), sizeof(PageTable));
+        memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t*>(0), sizeof(PageTable));
 
         uint32_t t = Virtual2Phyiscal(kernelDirectory, table);
         dir->tables[pageDirIdx].frame = t >> 12;
@@ -178,4 +185,49 @@ void Kernel::MemoryManagement::Paging::FreePage(PageDirectory *dir, uint32_t vir
 
     table->pages[pageTblIdx].present = 0;
     table->pages[pageTblIdx].frame = 0;
+}
+
+PageTable * CopyPageTable(PageDirectory * src_page_dir, PageDirectory * dst_page_dir, uint32_t page_dir_idx, PageTable * src) {
+    PageTable * table = (PageTable*)Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageTable), true);
+    for(int i = 0; i < 1024; i++) {
+        if(!table->pages[i].frame)
+            continue;
+        // Source frame's virtual address
+        uint32_t src_virtual_address = (page_dir_idx << 22) | (i << 12) | (0);
+        // Destination frame's virtual address
+        uint32_t dst_virtual_address = src_virtual_address;
+        // Temporary virtual address in current virtual address space
+        uint32_t tmp_virtual_address = 0;
+
+        // Allocate a frame in destination page table
+        Kernel::MemoryManagement::Paging::AllocatePage(dst_page_dir, dst_virtual_address, 0, 0, 1);
+        // Now I want tmp_virtual_address and dst_virtual_address both points to the same frame
+        Kernel::MemoryManagement::Paging::AllocatePage(src_page_dir, tmp_virtual_address, (uint32_t)Kernel::MemoryManagement::Paging::Virtual2Phyiscal(dst_page_dir, (void*)dst_virtual_address), 0, 1);
+        if (src->pages[i].present) table->pages[i].present = 1;
+        if (src->pages[i].rw)      table->pages[i].rw = 1;
+        if (src->pages[i].user)    table->pages[i].user = 1;
+        if (src->pages[i].accessed)table->pages[i].accessed = 1;
+        if (src->pages[i].dirty)   table->pages[i].dirty = 1;
+        memcpy((unsigned char*)tmp_virtual_address, (unsigned char*)src_virtual_address, 0x1000);
+        // Unlink frame
+        Kernel::MemoryManagement::Paging::FreePage(src_page_dir, tmp_virtual_address, 0);
+    }
+    return table;
+}
+
+extern void  Kernel::MemoryManagement::Paging::CopyDirectory(PageDirectory* src, PageDirectory* dst){
+    for(uint32_t i = 0; i < 1024; i++) {
+        if(kernelDirectory->ref_tables[i] == src->ref_tables[i]) {
+            dst->tables[i] = src->tables[i];
+            dst->ref_tables[i] = src->ref_tables[i];
+        }
+        else {
+            dst->ref_tables[i] = CopyPageTable(src, dst, i, src->ref_tables[i]);
+            uint32_t phys = (uint32_t)Virtual2Phyiscal(src, dst->ref_tables[i]);
+            dst->tables[i].frame = phys >> 12;
+            dst->tables[i].user = 1;
+            dst->tables[i].rw = 1;
+            dst->tables[i].present = 1;
+        }
+    }
 }

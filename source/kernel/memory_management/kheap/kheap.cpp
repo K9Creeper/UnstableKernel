@@ -1,6 +1,6 @@
 /// ---------
 /// kheap.cpp
-/// @brief This file defines the functions and structures to handle and allow for dynamic memory allocation.
+/// @brief This file defines the functions and structures to handle and allow for dynamic memory allocation in the kernel.
 
 #include "kheap.hpp"
 
@@ -13,6 +13,8 @@
 #define HEAP_MAGIC 0xDEADBEEF
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
+
+extern "C" void printf(const char* format, ...);
 
 bool KHeapOrderedArray::lessthan_(void *a, void *b)
 {
@@ -38,8 +40,6 @@ namespace Kernel
     }
   }
 }
-
-extern "C" void printf(const char* format, ...);
 
 void Kernel::MemoryManagement::KHeap::Early::PreInit(uint32_t kernel_end)
 {
@@ -78,7 +78,7 @@ uint32_t Kernel::MemoryManagement::KHeap::Early::pkmalloc_(uint32_t size, bool s
 void Kernel::MemoryManagement::KHeap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, bool readonly)
 {
   uint32_t i = start;
-  while (i < end)
+  while (i < end + 0x1000)
   {
     Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i,0, 1, 1);
     i += 0x1000;
@@ -330,6 +330,7 @@ static void *Alloc(uint32_t size, bool page_align)
   // If there is leftover space after the allocated block, create a new hole
   if (orig_hole_size - new_size > 0)
   {
+
     Kernel::MemoryManagement::KHeap::Header *hole_header = (Kernel::MemoryManagement::KHeap::Header *)(orig_hole_pos + sizeof(Kernel::MemoryManagement::KHeap::Header) + size + sizeof(Kernel::MemoryManagement::KHeap::Footer));
     hole_header->size = orig_hole_size - new_size;
     hole_header->magic = HEAP_MAGIC;
@@ -468,7 +469,7 @@ uint32_t Kernel::MemoryManagement::KHeap::kmalloc_(uint32_t size, bool align, ui
     {
       *physAddress = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, address);
     }
-
+    
     // return the virtual address of the newly allocated memory
     return reinterpret_cast<uint32_t>(address);
   }

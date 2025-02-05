@@ -3,7 +3,7 @@
 .equ MBOOT2_LENGTH, (Multiboot2HeaderEnd - Multiboot2Header)
 .equ MBOOT2_CHECKSUM, -(MBOOT2_MAGIC + MBOOT2_ARCH + MBOOT2_LENGTH)
 
-.section .multiboot.data, "aw"
+.section .text
 .align 8
 
 Multiboot2Header:

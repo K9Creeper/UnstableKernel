@@ -28,10 +28,9 @@ void OrderedArray<type_t>::Insert(type_t item)
 	uint32_t i;
 	static type_t tmp, tmp2;
 
-	// Iterate till find value greater or equal to item
 	i = 0;
 
-	while (i < this->size && this->lessthan_(this->array[i], item)) // array[i] < item
+	while (i < this->size && this->lessthan_(this->array[i], item))
 	{
 		i++;
 	}
