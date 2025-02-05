@@ -1,7 +1,7 @@
 ;;; ----------
 ;;; bios32.asm
-;;; @brief This file handles the switch from protected mode to real mode, to call BIOS interrupts given by the C/C++ code. 
-;;; This code came from https://github.com/szhou42/osdev/tree/master, sorry!.
+;;; @brief This file handles the switch from protected mode to real mode. It allows BIOS interrupts given by the C/C++ code. 
+;;; This code came from https://github.com/szhou42/osdev/tree/master ( and relating content in this folder came from szhou42), sorry!.
 
 [bits 32]
 
