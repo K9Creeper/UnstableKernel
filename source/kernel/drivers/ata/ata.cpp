@@ -4,6 +4,8 @@
 
 #include "ata.hpp"
 
+#include "../../../chelpers/memory.h"
+
 #include "../pci/pci.hpp"
 
 #include "../../memory/interrupt_request/interrupt_request.hpp"
