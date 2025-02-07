@@ -23,14 +23,18 @@ namespace Kernel
                     uint32_t enable : 1;
                 };
             };
-            enum DeviceType{
-                PCI_HEADER_TYPE_DEVICE = 0,
+            enum DeviceType : int{
+                PCI_HEADER_NEGATIVE = -1,
+                PCI_HEADER_TYPE_DEVIC,
                 PCI_HEADER_TYPE_BRIDGE,
                 PCI_HEADER_TYPE_CARDBUS,
                 PCI_TYPE_BRIDGE = 0x0604,
                 PCI_TYPE_SATA = 0x0106,
                 PCI_NONE = 0xFFFF
             };
+
+            extern bool bInitialized;
+
             extern void Init();
             extern PCIDevice GetDevice(uint16_t vendor_id, uint16_t device_id, Kernel::Drivers::PCI::DeviceType device_type);
         }

@@ -29,8 +29,19 @@
 #define PCI_SECONDARY_BUS 0x09
 #define DEVICE_PER_BUS 32
 #define FUNCTION_PER_DEVICE 32
+
 uint32_t pci_size_map[100];
+
 Kernel::Drivers::PCI::PCIDevice dev_zero = {0};
+
+namespace Kernel{
+    namespace Drivers{
+        namespace PCI{
+            bool bInitialized = false;
+        }
+    }
+}
+
 void Kernel::Drivers::PCI::Init()
 {
     pci_size_map[PCI_VENDOR_ID] = 2;
@@ -51,6 +62,8 @@ void Kernel::Drivers::PCI::Init()
     pci_size_map[PCI_BAR5] = 4;
     pci_size_map[PCI_INTERRUPT_LINE] = 1;
     pci_size_map[PCI_SECONDARY_BUS] = 1;
+
+    bInitialized = true;
 }
 uint32_t PCIRead(Kernel::Drivers::PCI::PCIDevice dev, uint32_t field)
 {

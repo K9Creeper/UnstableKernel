@@ -18,9 +18,11 @@
 
 #include "drivers/debug/serial.hpp"
 #include "drivers/input/keyboard.hpp"
+#include "drivers/input/mouse.hpp"
 
 #include "drivers/vesa/vesa.hpp"
 
+#include "drivers/pci/pci.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -79,12 +81,35 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     Kernel::Drivers::Input::Keyboard::Init();
     printf("Initialized | Keyboard\n");
+    
+    Kernel::Drivers::Input::Mouse::Init();
+    printf("Initialized | Mouse\n");
 
     Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
     printf("Initialized | Keyboard Handle\n");
 
+    Kernel::Drivers::PCI::Init();
+    printf("Initialized | PCI\n");
+
     asm volatile("sti");
 
-    for (;;)
+    for (;;){
+        memset(reinterpret_cast<uint8_t*>(Kernel::Drivers::VESA::GetLFBAddress()), 0, Kernel::Drivers::VESA::GetMaxLFBAddress()-Kernel::Drivers::VESA::GetLFBAddress());
+
+        int mX = Kernel::Drivers::Input::Mouse::MouseInfo::X;
+        int mY = Kernel::Drivers::Input::Mouse::MouseInfo::Y;
+
+        for(int x = mX; x < mX + 15; x++)
+        {
+            for(int y = mY; y < mY + 15; y++)
+            {
+                uint32_t* pixel = reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress() + (y * Kernel::Drivers::VESA::currentMode.info.pitch + (x * (Kernel::Drivers::VESA::currentMode.info.bpp / 8))));
+                if(reinterpret_cast<uint32_t>(pixel) > Kernel::Drivers::VESA::GetMaxLFBAddress())
+                    continue;
+                *pixel = 0xFFFFFF;
+            }
+        }
+
         asm volatile("hlt");
+    }
 }

@@ -31,5 +31,6 @@
         "interrupt_request.h": "c",
         "string.h": "c",
         "ordered_array.h": "c"
-    }
+    },
+    "C_Cpp.default.compilerPath": "cl.exe"
 }
