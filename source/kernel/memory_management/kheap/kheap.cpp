@@ -467,7 +467,7 @@ uint32_t Kernel::MemoryManagement::KHeap::kmalloc_(uint32_t size, bool align, ui
     // if physical address is requested, calculate and return it
     if (physAddress != nullptr)
     {
-      *physAddress = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, address);
+      *physAddress = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(address));
     }
     
     // return the virtual address of the newly allocated memory

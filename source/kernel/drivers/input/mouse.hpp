@@ -2,6 +2,8 @@
 /// mouse.hpp
 /// @brief This file declares the functions for mouse input.
 
+#pragma once
+
 namespace Kernel{
     namespace Drivers{
         namespace Input{

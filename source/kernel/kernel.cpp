@@ -24,12 +24,17 @@
 
 #include "drivers/pci/pci.hpp"
 
+#include "../graphics/framebuffer.hpp"
+
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
 void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
 {
 
 }
+
+Framebuffer f1;
+Framebuffer f2;
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
@@ -79,6 +84,17 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Initialized & Installed | KHeap\n");
     printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", Kernel::Memory::Info::kheap_start, Kernel::Memory::Info::kheap_end, Kernel::Memory::Info::kheap_max_address);
 
+    printf("Gonna malloc...\n");
+    char* c = reinterpret_cast<char*>(Kernel::MemoryManagement::KHeap::kmalloc_(3));
+    c[0] = 'b';
+    c[1] = 'c';
+    c[3] = '\0';
+    printf("did malloc %s...\n", c);
+
+    f1.Set(reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress()), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
+    f2.Set(reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::KHeap::kmalloc_(f1.GetSize())), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
+    
+
     Kernel::Drivers::Input::Keyboard::Init();
     printf("Initialized | Keyboard\n");
     
@@ -94,7 +110,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     asm volatile("sti");
 
     for (;;){
-        memset(reinterpret_cast<uint8_t*>(Kernel::Drivers::VESA::GetLFBAddress()), 0, Kernel::Drivers::VESA::GetMaxLFBAddress()-Kernel::Drivers::VESA::GetLFBAddress());
+        f1.Clear();
 
         int mX = Kernel::Drivers::Input::Mouse::MouseInfo::X;
         int mY = Kernel::Drivers::Input::Mouse::MouseInfo::Y;
@@ -103,12 +119,11 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
         {
             for(int y = mY; y < mY + 15; y++)
             {
-                uint32_t* pixel = reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress() + (y * Kernel::Drivers::VESA::currentMode.info.pitch + (x * (Kernel::Drivers::VESA::currentMode.info.bpp / 8))));
-                if(reinterpret_cast<uint32_t>(pixel) > Kernel::Drivers::VESA::GetMaxLFBAddress())
-                    continue;
-                *pixel = 0xFFFFFF;
+                f1.PutPixel(x, y, 0xFFFFFF);
             }
         }
+
+        //f1.Swap(&f2);
 
         asm volatile("hlt");
     }

@@ -13,7 +13,7 @@ Initialized | VESA
 Width: 640, Height: 480, Bytes Per Pixel: 32
 Initialized & Installed | KHeap
 Located at 0xc0481000, Initial End at 0xc0500000, Max Address 0xcffff000
-Initialized | Keyboard
-Initialized | Mouse
-Initialized | Keyboard Handle
-Initialized | PCI
+Gonna malloc...
+did malloc bc...
+| Fault 14 |
+Possible causes: [ Page not present Page is read only ] at 0xc062cffc
