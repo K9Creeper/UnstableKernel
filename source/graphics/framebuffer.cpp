@@ -39,5 +39,9 @@ void Framebuffer::PutPixel(uint32_t x, uint32_t y, uint32_t color){
 }
 
 uint32_t Framebuffer::GetSize()const{
-    return (reinterpret_cast<uint32_t>(data) + ((height-1) * pitch + ((width-1) * (bpp / 8)))) - reinterpret_cast<uint32_t>(data); 
+    return  GetMaxDataLocation() - reinterpret_cast<uint32_t>(data); 
+}
+
+uint32_t Framebuffer::GetMaxDataLocation()const{
+    return reinterpret_cast<uint32_t>(data) + ((height-1) * pitch + ((width-1) * (bpp / 8)));
 }

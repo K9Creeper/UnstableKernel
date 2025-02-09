@@ -26,5 +26,5 @@ public:
 
     uint32_t GetSize()const;
 private:
-    
+    uint32_t GetMaxDataLocation()const;
 };

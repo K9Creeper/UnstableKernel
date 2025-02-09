@@ -80,7 +80,7 @@ void Kernel::MemoryManagement::KHeap::Init(uint32_t start, uint32_t end, uint32_
   uint32_t i = start;
   while (i < end + 0x1000)
   {
-    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i,0, 1, 1);
+    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i, 0, !Kernel::MemoryManagement::KHeap::bSupervisor, !Kernel::MemoryManagement::KHeap::bReadOnly);
     i += 0x1000;
   }
 
@@ -159,13 +159,12 @@ static void Expand(uint32_t new_size)
     new_size += 0x1000;
   }
 
-  // this should always be on a page boundary
   uint32_t old_size = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
   for (uint32_t i = old_size; i < new_size; i += 0x1000)
   {
     // allocate a frame at the current address
-    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, i, 0, Kernel::MemoryManagement::KHeap::bSupervisor, !Kernel::MemoryManagement::KHeap::bReadOnly);
+    Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, Kernel::Memory::Info::kheap_end + i, 0, !Kernel::MemoryManagement::KHeap::bSupervisor, !Kernel::MemoryManagement::KHeap::bReadOnly);
   }
 
   // update the heap end address
@@ -237,7 +236,7 @@ static void *Alloc(uint32_t size, bool page_align)
         idx = i;
       }
 
-      i += 1;
+      i++;
     }
 
     // if no headers found, create a new one at the end of the heap
@@ -265,6 +264,7 @@ static void *Alloc(uint32_t size, bool page_align)
 
       // update the footer to match the new header size
       Kernel::MemoryManagement::KHeap::Footer *footer = (Kernel::MemoryManagement::KHeap::Footer *)((uint32_t)header + header->size - sizeof(Kernel::MemoryManagement::KHeap::Footer));
+      footer->header = nullptr;
       footer->header = header;
       footer->magic = HEAP_MAGIC;
     }

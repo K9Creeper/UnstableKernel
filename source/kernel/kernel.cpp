@@ -80,7 +80,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     printf("Initialized | VESA\n");
     printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.bpp);
 
-    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0400000 + 0x100000, 0xCFFFF000);
+    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0400000 + (1 * 0x100000), 0xCFFFF000);
     printf("Initialized & Installed | KHeap\n");
     printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", Kernel::Memory::Info::kheap_start, Kernel::Memory::Info::kheap_end, Kernel::Memory::Info::kheap_max_address);
 
@@ -89,10 +89,17 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     c[0] = 'b';
     c[1] = 'c';
     c[3] = '\0';
-    printf("did malloc %s...\n", c);
+    printf("Did malloc %s...\n", c);
 
     f1.Set(reinterpret_cast<uint32_t*>(Kernel::Drivers::VESA::GetLFBAddress()), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
-    f2.Set(reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::KHeap::kmalloc_(f1.GetSize())), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
+
+    printf("Gonna malloc... a size of 0x%X\n", f1.GetSize());
+
+    uint32_t* data = reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::KHeap::kmalloc_(f1.GetSize()));
+
+    printf("Did a malloc... at 0x%X\n", data);
+
+    f2.Set(data, Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     
 
     Kernel::Drivers::Input::Keyboard::Init();
