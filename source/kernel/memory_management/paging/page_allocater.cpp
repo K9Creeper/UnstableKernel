@@ -34,7 +34,7 @@ PageDirectory *PageAllocater::AllocatePageDirectory(bool PROTECTED)
         raw_data[i].bUsed = true;
         raw_data[i].PROTECT = PROTECTED;
 
-        memset(reinterpret_cast<uint8_t *>(raw_data[i].directory), reinterpret_cast<uint8_t *>(0), sizeof(PageDirectory));
+        memset(reinterpret_cast<uint8_t *>(raw_data[i].directory), 0, sizeof(PageDirectory));
 
         return raw_data[i].directory;
     }

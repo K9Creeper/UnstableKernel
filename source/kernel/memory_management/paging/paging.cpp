@@ -37,12 +37,12 @@ void Kernel::MemoryManagement::Paging::Init()
 {
     PageDirectoryAllocater.PreInit();
     kernelDirectory = PageDirectoryAllocater.AllocatePageDirectory(true);
-    memset(reinterpret_cast<uint8_t *>(kernelDirectory), reinterpret_cast<uint8_t *>(0), sizeof(PageDirectory));
+    memset(reinterpret_cast<uint8_t *>(kernelDirectory), 0, sizeof(PageDirectory));
 
     uint32_t i = 0xC0000000; // + 4mb
-    while (i < 0xC0000000 + 0x400000)
+    while (i < 0xC0000000 + 0x400000 + 0x1000)
     {
-        AllocatePage(kernelDirectory, i, 0, 1, 1);
+        AllocatePage(kernelDirectory, i, 0, true, true);
         i += 0x1000;
     }
 
@@ -52,10 +52,9 @@ void Kernel::MemoryManagement::Paging::Init()
     Kernel::MemoryManagement::Paging::bInitialzed = true;
 
     i = 0;
-    while (i < 0x10000)
+    while (i < 0x10000 + 0x1000)
     {
-                                        // identity map
-        AllocatePage(kernelDirectory, i, i / 0x1000, 1, 1);
+        AllocatePage(kernelDirectory, i, i / 0x1000, true, true);
         i += 0x1000;
     }
 
@@ -200,9 +199,9 @@ PageTable * CopyPageTable(PageDirectory * src_page_dir, PageDirectory * dst_page
         uint32_t tmp_virtual_address = 0;
 
         // Allocate a frame in destination page table
-        Kernel::MemoryManagement::Paging::AllocatePage(dst_page_dir, dst_virtual_address, 0, 0, 1);
+        Kernel::MemoryManagement::Paging::AllocatePage(dst_page_dir, dst_virtual_address, 0, false, true);
         // Now I want tmp_virtual_address and dst_virtual_address both points to the same frame
-        Kernel::MemoryManagement::Paging::AllocatePage(src_page_dir, tmp_virtual_address, (uint32_t)Kernel::MemoryManagement::Paging::Virtual2Phyiscal(dst_page_dir, (void*)dst_virtual_address), 0, 1);
+        Kernel::MemoryManagement::Paging::AllocatePage(src_page_dir, tmp_virtual_address, (uint32_t)Kernel::MemoryManagement::Paging::Virtual2Phyiscal(dst_page_dir, (void*)dst_virtual_address), false, true);
         if (src->pages[i].present) table->pages[i].present = 1;
         if (src->pages[i].rw)      table->pages[i].rw = 1;
         if (src->pages[i].user)    table->pages[i].user = 1;

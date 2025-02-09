@@ -161,7 +161,7 @@ static void Expand(uint32_t new_size)
 
   uint32_t old_size = Kernel::Memory::Info::kheap_end - Kernel::Memory::Info::kheap_start;
 
-  for (uint32_t i = old_size; i < new_size; i += 0x1000)
+  for (uint32_t i = old_size; i < new_size + 0x1000; i += 0x1000)
   {
     // allocate a frame at the current address
     Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, Kernel::Memory::Info::kheap_end + i, 0, !Kernel::MemoryManagement::KHeap::bSupervisor, !Kernel::MemoryManagement::KHeap::bReadOnly);
@@ -316,7 +316,7 @@ static void *Alloc(uint32_t size, bool page_align)
     // If no page alignment is needed, remove the hole from the index
     Kernel::MemoryManagement::KHeap::heapIndex.Remove(i);
   }
-
+  
   // Overwrite the original hole header and footer with the new block allocation
   Kernel::MemoryManagement::KHeap::Header *block_header = (Kernel::MemoryManagement::KHeap::Header *)orig_hole_pos;
   block_header->size = new_size;
@@ -326,11 +326,10 @@ static void *Alloc(uint32_t size, bool page_align)
   Kernel::MemoryManagement::KHeap::Footer *block_footer = (Kernel::MemoryManagement::KHeap::Footer *)(orig_hole_pos + sizeof(Kernel::MemoryManagement::KHeap::Header) + size);
   block_footer->header = block_header;
   block_footer->magic = HEAP_MAGIC;
-
+  
   // If there is leftover space after the allocated block, create a new hole
   if (orig_hole_size - new_size > 0)
   {
-
     Kernel::MemoryManagement::KHeap::Header *hole_header = (Kernel::MemoryManagement::KHeap::Header *)(orig_hole_pos + sizeof(Kernel::MemoryManagement::KHeap::Header) + size + sizeof(Kernel::MemoryManagement::KHeap::Footer));
     hole_header->size = orig_hole_size - new_size;
     hole_header->magic = HEAP_MAGIC;
