@@ -9,8 +9,6 @@
 template <typename type_t>
 OrderedArray<type_t>::~OrderedArray() {}
 
-extern "C" void printf(const char* format, ...);
-
 template <typename type_t>
 void OrderedArray<type_t>::RePlace(void *address, uint32_t max_size)
 {
@@ -20,47 +18,6 @@ void OrderedArray<type_t>::RePlace(void *address, uint32_t max_size)
 	
 	size = 0;
 	this->max_size = max_size;
-}
-
-template <typename type_t>
-void OrderedArray<type_t>::Insert(type_t item)
-{
-	uint32_t i;
-	static type_t tmp, tmp2;
-
-	i = 0;
-
-	while (i < this->size && this->lessthan_(this->array[i], item))
-	{
-		i++;
-	}
-
-	// If reached end of array, just append the item
-	if (i == this->size)
-	{
-		this->array[this->size] = item;
-
-		this->size++;
-	}
-	else // insert
-	{
-		tmp = this->array[i];
-
-		this->array[i] = item;
-
-		while (i < this->size)
-		{
-			i++;
-
-			tmp2 = this->array[i];
-
-			this->array[i] = tmp;
-
-			tmp = tmp2;
-		}
-
-		this->size++;
-	}
 }
 
 template <typename type_t>

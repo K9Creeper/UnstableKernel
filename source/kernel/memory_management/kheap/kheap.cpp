@@ -14,11 +14,51 @@
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
 
-extern "C" void printf(const char* format, ...);
+void KHeapOrderedArray::Insert(void* item)
+{
+	uint32_t i;
+
+  static void* tmp;
+  static void* tmp2;
+
+	i = 0;
+
+	while (i < this->size && this->lessthan_(this->array[i], item))
+	{
+		i++;
+	}
+
+	// If reached end of array, just append the item
+	if (i == this->size)
+	{
+		this->array[this->size] = item;
+
+		this->size++;
+	}
+	else // insert
+	{
+		tmp = this->array[i];
+
+		this->array[i] = item;
+
+		while (i < this->size)
+		{
+			i++;
+
+			tmp2 = this->array[i];
+
+			this->array[i] = tmp;
+
+			tmp = tmp2;
+		}
+
+		this->size++;
+	}
+}
 
 bool KHeapOrderedArray::lessthan_(void *a, void *b)
 {
-  return (((Kernel::MemoryManagement::KHeap::Header *)a)->size < ((Kernel::MemoryManagement::KHeap::Header *)b)->size);
+  return ((reinterpret_cast<Kernel::MemoryManagement::KHeap::Header*>(a))->size < (reinterpret_cast<Kernel::MemoryManagement::KHeap::Header*>(b))->size);
 }
 
 namespace Kernel

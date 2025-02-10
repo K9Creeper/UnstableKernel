@@ -91,9 +91,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
 
-    // Why bad... either my paging or kheap
-    Kernel::MemoryManagement::KHeap::kmalloc_(0x400000);
-
     asm volatile("sti");
 
     for (;;){

@@ -7,5 +7,9 @@
 #include "../../../cpphelpers/ordered_array.hpp"
 
 class KHeapOrderedArray : public OrderedArray<void *> {
-  bool lessthan_(void *a, void *b);
+    public:
+        void Insert(void* item);
+
+    private:
+        bool lessthan_(void *a, void *b);
 };

@@ -17,5 +17,5 @@ Initialized | Keyboard
 Initialized | Mouse
 Initialized | Keyboard Handle
 Initialized | PCI
-| Fault 14 |
-Possible causes: [ Page not present Page is read only ] at 0x7e00c
+Passed
+Passed

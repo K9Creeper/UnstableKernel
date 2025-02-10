@@ -8,23 +8,25 @@ SECTIONS
 {
     . = virt;
     linkerld_startofkernel = .;
-    .text ALIGN(4K) : AT(ADDR(.text)-0xC0000000)
+
+    .text ALIGN(4K) : AT(ADDR(.text) - offset)
     {
         *(.multiboot)
         *(.text)
     }
-    .rodata ALIGN(4K) : AT(ADDR(.rodata)-0xC0000000)
+
+    .rodata ALIGN(4K) : AT(ADDR(.rodata) - offset)
     {
         *(.rodata)
     }
-     
-    .bss ALIGN(4K) : AT(ADDR(.bss)-0xC0000000)
+
+    .bss ALIGN(4K) : AT(ADDR(.bss) - offset)
     {
-        *(.COMMON)
+        *(COMMON)
         *(.bss)
     }
 
-    .data ALIGN(4K) : AT(ADDR(.data)-0xC0000000)
+    .data ALIGN(4K) : AT(ADDR(.data) - offset)
     {
         *(.data)
     }
