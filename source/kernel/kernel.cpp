@@ -24,6 +24,8 @@
 
 #include "drivers/pci/pci.hpp"
 
+#include "../graphics/graphics.hpp"
+
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
 void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
@@ -107,6 +109,9 @@ void SetupGraphics(){
         Kernel::Drivers::VESA::currentMode.info.bpp
     );
 
+    Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
+    printf("Initialized | Graphics\n");
+
     printf("\n|--------------|\n\n");
 }
 
@@ -129,12 +134,16 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupDrivers();
     
-    uint32_t largeAllocatedBlock = Kernel::MemoryManagement::KHeap::kmalloc_(0x400000);
-    printf("Created a large block at 0x%X\n", largeAllocatedBlock);
-
     asm volatile("sti");
 
     for (;;){
+
+        for(uint32_t x = Kernel::Drivers::Input::Mouse::MouseInfo::X; x < Kernel::Drivers::Input::Mouse::MouseInfo::X + 15; x++)
+            for(uint32_t y = Kernel::Drivers::Input::Mouse::MouseInfo::Y; y < Kernel::Drivers::Input::Mouse::MouseInfo::Y + 15; y++)
+                Graphics::Paint(x, y, 0xFF0000);
+
+        Graphics::SwapBuffers();
+
         asm volatile("hlt");
     }
 }

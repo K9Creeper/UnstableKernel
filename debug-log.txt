@@ -1,7 +1,7 @@
 -- This is the Kernel Debug Log --
 
 
-|Setup Eary Memory|
+|Setup Early Memory|
 
 Kernel Memory Info | Start: 0xc0100000 | end: 0xc0111000
 Initialized | GDT
@@ -10,7 +10,7 @@ Installed | TSS
 Initialized | IDT
 Installed | Interrupts & IDT
 
-|-----------------|
+|------------------|
 
 Initialized | Bios32 Service
 
@@ -28,6 +28,7 @@ Located at 0xc0481000, Initial End at 0xc0500000, Max Address 0xcfffff00
 
 Initialized | VESA
 Width: 640, Height: 480, Bytes Per Pixel: 32
+Initialized | Graphics
 
 |--------------|
 
@@ -40,4 +41,3 @@ Initialized | PCI
 
 |-------------|
 
-Created a large block at 0xc0485014
