@@ -31,18 +31,14 @@ void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kerne
 
 }
 
-extern "C" void kernel_main(uint32_t addr, uint32_t magic)
+void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
 {
-    asm volatile("cli");
+    printf("\n|Setup Early Memory|\n\n");
 
     Kernel::Multiboot::mb_info = addr;
     Kernel::Multiboot::mb_magic = magic;
 
-    Kernel::Debug::COM1::Init();
-    printf("-- This is the Kernel Debug Log --\n\n");
-
     Kernel::Memory::InitMemInfo();
-
     printf("Kernel Memory Info | Start: 0x%X | end: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
 
     Kernel::MemoryManagement::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);
@@ -62,8 +58,11 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
 
-    Kernel::Bios32::Init();
-    printf("Initialized | Bios32 Service\n");
+    printf("\n|------------------|\n\n");
+}
+
+void SetupMemoryManagement(){
+    printf("\n|Setup Memory Management|\n\n");
 
     Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
     printf("Initialzied | PMM\n");
@@ -71,25 +70,67 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::MemoryManagement::Paging::Init();
     printf("Initialzied | Paging\n");
 
-    Kernel::Drivers::VESA::Init(640, 480);
-    printf("Initialized | VESA\n");
-    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.bpp);
-
-    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0500000, 0xC0500000+(0x300000*10));
+    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0500000, 0xCFFFFF00);
     printf("Initialized & Installed | KHeap\n");
-    printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", Kernel::Memory::Info::kheap_start, Kernel::Memory::Info::kheap_end, Kernel::Memory::Info::kheap_max_address);
-    
+    printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", 
+        Kernel::Memory::Info::kheap_start, 
+        Kernel::Memory::Info::kheap_end, 
+        Kernel::Memory::Info::kheap_max_address
+    );
+
+    printf("\n|-----------------------|\n\n");
+}
+
+void SetupDrivers(){
+    printf("\n|Setup Drivers|\n\n");
+
     Kernel::Drivers::Input::Keyboard::Init();
     printf("Initialized | Keyboard\n");
     
     Kernel::Drivers::Input::Mouse::Init();
     printf("Initialized | Mouse\n");
 
-    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
-    printf("Initialized | Keyboard Handle\n");
-
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
+
+    printf("\n|-------------|\n\n");
+}
+
+void SetupGraphics(){
+    printf("\n|Setup Graphics|\n\n");
+
+    Kernel::Drivers::VESA::Init(640, 480);
+    printf("Initialized | VESA\n");
+    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", 
+        Kernel::Drivers::VESA::currentMode.info.width, 
+        Kernel::Drivers::VESA::currentMode.info.height, 
+        Kernel::Drivers::VESA::currentMode.info.bpp
+    );
+
+    printf("\n|--------------|\n\n");
+}
+
+extern "C" void kernel_main(uint32_t addr, uint32_t magic)
+{
+    asm volatile("cli");
+
+    Kernel::Debug::COM1::Init();
+    printf("-- This is the Kernel Debug Log --\n\n");
+
+    // Setup Tables, KHeap Info, and General Memory Info
+    SetupEarlyMemory(addr, magic);
+
+    Kernel::Bios32::Init();
+    printf("Initialized | Bios32 Service\n");
+
+    SetupMemoryManagement();
+
+    SetupGraphics();
+
+    SetupDrivers();
+    
+    uint32_t largeAllocatedBlock = Kernel::MemoryManagement::KHeap::kmalloc_(0x400000);
+    printf("Created a large block at 0x%X\n", largeAllocatedBlock);
 
     asm volatile("sti");
 

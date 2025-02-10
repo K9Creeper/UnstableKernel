@@ -23,6 +23,8 @@ namespace Kernel
             VESAMode vesaModes[64];
 
             VESAMode currentMode;
+
+            bool bInitalized = false;
         }
     }
 }
@@ -40,6 +42,9 @@ void LoadvbeInfo(){
 
 void VESAGetMode(uint16_t mode, Kernel::Drivers::VESA::VbeModeInfoStruct *modeInfo)
 {
+    if(!Kernel::Drivers::VESA::bInitalized)
+        return;
+        
     Registers16 reg_in = {0};
     Registers16 reg_out = {0};
     reg_in.ax = 0x4F01;
@@ -52,6 +57,9 @@ void VESAGetMode(uint16_t mode, Kernel::Drivers::VESA::VbeModeInfoStruct *modeIn
 // make sure to free the return.
 Kernel::Drivers::VESA::VESAMode *VESAGetModes()
 {
+    if(!Kernel::Drivers::VESA::bInitalized)
+        return nullptr;
+
     Kernel::Drivers::VESA::VbeInfoBlock *block = &Kernel::Drivers::VESA::vbeInfo;
     Kernel::Drivers::VESA::VbeModeInfoStruct tmpMode; 
 
@@ -82,6 +90,8 @@ Kernel::Drivers::VESA::VESAMode *VESAGetModes()
 
 void VESASetMode(uint32_t mode)
 {
+    if(!Kernel::Drivers::VESA::bInitalized)
+        return;
     Registers16 reg_in = {0};
     Registers16 reg_out = {0};
     reg_in.ax = 0x4F02;
@@ -91,6 +101,9 @@ void VESASetMode(uint32_t mode)
 
 void Kernel::Drivers::VESA::SetMode(uint32_t mode)
 {
+    if(!bInitalized)
+        return;
+    
     VESASetMode(mode);
     // not the most efficent thing.
     for (uint8_t i = 0; i < 64; i++)
@@ -105,6 +118,9 @@ void Kernel::Drivers::VESA::SetMode(uint32_t mode)
 
 bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bpp)
 {
+    if(!bInitalized)
+        return false;
+    
     Kernel::Drivers::VESA::VESAMode *m = VESAGetModes();
     
     for (uint8_t i = 0; i < 64; i++)
@@ -126,8 +142,13 @@ bool Kernel::Drivers::VESA::SetMode(uint32_t width, uint32_t height, uint16_t bp
 
 void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height)
 {
+    if(bInitalized)
+        return;
+
     const uint16_t bpp = 32;
     LoadvbeInfo();
+
+    bInitalized = true;
 
     SetMode(width, height, bpp);
 
@@ -135,6 +156,8 @@ void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height)
                                                                                                             // identity map
         Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, j, (j/0x1000), false, true);        
     }
+
+    
 }
 
 uint32_t Kernel::Drivers::VESA::GetLFBAddress(){

@@ -63,6 +63,8 @@ namespace Kernel
 
             extern VESAMode currentMode;
 
+            extern bool bInitalized;
+
             extern void Init(uint32_t width, uint32_t height);
             extern uint32_t GetLFBAddress();
             extern uint32_t GetMaxLFBAddress();
