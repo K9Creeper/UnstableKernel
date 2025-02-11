@@ -61,7 +61,7 @@ uint8_t Mouse_Read()
 
 extern "C" void printf(const char* format, ...);
 
-void MouseHandle(Registers * regs){
+void MouseHandler_(Registers * regs){
     if(Kernel::Drivers::Input::Mouse::cycle == 0){
         Kernel::Drivers::Input::Mouse::mouse_byte[0] = Mouse_Read();
 
@@ -152,5 +152,5 @@ void Kernel::Drivers::Input::Mouse::Init(){
     mouseInfo.X = 20;
     mouseInfo.Y = 20;
 
-    Kernel::Memory::IRQ::AddHandle(12, MouseHandle);
+    Kernel::Memory::IRQ::AddHandle(12, MouseHandler_);
 }

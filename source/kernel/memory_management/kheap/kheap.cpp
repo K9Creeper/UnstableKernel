@@ -14,7 +14,7 @@
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
 
-void KHeapOrderedArray::Insert(void* item)
+bool KHeapOrderedArray::Insert(void* item)
 {
 	uint32_t i;
 
@@ -27,6 +27,9 @@ void KHeapOrderedArray::Insert(void* item)
 	{
 		i++;
 	}
+
+  if(i + 1 > this->max_size)
+    return false;
 
 	// If reached end of array, just append the item
 	if (i == this->size)
@@ -54,6 +57,8 @@ void KHeapOrderedArray::Insert(void* item)
 
 		this->size++;
 	}
+
+  return true;
 }
 
 bool KHeapOrderedArray::lessthan_(void *a, void *b)

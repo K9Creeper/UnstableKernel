@@ -1,6 +1,7 @@
 /// ------------
 /// graphics.hpp
 /// @brief This file declares the data or information for system graphics.
+#pragma once
 
 #include <stdint.h>
 

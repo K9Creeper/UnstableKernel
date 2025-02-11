@@ -20,11 +20,15 @@
 #include "drivers/input/keyboard.hpp"
 #include "drivers/input/mouse.hpp"
 
+#include "drivers/pit/pit.hpp"
+
 #include "drivers/vesa/vesa.hpp"
 
 #include "drivers/pci/pci.hpp"
 
 #include "../graphics/graphics.hpp"
+
+#include "../multitasking/multitasking.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -35,11 +39,16 @@ void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
 
 void MouseHandler(const MouseInfo &info)
 {
-    for(uint32_t x = info.X; x < info.X + 15; x++)
-            for(uint32_t y = info.Y; y < info.Y + 15; y++)
-                Graphics::Paint(x, y, (info.currState[0] ? 0x00FF00 : 0xFF0000));
+    
+}
 
-    Graphics::SwapBuffers();
+void PITHandler(const uint32_t& ticks)
+{
+
+}
+
+void TaskTest(){
+
 }
 
 void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
@@ -95,14 +104,15 @@ void SetupMemoryManagement(){
 void SetupDrivers(){
     printf("\n|Setup Drivers|\n\n");
 
+    Kernel::Drivers::PIT::Init();
+    printf("Initialized | PIT\n");
+
     Kernel::Drivers::Input::Keyboard::Init();
     printf("Initialized | Keyboard\n");
     
     Kernel::Drivers::Input::Mouse::Init();
     printf("Initialized | Mouse\n");
 
-    
-    
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
 
@@ -150,6 +160,11 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupDrivers();
     
+    Multitasking::Init();
+    printf("Initialized | Multitasking\n");
+
+    Multitasking::CreateProcess("Cool!", TaskTest);
+
     asm volatile("sti");
 
     for (;;){

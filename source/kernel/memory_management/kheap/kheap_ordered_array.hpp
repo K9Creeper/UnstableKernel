@@ -8,7 +8,7 @@
 
 class KHeapOrderedArray : public OrderedArray<void *> {
     public:
-        void Insert(void* item);
+        bool Insert(void* item);
 
     private:
         bool lessthan_(void *a, void *b);

@@ -1,6 +1,7 @@
 /// ---------------
 /// framebuffer.hpp
 /// @brief This defines the Framebuffer class, for handling the system display.
+#pragma once
 
 #include <stdint.h>
 
