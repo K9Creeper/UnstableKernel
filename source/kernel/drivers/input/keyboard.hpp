@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "../../../input/keyboard.hpp"
 
 namespace Kernel
 {
@@ -15,21 +15,6 @@ namespace Kernel
         {
             namespace Keyboard
             {
-                struct Key
-                {
-                    uint16_t index;
-
-                    char *keyname;
-
-                    bool bhHasValue;
-                    char value;
-
-                    bool bPressed;
-                    bool bPressedPrev = false;
-                };
-
-                typedef void (*keyboard_input_handle)(const Key &k, const Key* keymap);
-
                 extern bool bInitialized;
 
                 extern void Init();
@@ -37,7 +22,7 @@ namespace Kernel
                 extern int AddHandle(void *handle);
                 extern void RemoveHandle(int i);
 
-                extern const Key *GetKeyMap();
+                extern const KeyboardKey *GetKeyMap();
             }
         }
     }

@@ -4,16 +4,18 @@
 
 #pragma once
 
+#include "../../../input/mouse.hpp"
+
 namespace Kernel{
     namespace Drivers{
         namespace Input{
             namespace Mouse{
-                namespace MouseInfo{
-                    extern int X;
-                    extern int Y;
-                }
+                extern MouseInfo mouseInfo; 
 
                 extern bool bInitialized;
+                
+                extern int AddHandle(void *handle);
+                extern void RemoveHandle(int i);
 
                 extern void Init();
             }

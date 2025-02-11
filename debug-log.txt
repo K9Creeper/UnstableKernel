@@ -38,6 +38,8 @@ Initialized | Graphics
 Initialized | Keyboard
 Initialized | Mouse
 Initialized | PCI
+Added Handle | Keyboard
+Added Handle | Mouse
 
 |-------------|
 

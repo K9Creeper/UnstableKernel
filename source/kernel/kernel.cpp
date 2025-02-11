@@ -28,9 +28,18 @@
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
-void KeyboardHandler(const Kernel::Drivers::Input::Keyboard::Key &k, const Kernel::Drivers::Input::Keyboard::Key *keymap)
+void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
 {
 
+}
+
+void MouseHandler(const MouseInfo &info)
+{
+    for(uint32_t x = info.X; x < info.X + 15; x++)
+            for(uint32_t y = info.Y; y < info.Y + 15; y++)
+                Graphics::Paint(x, y, (info.currState[0] ? 0x00FF00 : 0xFF0000));
+
+    Graphics::SwapBuffers();
 }
 
 void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
@@ -92,8 +101,15 @@ void SetupDrivers(){
     Kernel::Drivers::Input::Mouse::Init();
     printf("Initialized | Mouse\n");
 
+    
+    
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
+
+    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
+    printf("Added Handle | Keyboard\n");
+    Kernel::Drivers::Input::Mouse::AddHandle(MouseHandler);
+    printf("Added Handle | Mouse\n");
 
     printf("\n|-------------|\n\n");
 }
@@ -137,13 +153,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     asm volatile("sti");
 
     for (;;){
-
-        for(uint32_t x = Kernel::Drivers::Input::Mouse::MouseInfo::X; x < Kernel::Drivers::Input::Mouse::MouseInfo::X + 15; x++)
-            for(uint32_t y = Kernel::Drivers::Input::Mouse::MouseInfo::Y; y < Kernel::Drivers::Input::Mouse::MouseInfo::Y + 15; y++)
-                Graphics::Paint(x, y, 0xFF0000);
-
-        Graphics::SwapBuffers();
-
         asm volatile("hlt");
     }
 }

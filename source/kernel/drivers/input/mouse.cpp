@@ -19,16 +19,9 @@ namespace Kernel{
                 uint8_t cycle = 0;
                 char mouse_byte[3];
 
-                uint8_t prevState[3];
-                uint8_t currState[3];
+                MouseInfo mouseInfo;
 
-                namespace MouseInfo{
-                    int X;
-                    int Y;
-                }
-
-                int CHANGE_X;
-                int CHANGE_Y;
+                void* mouseHandles[16];
             }
         }
     }
@@ -73,17 +66,17 @@ void MouseHandle(Registers * regs){
         Kernel::Drivers::Input::Mouse::mouse_byte[0] = Mouse_Read();
 
         if(MOUSE_LEFT_BUTTON(Kernel::Drivers::Input::Mouse::mouse_byte[0])) {
-                Kernel::Drivers::Input::Mouse::currState[0] = 1;
+            Kernel::Drivers::Input::Mouse::mouseInfo.currState[0] = 1;
             }
             else {
-                Kernel::Drivers::Input::Mouse::currState[0] = 0;
+                Kernel::Drivers::Input::Mouse::mouseInfo.currState[0] = 0;
             }
 
             if(MOUSE_RIGHT_BUTTON(Kernel::Drivers::Input::Mouse::mouse_byte[0])) {
-                Kernel::Drivers::Input::Mouse::currState[2] = 1;
+                Kernel::Drivers::Input::Mouse::mouseInfo.currState[2] = 1;
             }
             else {
-                Kernel::Drivers::Input::Mouse::currState[2] = 0;
+                Kernel::Drivers::Input::Mouse::mouseInfo.currState[2] = 0;
             }
             Kernel::Drivers::Input::Mouse::cycle++;
     }else if(Kernel::Drivers::Input::Mouse::cycle == 1){
@@ -92,24 +85,45 @@ void MouseHandle(Registers * regs){
     }else{
         Kernel::Drivers::Input::Mouse::mouse_byte[2]= Mouse_Read();
 
-        Kernel::Drivers::Input::Mouse::CHANGE_X = Kernel::Drivers::Input::Mouse::mouse_byte[1];
-        Kernel::Drivers::Input::Mouse::CHANGE_Y = Kernel::Drivers::Input::Mouse::mouse_byte[2];
+        Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_X = Kernel::Drivers::Input::Mouse::mouse_byte[1];
+        Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y = Kernel::Drivers::Input::Mouse::mouse_byte[2];
 
-        Kernel::Drivers::Input::Mouse::MouseInfo::X += Kernel::Drivers::Input::Mouse::CHANGE_X;
-        Kernel::Drivers::Input::Mouse::MouseInfo::Y -= Kernel::Drivers::Input::Mouse::CHANGE_Y;
+        Kernel::Drivers::Input::Mouse::mouseInfo.X += Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_X;
+        Kernel::Drivers::Input::Mouse::mouseInfo.Y -= Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y;
 
-        if(Kernel::Drivers::Input::Mouse::MouseInfo::X < 0)
-                Kernel::Drivers::Input::Mouse::MouseInfo::X = 0;
-        if(Kernel::Drivers::Input::Mouse::MouseInfo::Y < 0)
-            Kernel::Drivers::Input::Mouse::MouseInfo::Y = 0;
+        if(Kernel::Drivers::Input::Mouse::mouseInfo.X < 0)
+                Kernel::Drivers::Input::Mouse::mouseInfo.X = 0;
+        if(Kernel::Drivers::Input::Mouse::mouseInfo.Y < 0)
+            Kernel::Drivers::Input::Mouse::mouseInfo.Y = 0;
 
         Kernel::Drivers::Input::Mouse::cycle = 0;
     }
 
+    // Finished 1 cycle
     if(Kernel::Drivers::Input::Mouse::cycle == 0){
-        memcpy(Kernel::Drivers::Input::Mouse::prevState, Kernel::Drivers::Input::Mouse::currState, 3);
-        memset(Kernel::Drivers::Input::Mouse::currState, 0x00, 3);
+        for(uint8_t i = 0; i < 16; i++)
+            if(Kernel::Drivers::Input::Mouse::mouseHandles[i])
+                reinterpret_cast<mouse_input_handle>(Kernel::Drivers::Input::Mouse::mouseHandles[i])(Kernel::Drivers::Input::Mouse::mouseInfo);
+
+        memcpy(Kernel::Drivers::Input::Mouse::mouseInfo.prevState, Kernel::Drivers::Input::Mouse::mouseInfo.currState, 3);
+        memset(Kernel::Drivers::Input::Mouse::mouseInfo.currState, 0x00, 3);
     }
+}
+
+int Kernel::Drivers::Input::Mouse::AddHandle(void *handle){
+    for(uint8_t i = 0; i < 16; i++)
+        if(!mouseHandles[i])
+        {
+            mouseHandles[i] = handle;
+            return i;
+        }
+
+    return -1;
+}
+
+void Kernel::Drivers::Input::Mouse::RemoveHandle(int i){
+    if(i >= 0 && i < 16)
+    mouseHandles[i] = nullptr;
 }
 
 void Kernel::Drivers::Input::Mouse::Init(){
@@ -135,8 +149,8 @@ void Kernel::Drivers::Input::Mouse::Init(){
     Mouse_Write(0xF4);
     Mouse_Read();
 
-    MouseInfo::X = 20;
-    MouseInfo::Y = 20;
+    mouseInfo.X = 20;
+    mouseInfo.Y = 20;
 
     Kernel::Memory::IRQ::AddHandle(12, MouseHandle);
 }

@@ -17,7 +17,7 @@ namespace Kernel
             {
                 namespace US_QWETY
                 {
-                    Key keymap[128] = {
+                    KeyboardKey keymap[128] = {
                         {0, (char *)"None", false, 0, false},
                         {1, (char *)"Escape", false, 27, false},
                         {2, (char *)"1", true, '1', false},
@@ -179,11 +179,11 @@ void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
 
         if ((scancode & 128) == 128)
         {
-            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode - 128], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
+            (reinterpret_cast<keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode - 128], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
         }
         else
         {
-            (reinterpret_cast<Kernel::Drivers::Input::Keyboard::keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
+            (reinterpret_cast<keyboard_input_handle>(Kernel::Drivers::Input::Keyboard::handles[i]))(Kernel::Drivers::Input::Keyboard::US_QWETY::keymap[scancode], Kernel::Drivers::Input::Keyboard::US_QWETY::keymap);
         }
     }
 }
@@ -215,7 +215,7 @@ void Kernel::Drivers::Input::Keyboard::RemoveHandle(int i)
     handles[i] = nullptr;
 }
 
-const Kernel::Drivers::Input::Keyboard::Key *Kernel::Drivers::Input::Keyboard::GetKeyMap()
+const KeyboardKey *Kernel::Drivers::Input::Keyboard::GetKeyMap()
 {
     return US_QWETY::keymap;
 }

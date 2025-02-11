@@ -1,6 +1,6 @@
 /// ----------
 /// paging.hpp
-/// @brief This file declares and defines important strucuters relating to the core function of paging.
+/// @brief This file declares and defines important structures relating to the core function of paging.
 #pragma once
 struct PageDirectoryEntry
 {
