@@ -39,19 +39,32 @@ void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
 
 void MouseHandler(const MouseInfo &info)
 {
-    
+
 }
 
-void PITHandler(const uint32_t& ticks)
+void PITHandler(const uint32_t &ticks)
 {
 
 }
 
-void TaskTest(){
+void TaskTest()
+{
     printf("\n|Multitasking working!|\n\n");
+
+    static uint32_t count = 0;
+
+    while (true)
+    {
+        printf("\n| Iterating! |\n\n");
+        for (uint32_t i = 0; i < 10; i++)
+        {
+            printf("\tCount: %D\n", count);
+            count++;
+        }
+    }
 }
 
-void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
+void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
 {
     printf("\n| Setup Early Memory |\n\n");
 
@@ -84,7 +97,8 @@ void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
     printf("\n| ------------------ |\n\n");
 }
 
-void SetupMemoryManagement(){
+void SetupMemoryManagement()
+{
     printf("\n| Setup Memory Management |\n\n");
 
     Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
@@ -95,16 +109,16 @@ void SetupMemoryManagement(){
 
     Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0500000, 0xCFFFFF00);
     printf("Initialized & Installed | KHeap\n");
-    printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n", 
-        Kernel::Memory::Info::kheap_start, 
-        Kernel::Memory::Info::kheap_end, 
-        Kernel::Memory::Info::kheap_max_address
-    );
+    printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n",
+           Kernel::Memory::Info::kheap_start,
+           Kernel::Memory::Info::kheap_end,
+           Kernel::Memory::Info::kheap_max_address);
 
     printf("\n| ----------------------- |\n\n");
 }
 
-void SetupDrivers(){
+void SetupDrivers()
+{
     printf("\n| Setup Drivers |\n\n");
 
     Kernel::Drivers::PIT::Init();
@@ -112,7 +126,7 @@ void SetupDrivers(){
 
     Kernel::Drivers::Input::Keyboard::Init();
     printf("Initialized | Keyboard\n");
-    
+
     Kernel::Drivers::Input::Mouse::Init();
     printf("Initialized | Mouse\n");
 
@@ -127,16 +141,16 @@ void SetupDrivers(){
     printf("\n| ------------- |\n\n");
 }
 
-void SetupGraphics(){
+void SetupGraphics()
+{
     printf("\n| Setup Graphics |\n\n");
 
     Kernel::Drivers::VESA::Init(640, 480);
     printf("Initialized | VESA\n");
-    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n", 
-        Kernel::Drivers::VESA::currentMode.info.width, 
-        Kernel::Drivers::VESA::currentMode.info.height, 
-        Kernel::Drivers::VESA::currentMode.info.bpp
-    );
+    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n",
+           Kernel::Drivers::VESA::currentMode.info.width,
+           Kernel::Drivers::VESA::currentMode.info.height,
+           Kernel::Drivers::VESA::currentMode.info.bpp);
 
     Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     printf("Initialized | Graphics\n");
@@ -144,7 +158,8 @@ void SetupGraphics(){
     printf("\n| -------------- |\n\n");
 }
 
-void SetupMultitasking(){
+void SetupMultitasking()
+{
     printf("\n| Setup Multitasking |\n\n");
 
     // Setup the stack on the return from usermode
@@ -171,8 +186,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     // Setup Tables, KHeap Info, and General Memory Info
     SetupEarlyMemory(addr, magic);
 
-    
-
     SetupMemoryManagement();
 
     SetupGraphics();
@@ -183,7 +196,8 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     asm volatile("sti");
 
-    for (;;){
+    for (;;)
+    {
         asm volatile("hlt");
     }
 }
