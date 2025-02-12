@@ -48,12 +48,12 @@ void PITHandler(const uint32_t& ticks)
 }
 
 void TaskTest(){
-
+    printf("\n|Multitasking working!|\n\n");
 }
 
 void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
 {
-    printf("\n|Setup Early Memory|\n\n");
+    printf("\n| Setup Early Memory |\n\n");
 
     Kernel::Multiboot::mb_info = addr;
     Kernel::Multiboot::mb_magic = magic;
@@ -78,11 +78,14 @@ void SetupEarlyMemory(const uint32_t& addr, const uint32_t& magic)
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
 
-    printf("\n|------------------|\n\n");
+    Kernel::Bios32::Init();
+    printf("Initialized | Bios32 Service\n");
+
+    printf("\n| ------------------ |\n\n");
 }
 
 void SetupMemoryManagement(){
-    printf("\n|Setup Memory Management|\n\n");
+    printf("\n| Setup Memory Management |\n\n");
 
     Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
     printf("Initialzied | PMM\n");
@@ -98,11 +101,11 @@ void SetupMemoryManagement(){
         Kernel::Memory::Info::kheap_max_address
     );
 
-    printf("\n|-----------------------|\n\n");
+    printf("\n| ----------------------- |\n\n");
 }
 
 void SetupDrivers(){
-    printf("\n|Setup Drivers|\n\n");
+    printf("\n| Setup Drivers |\n\n");
 
     Kernel::Drivers::PIT::Init();
     printf("Initialized | PIT\n");
@@ -121,11 +124,11 @@ void SetupDrivers(){
     Kernel::Drivers::Input::Mouse::AddHandle(MouseHandler);
     printf("Added Handle | Mouse\n");
 
-    printf("\n|-------------|\n\n");
+    printf("\n| ------------- |\n\n");
 }
 
 void SetupGraphics(){
-    printf("\n|Setup Graphics|\n\n");
+    printf("\n| Setup Graphics |\n\n");
 
     Kernel::Drivers::VESA::Init(640, 480);
     printf("Initialized | VESA\n");
@@ -138,7 +141,24 @@ void SetupGraphics(){
     Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     printf("Initialized | Graphics\n");
 
-    printf("\n|--------------|\n\n");
+    printf("\n| -------------- |\n\n");
+}
+
+void SetupMultitasking(){
+    printf("\n| Setup Multitasking |\n\n");
+
+    // Setup the stack on the return from usermode
+    uint32_t esp;
+    asm volatile("mov %%esp, %0" : "=r"(esp));
+    Kernel::Memory::TSS::SetStack(0x10, esp);
+
+    Multitasking::Init();
+    printf("Initialized | Multitasking\n");
+
+    Multitasking::CreateProcess("Cool!", TaskTest);
+    printf("Created a process: TaskTest\n");
+
+    printf("\n| ------------------ |\n\n");
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
@@ -151,19 +171,15 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     // Setup Tables, KHeap Info, and General Memory Info
     SetupEarlyMemory(addr, magic);
 
-    Kernel::Bios32::Init();
-    printf("Initialized | Bios32 Service\n");
+    
 
     SetupMemoryManagement();
 
     SetupGraphics();
 
     SetupDrivers();
-    
-    Multitasking::Init();
-    printf("Initialized | Multitasking\n");
 
-    Multitasking::CreateProcess("Cool!", TaskTest);
+    SetupMultitasking();
 
     asm volatile("sti");
 

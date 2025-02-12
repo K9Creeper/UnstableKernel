@@ -29,7 +29,7 @@ namespace Kernel
             extern void AllocatePage(PageDirectory * dir, uint32_t virtual_address, uint32_t frame, bool isKernel = false, int isWritable = false);
             extern void FreePage(PageDirectory * dir, uint32_t virtual_address, bool bFree);
 
-            extern void CopyDirectory(PageDirectory* in, PageDirectory* out);
+            extern void CopyDirectory(PageDirectory* src, PageDirectory* dst);
         }
     }
 }

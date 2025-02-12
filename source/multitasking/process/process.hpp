@@ -30,7 +30,7 @@ struct Process{
 private:
     char filename[512];
 
-    ProcessState state;
+    ProcessState state = ProcessState_NONE;
     uint32_t time;
 
 protected:
@@ -41,6 +41,10 @@ protected:
     PageDirectory* pageDir;    
 public:
     void Init(char* filename, void * routine = nullptr);
+
+    ProcessState GetState()const;
+
+    Context& GetContext();
 private:
 
 }; 
