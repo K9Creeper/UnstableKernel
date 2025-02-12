@@ -5,6 +5,8 @@
 #include "keyboard.hpp"
 
 #include "../../../chelpers/memory.h"
+#include "../../../chelpers/registers.h"
+
 #include "../../memory/interrupt_request/interrupt_request.hpp"
 
 namespace Kernel
@@ -157,7 +159,7 @@ namespace Kernel
     }
 }
 
-void KeyboardHandler_(struct Kernel_Memory_ISR_Regs *reg)
+void KeyboardHandler_(Registers *regs)
 {
     const uint8_t scancode = inportb(0x60);
 

@@ -40,12 +40,17 @@ void Process::Init(char *filename, void *routine)
     this->state = ProcessState_Created;
 }
 
-ProcessState Process::GetState() const
+const char* Process::GetName()const
+{
+    return this->filename;
+}
+
+ProcessState& Process::GetState()
 {
     return this->state;
 }
 
-Context &Process::GetContext()
+Context& Process::GetContext()
 {
     return this->regs;
 }

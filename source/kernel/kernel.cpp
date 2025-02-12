@@ -51,16 +51,9 @@ void TaskTest()
 {
     printf("\n|Multitasking working!|\n\n");
 
-    static uint32_t count = 0;
-
     while (true)
     {
-        printf("\n| Iterating! |\n\n");
-        for (uint32_t i = 0; i < 10; i++)
-        {
-            printf("\tCount: %D\n", count);
-            count++;
-        }
+        printf("\nHello from Task!\n");
     }
 }
 
@@ -170,8 +163,8 @@ void SetupMultitasking()
     Multitasking::Init();
     printf("Initialized | Multitasking\n");
 
-    Multitasking::CreateProcess("Cool!", TaskTest);
-    printf("Created a process: TaskTest\n");
+    Multitasking::CreateProcess("File", TaskTest);
+    printf("Created task\n");
 
     printf("\n| ------------------ |\n\n");
 }

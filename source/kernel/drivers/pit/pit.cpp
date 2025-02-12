@@ -23,6 +23,7 @@ namespace Kernel
     }
 }
 
+
 void TimerHandler_(Registers* regs){
     Kernel::Drivers::PIT::ticks++;
 
@@ -50,15 +51,12 @@ void Kernel::Drivers::PIT::RemoveHandle(int num){
 
 void Kernel::Drivers::PIT::Init(uint16_t hz){
     SetFrequency(hz);
-
-    
-
     Kernel::Memory::IRQ::AddHandle(0, TimerHandler_);
 }
 
 void Kernel::Drivers::PIT::SetFrequency(uint16_t hz){
     hzFrequency = hz;
-    uint16_t d = 0x1234DC / hz;
+    uint16_t d = 1193180 / hz;
 
     outportb(0x43, 0x36);
     outportb(0x40, d & 0xFF);

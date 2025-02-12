@@ -42,7 +42,9 @@ protected:
 public:
     void Init(char* filename, void * routine = nullptr);
 
-    ProcessState GetState()const;
+    const char* GetName()const;
+
+    ProcessState& GetState();
 
     Context& GetContext();
 private:

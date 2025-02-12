@@ -5,7 +5,9 @@
 
 #include <stdint.h>
 
-typedef void (*wakeup_calback)();
+#include "../../chelpers/registers.h"
+
+typedef void (*wakeup_calback)(Registers* reg);
 
 struct Wakeup{
     void* callback;
