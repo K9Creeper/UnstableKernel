@@ -47,15 +47,7 @@ void PITHandler(const uint32_t &ticks)
 
 }
 
-void TaskTest()
-{
-    printf("\n|Multitasking working!|\n\n");
-
-    while (true)
-    {
-        printf("\nHello from Task!\n");
-    }
-}
+extern "C" void usermode_main();
 
 void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
 {
@@ -163,10 +155,12 @@ void SetupMultitasking()
     Multitasking::Init();
     printf("Initialized | Multitasking\n");
 
-    Multitasking::CreateProcess("File", TaskTest);
-    printf("Created task\n");
-
     printf("\n| ------------------ |\n\n");
+}
+
+void EnterUsermode(){
+    Multitasking::CreateProcess("usermode_", usermode_main);
+    printf("\n-- Entering Usermode --\n");
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
@@ -186,6 +180,8 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     SetupDrivers();
 
     SetupMultitasking();
+
+    EnterUsermode();
 
     asm volatile("sti");
 

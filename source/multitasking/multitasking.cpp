@@ -46,8 +46,6 @@ void RegisterWakeup(void *callback, double seconds)
     Multitasking::wakeupList.Insert(w);
 }
 
-extern "C" void printf(const char *format, ...);
-
 void WakeupListHandle_(Registers *regs, const uint32_t &ticks)
 {
     for (uint32_t i = 0; i < Multitasking::wakeupList.GetSize(); i++)
@@ -57,12 +55,7 @@ void WakeupListHandle_(Registers *regs, const uint32_t &ticks)
     }
 }
 
-
-extern "C"
-{
-    void user_regs_switch(Context *regs);
-    void kernel_regs_switch(Context *regs);
-}
+extern "C" void user_regs_switch(Context *regs);
 
 void ContextSwitch(Registers *prev, Context *nregs)
 {
@@ -100,11 +93,11 @@ void ContextSwitch(Registers *prev, Context *nregs)
     user_regs_switch(nregs);
 }
 
-void SchedulerHandle_(Registers* regs)
-{        
+void SchedulerHandle_(Registers *regs)
+{
     if (Multitasking::scheduler.GetSize() == 0)
         return;
-    
+
     if (!Multitasking::currentProcess)
     {
         Multitasking::previousTicks = Kernel::Drivers::PIT::ticks;
@@ -117,7 +110,7 @@ void SchedulerHandle_(Registers* regs)
     if (Multitasking::previousProcessIndex >= Multitasking::scheduler.GetSize())
         Multitasking::previousProcessIndex = 0;
 
-    if(Multitasking::currentProcess->GetState() == ProcessState_Zombie)
+    if (Multitasking::currentProcess->GetState() == ProcessState_Zombie)
         Multitasking::previousProcess = nullptr;
 
     Process *next = nullptr;
@@ -177,8 +170,8 @@ void Multitasking::CreateProcess(const char *filename, void *routine)
     Process *p = reinterpret_cast<Process *>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(Process)));
     p->Init(filename, routine);
 
-    if(!currentProcess)
+    if (!currentProcess)
         currentProcess = p;
-    
+
     scheduler.Insert(p);
 }

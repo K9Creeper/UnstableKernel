@@ -30,6 +30,12 @@ void Graphics::Init(uint32_t lfbLocation, uint32_t w, uint32_t h, uint32_t p, ui
     backBuffer.Init(reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::KHeap::kmalloc_(foregroundBuffer.GetSize())), pxWidth, pxHeight, pitch, bPerPixel);
 }
 
+void Graphics::FillBuffer(uint32_t color){
+    for(uint32_t y = 0; y < pxHeight; y++)
+        for(uint32_t x = 0; x < pxWidth; x++)
+            Graphics::Paint(x, y, color);
+}
+
 void Graphics::Paint(uint32_t x, uint32_t y, uint32_t color){
     uint32_t* pixel = backBuffer.GetPixel(x, y);
     if(pixel)
