@@ -86,6 +86,8 @@ void ContextSwitch(Registers *prev, Context *nregs)
         asm volatile("mov %%cr3, %0" : "=r"(pregs.cr3));
     }
 
+    Multitasking::previousProcess = Multitasking::currentProcess;
+
     Multitasking::currentProcess->GetState() = ProcessState_Swapping;
 
     if (reinterpret_cast<PageDirectory *>(nregs->cr3) != nullptr)
@@ -94,17 +96,15 @@ void ContextSwitch(Registers *prev, Context *nregs)
     }
 
     Multitasking::currentProcess->GetState() = ProcessState_Running;
-    
+
     user_regs_switch(nregs);
 }
 
 void SchedulerHandle_(Registers* regs)
-{    
-    Multitasking::previousProcess = Multitasking::currentProcess;
-
+{        
     if (Multitasking::scheduler.GetSize() == 0)
         return;
-
+    
     if (!Multitasking::currentProcess)
     {
         Multitasking::previousTicks = Kernel::Drivers::PIT::ticks;
