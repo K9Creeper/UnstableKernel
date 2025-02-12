@@ -47,7 +47,7 @@ extern "C" void irq_handler(Registers regs)
 			Kernel::Memory::IRQ::Handle handler = reinterpret_cast<Kernel::Memory::IRQ::Handle>(irq_handles[regs.int_no - 32]);
 			if (handler)
 			{
-				handler(regs);
+				handler(&regs);
 			}
 		}
 	}

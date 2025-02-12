@@ -11,7 +11,7 @@
 namespace Kernel{
 	namespace Memory{
 		namespace ISRS{
-			typedef void(*Handle)(Registers regs);
+			typedef void(*Handle)(Registers* regs);
 
 			extern void AddHandle(uint16_t num, void* handle);
 			extern void RemoveHandle(uint16_t num);

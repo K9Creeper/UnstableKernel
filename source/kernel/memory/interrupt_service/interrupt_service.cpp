@@ -90,7 +90,7 @@ extern "C" void isr_handler(struct Registers r)
 	Kernel::Memory::ISRS::Handle handler = reinterpret_cast<Kernel::Memory::ISRS::Handle>(isrs_handles[r.int_no]);
 	if (handler)
 	{
-		handler(r);
+		handler(&r);
 	}
 }
 
