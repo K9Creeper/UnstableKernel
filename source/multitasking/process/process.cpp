@@ -24,8 +24,24 @@ void Process::Init(char *filename, void *routine)
 
     this->pageDir = reinterpret_cast<PageDirectory*>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageDirectory), true));
     memset(reinterpret_cast<uint8_t *>(this->pageDir), 0, sizeof(PageDirectory));
+
+    // Copy mappings, including kernel space... (maybe i should change this??)
     Kernel::MemoryManagement::Paging::CopyDirectory(Kernel::MemoryManagement::Paging::kernelDirectory, this->pageDir);
 
+    /*
+    {
+        uint32_t start = 0xC0000000;
+        uint32_t end = 0xCFFFFF00;
+        
+        while (start <= end)
+        {
+            Kernel::MemoryManagement::Paging::FreePage(this->pageDir, start, false);
+            start = start + 0x1000;
+        }
+    }
+        */
+
+    // Map user space...
     {
         uint32_t start = 0xC0000000 - 0x4000;
         uint32_t end = 0xC0000000;

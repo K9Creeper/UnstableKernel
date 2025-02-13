@@ -4,11 +4,29 @@
 
 #include "../graphics/graphics.hpp"
 
-extern "C" void usermode_main(){
-    Graphics::FillBuffer(0x59c2ff);
+#include "../input/mouse.hpp"
+#include "../input/keyboard.hpp"
 
-    Graphics::SwapBuffers();
+void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
+{
 
+}
+
+void MouseHandler(const MouseInfo &info)
+{
+
+}
+
+extern "C" void usermode_main()
+{
+    for (;;)
+    {
+        
+    }
+}
+
+extern "C" void usermode_main2()
+{
     for (;;)
     {
         

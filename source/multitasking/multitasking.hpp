@@ -6,6 +6,8 @@
 
 namespace Multitasking{
     extern void Init();
+    
+    extern void Start();
 
     extern void CreateProcess(const char* filename, void* routine = nullptr);
 }

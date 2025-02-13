@@ -93,8 +93,12 @@ void ContextSwitch(Registers *prev, Context *nregs)
     user_regs_switch(nregs);
 }
 
+extern "C" void printf(const char* format, ...);
+
 void SchedulerHandle_(Registers *regs)
 {
+    printf("Scheduling...\n");
+
     if (Multitasking::scheduler.GetSize() == 0)
         return;
 
@@ -151,6 +155,7 @@ void SchedulerHandle_(Registers *regs)
     }
 
     Multitasking::currentProcess = next;
+    printf("Chose %s\n", next->GetName());
 
     ContextSwitch(regs, &next->GetContext());
 }
@@ -159,7 +164,9 @@ void Multitasking::Init()
 {
     wakeupList.RePlace(reinterpret_cast<void *>(Kernel::MemoryManagement::KHeap::kmalloc_(MAX_WAKEUPS_SIZE * sizeof(Wakeup *))), MAX_WAKEUPS_SIZE);
     scheduler.RePlace(reinterpret_cast<void *>(Kernel::MemoryManagement::KHeap::kmalloc_(MAX_PROCESSES_SIZE * sizeof(Process *))), MAX_PROCESSES_SIZE);
+}
 
+void Multitasking::Start(){
     RegisterWakeup(SchedulerHandle_, 30.0 / Kernel::Drivers::PIT::hzFrequency);
 
     Kernel::Drivers::PIT::AddHandle(WakeupListHandle_);

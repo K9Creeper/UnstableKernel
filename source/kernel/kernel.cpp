@@ -32,22 +32,11 @@
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
-void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
-{
-
-}
-
-void MouseHandler(const MouseInfo &info)
-{
-
-}
-
-void PITHandler(const uint32_t &ticks)
-{
-
-}
-
 extern "C" void usermode_main();
+extern "C" void usermode_main2();
+
+extern void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap);
+extern void MouseHandler(const MouseInfo &info);
 
 void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
 {
@@ -118,11 +107,6 @@ void SetupDrivers()
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
 
-    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
-    printf("Added Handle | Keyboard\n");
-    Kernel::Drivers::Input::Mouse::AddHandle(MouseHandler);
-    printf("Added Handle | Mouse\n");
-
     printf("\n| ------------- |\n\n");
 }
 
@@ -159,8 +143,21 @@ void SetupMultitasking()
 }
 
 void EnterUsermode(){
+    printf("\n| Enter Usermode |\n\n");
+
+    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
+    printf("Added Handle | Keyboard\n");
+    Kernel::Drivers::Input::Mouse::AddHandle(MouseHandler);
+    printf("Added Handle | Mouse\n");
+
+    Multitasking::CreateProcess("usermode_2", usermode_main2);
     Multitasking::CreateProcess("usermode_", usermode_main);
+
     printf("\n-- Entering Usermode --\n");
+
+    Multitasking::Start();
+
+    printf("\n| -------------- |\n\n");
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)

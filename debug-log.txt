@@ -39,8 +39,6 @@ Initialized | PIT
 Initialized | Keyboard
 Initialized | Mouse
 Initialized | PCI
-Added Handle | Keyboard
-Added Handle | Mouse
 
 | ------------- |
 
@@ -52,4 +50,16 @@ Initialized | Multitasking
 | ------------------ |
 
 
+| Enter Usermode |
+
+Added Handle | Keyboard
+Added Handle | Mouse
+
 -- Entering Usermode --
+
+| -------------- |
+
+Scheduling...
+Chose usermode_
+Scheduling...
+Chose 
