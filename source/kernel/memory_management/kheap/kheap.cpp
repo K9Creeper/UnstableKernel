@@ -14,56 +14,56 @@
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
 
-bool KHeapOrderedArray::Insert(void* item)
+bool KHeapOrderedArray::Insert(void *item)
 {
-	uint32_t i;
+  uint32_t i;
 
-  static void* tmp;
-  static void* tmp2;
+  static void *tmp;
+  static void *tmp2;
 
-	i = 0;
+  i = 0;
 
-	while (i < this->size && this->lessthan_(this->array[i], item))
-	{
-		i++;
-	}
+  while (i < this->size && this->lessthan_(this->array[i], item))
+  {
+    i++;
+  }
 
-  if(i + 1 > this->max_size)
+  if (i + 1 > this->max_size)
     return false;
 
-	// If reached end of array, just append the item
-	if (i == this->size)
-	{
-		this->array[this->size] = item;
+  // If reached end of array, just append the item
+  if (i == this->size)
+  {
+    this->array[this->size] = item;
 
-		this->size++;
-	}
-	else // insert
-	{
-		tmp = this->array[i];
+    this->size++;
+  }
+  else // insert
+  {
+    tmp = this->array[i];
 
-		this->array[i] = item;
+    this->array[i] = item;
 
-		while (i < this->size)
-		{
-			i++;
+    while (i < this->size)
+    {
+      i++;
 
-			tmp2 = this->array[i];
+      tmp2 = this->array[i];
 
-			this->array[i] = tmp;
+      this->array[i] = tmp;
 
-			tmp = tmp2;
-		}
+      tmp = tmp2;
+    }
 
-		this->size++;
-	}
+    this->size++;
+  }
 
   return true;
 }
 
 bool KHeapOrderedArray::lessthan_(void *a, void *b)
 {
-  return ((reinterpret_cast<Kernel::MemoryManagement::KHeap::Header*>(a))->size < (reinterpret_cast<Kernel::MemoryManagement::KHeap::Header*>(b))->size);
+  return ((reinterpret_cast<Kernel::MemoryManagement::KHeap::Header *>(a))->size < (reinterpret_cast<Kernel::MemoryManagement::KHeap::Header *>(b))->size);
 }
 
 namespace Kernel
@@ -131,7 +131,6 @@ void Kernel::MemoryManagement::KHeap::Init(uint32_t start, uint32_t end, uint32_
 
   heapIndex.RePlace((void *)start, HEAP_INDEX_SIZE);
   start += sizeof(void *) * HEAP_INDEX_SIZE;
-
 
   if ((start & 0xFFFFF000) != 0)
   {
@@ -243,7 +242,6 @@ uint32_t Contract(uint32_t new_size)
 
   return new_size;
 }
-
 
 static void *Alloc(uint32_t size, bool page_align)
 {
@@ -360,7 +358,7 @@ static void *Alloc(uint32_t size, bool page_align)
     // If no page alignment is needed, remove the hole from the index
     Kernel::MemoryManagement::KHeap::heapIndex.Remove(i);
   }
-  
+
   // Overwrite the original hole header and footer with the new block allocation
   Kernel::MemoryManagement::KHeap::Header *block_header = (Kernel::MemoryManagement::KHeap::Header *)orig_hole_pos;
   block_header->size = new_size;
@@ -370,7 +368,6 @@ static void *Alloc(uint32_t size, bool page_align)
   Kernel::MemoryManagement::KHeap::Footer *block_footer = (Kernel::MemoryManagement::KHeap::Footer *)(orig_hole_pos + sizeof(Kernel::MemoryManagement::KHeap::Header) + size);
   block_footer->header = block_header;
   block_footer->magic = HEAP_MAGIC;
-  
 
   // If there is leftover space after the allocated block, create a new hole
   if (orig_hole_size - new_size > 0)
@@ -501,6 +498,14 @@ static void Free(void *p)
   }
 }
 
+void Kernel::MemoryManagement::KHeap::kfree(uint32_t address)
+{
+  if (Kernel::MemoryManagement::KHeap::bInitialized)
+  {
+    Free(reinterpret_cast<void *>(address));
+  }
+}
+
 uint32_t Kernel::MemoryManagement::KHeap::kmalloc_(uint32_t size, bool align, uint32_t *physAddress)
 {
   if (Kernel::MemoryManagement::KHeap::bInitialized)
@@ -513,7 +518,7 @@ uint32_t Kernel::MemoryManagement::KHeap::kmalloc_(uint32_t size, bool align, ui
     {
       *physAddress = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(address));
     }
-    
+
     // return the virtual address of the newly allocated memory
     return reinterpret_cast<uint32_t>(address);
   }

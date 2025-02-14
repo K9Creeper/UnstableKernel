@@ -17,18 +17,16 @@ void MouseHandler(const MouseInfo &info)
 
 }
 
+extern "C" void printf(const char* name, ...);
+
 extern "C" void usermode_main()
 {
-    for (;;)
-    {
-        
-    }
+   printf("Hey!\n");
+   for(;;);
 }
 
 extern "C" void usermode_main2()
 {
-    for (;;)
-    {
-        
-    }
+   printf("Hey 2!\n");
+   for(;;);
 }

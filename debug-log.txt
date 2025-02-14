@@ -24,15 +24,6 @@ Located at 0xc0481000, Initial End at 0xc0500000, Max Address 0xcfffff00
 | ----------------------- |
 
 
-| Setup Graphics |
-
-Initialized | VESA
-Width: 640, Height: 480, Bytes Per Pixel: 32
-Initialized | Graphics
-
-| -------------- |
-
-
 | Setup Drivers |
 
 Initialized | PIT
@@ -43,23 +34,24 @@ Initialized | PCI
 | ------------- |
 
 
+| Setup Graphics |
+
+Initialized | VESA
+Width: 640, Height: 480, Bytes Per Pixel: 32
+Initialized | Graphics
+
+| -------------- |
+
+
 | Setup Multitasking |
 
-Initialized | Multitasking
 
 | ------------------ |
 
 
 | Enter Usermode |
 
-Added Handle | Keyboard
-Added Handle | Mouse
-
--- Entering Usermode --
 
 | -------------- |
 
-Scheduling...
-Chose usermode_
-Scheduling...
-Chose 
+Hey!

@@ -28,7 +28,7 @@
 
 #include "../graphics/graphics.hpp"
 
-#include "../multitasking/multitasking.hpp"
+#include "multitasking/multitasking.hpp"
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
@@ -131,31 +131,22 @@ void SetupMultitasking()
 {
     printf("\n| Setup Multitasking |\n\n");
 
-    // Setup the stack on the return from usermode
+    Kernel::Multitasking::Init();
+
     uint32_t esp;
     asm volatile("mov %%esp, %0" : "=r"(esp));
     Kernel::Memory::TSS::SetStack(0x10, esp);
 
-    Multitasking::Init();
-    printf("Initialized | Multitasking\n");
-
+    Kernel::Multitasking::Run();
+    
     printf("\n| ------------------ |\n\n");
 }
 
 void EnterUsermode(){
     printf("\n| Enter Usermode |\n\n");
 
-    Kernel::Drivers::Input::Keyboard::AddHandle(KeyboardHandler);
-    printf("Added Handle | Keyboard\n");
-    Kernel::Drivers::Input::Mouse::AddHandle(MouseHandler);
-    printf("Added Handle | Mouse\n");
-
-    Multitasking::CreateProcess("usermode_2", usermode_main2);
-    Multitasking::CreateProcess("usermode_", usermode_main);
-
-    printf("\n-- Entering Usermode --\n");
-
-    Multitasking::Start();
+    Kernel::Multitasking::CreateTask("Task1", usermode_main);
+    //Kernel::Multitasking::CreateTask("Task2", usermode_main2);
 
     printf("\n| -------------- |\n\n");
 }
@@ -167,14 +158,15 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     Kernel::Debug::COM1::Init();
     printf("-- This is the Kernel Debug Log --\n\n");
 
-    // Setup Tables, KHeap Info, and General Memory Info
+    // Set up Tables, KHeap Info, and General Memory Info
     SetupEarlyMemory(addr, magic);
 
+    // Set up PMM, Paging, KHeap
     SetupMemoryManagement();
 
-    SetupGraphics();
-
     SetupDrivers();
+
+    SetupGraphics();
 
     SetupMultitasking();
 
