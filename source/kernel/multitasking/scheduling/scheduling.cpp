@@ -28,31 +28,28 @@ namespace Kernel
     }
 }
 
-extern "C"{
-    void switch_stack(Registers* regs);
+extern "C"
+{
+    void context_switch(Registers *regs);
 
-    void printf(const char* format, ...);
+    void printf(const char *format, ...);
 }
 
-void ContextSwitch(Registers* regs, Task *t)
+void ContextSwitch(Task *t)
 {
     Kernel::Multitasking::Scheduling::currentTask = t;
 
-    if (Kernel::Multitasking::Scheduling::previousTask)
+    if (reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->pageDirectory))
     {
-        Kernel::Multitasking::Scheduling::previousTask->status = TaskStatus_Ready;
-
-        memcpy(reinterpret_cast<uint8_t*>(&Kernel::Multitasking::Scheduling::previousTask->state), reinterpret_cast<uint8_t*>(regs), sizeof(Registers));
-
-        asm volatile("mov %%cr3, %0" : "=r"(Kernel::Multitasking::Scheduling::previousTask->cr3));
+        Kernel::MemoryManagement::Paging::SwitchDirectory(reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3), true);
     }
 
-    if(reinterpret_cast<PageDirectory*>(Kernel::Multitasking::Scheduling::currentTask->cr3)) {
-        Kernel::MemoryManagement::Paging::SwitchDirectory(reinterpret_cast<PageDirectory*>(Kernel::Multitasking::Scheduling::currentTask->cr3), true);
-    }
+    Kernel::Multitasking::Scheduling::previousTask = Kernel::Multitasking::Scheduling::currentTask;
 
     Kernel::Multitasking::Scheduling::currentTask->status = TaskStatus_Running;
-    switch_stack(&Kernel::Multitasking::Scheduling::currentTask->state);
+    context_switch(&t->state);
+
+    return;
 }
 
 void Scheduler_(Registers *regs, const uint32_t &tick)
@@ -60,16 +57,21 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
     if (Kernel::Multitasking::Scheduling::taskList.GetSize() == 0)
         return;
 
-    Kernel::Multitasking::Scheduling::previousTask = Kernel::Multitasking::Scheduling::currentTask;
+    // Like do not look at this...none of this is ideal.....this whole project is not ideal.
+    if (Kernel::Multitasking::Scheduling::previousTask)
+    {
+        Kernel::Multitasking::Scheduling::previousTask->status = TaskStatus_Ready;
 
-    static uint32_t previousIndex = 0;
+        memcpy(reinterpret_cast<uint8_t *>(&Kernel::Multitasking::Scheduling::previousTask->state), reinterpret_cast<uint8_t *>(regs), sizeof(Registers));
+        // Lol, what am i doing, i like don't know why, but it just doesnt want to do the thing, because this is a userspace task
+        Kernel::Multitasking::Scheduling::previousTask->state.esp = Kernel::Multitasking::Scheduling::previousTask->state.useresp;
 
-    if (previousIndex >= Kernel::Multitasking::Scheduling::taskList.GetSize())
-        previousIndex = 0;
+        asm volatile("mov %%cr3, %0" : "=r"(Kernel::Multitasking::Scheduling::previousTask->cr3));
+    }
 
     Task *next = nullptr;
 
-    for (uint32_t i = previousIndex; i < Kernel::Multitasking::Scheduling::taskList.GetSize();)
+    for (uint32_t i = 0; i < Kernel::Multitasking::Scheduling::taskList.GetSize(); i++)
     {
         Task *t = Kernel::Multitasking::Scheduling::taskList.Get(i);
         if (!t)
@@ -80,11 +82,10 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
 
         if (t == Kernel::Multitasking::Scheduling::currentTask && Kernel::Multitasking::Scheduling::taskList.GetSize() > 1)
         {
-            i++;
             continue;
         }
 
-        if(Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
+        if (Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
         {
             // should do a clean up and free
 
@@ -93,12 +94,12 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
         }
 
         next = t;
-        previousIndex = i;
 
         break;
     }
 
-    ContextSwitch(regs, next);
+    if (next && next != Kernel::Multitasking::Scheduling::currentTask)
+        ContextSwitch(next);
 }
 
 void Kernel::Multitasking::Scheduling::Init()

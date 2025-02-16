@@ -2,45 +2,44 @@
 ;;; context_switch.asm
 ;;; @brief This file defines the functions for multitasking, context switching.
 
-global switch_stack
-switch_stack:
+global context_switch
+context_switch:
+    ; Save base pointer
     mov ebp, [esp + 4]
 
-    mov ecx, [ebp + 28]
-    mov edx, [ebp + 24]
-    mov ebx, [ebp + 20]
-    mov esi, [ebp + 8]
-    mov edi, [ebp + 4]
+    ; Restore general-purpose registers
+    mov ecx, [ebp + 28]  ; ecx
+    mov edx, [ebp + 24]  ; edx
+    mov ebx, [ebp + 20]  ; ebx
+    mov esi, [ebp + 8]   ; esi
+    mov edi, [ebp + 4]   ; edi
 
-    ; jump to usermode
+    ; Set up segment registers for user mode (0x23 = User Data Segment)
     mov ax, 0x23
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
 
-    ; mov esp to eax
-    mov eax, [ebp + 16]
-    ; push data sec
-    push 0x23
-    ; push esp
-    push eax
-    ; move eflags
-    mov eax, [ebp + 52]
-    ; push flags
-    push eax
-    
-    ; push code sec
-    push 0x1b
+    ; Load ESP (User Stack Pointer)
+    mov eax, [ebp + 16]  ; eax = user stack pointer
+    push 0x23            ; User Data Segment
+    push eax             ; Push ESP
 
-    ; push the function to jump or place to spawn from
-    mov eax, [ebp + 44]
-    push eax
+    ; Load EFLAGS
+    mov eax, [ebp + 52]  ; eax = eflags
+    push eax             ; Push EFLAGS
 
-    ; respawn eax
+    ; Load CS and EIP
+    push 0x1B            ; User Code Segment (0x1B)
+    mov eax, [ebp + 44]  ; eax = eip (entry point)
+    push eax             ; Push EIP
+
+    ; Restore EAX
     mov eax, [ebp + 32]
 
-    ; respawn ebp
+    ; Restore EBP
     mov ebp, [ebp + 12]
 
-    iret 
+    ; Perform iret (Interrupt Return) to switch to user mode
+    iret

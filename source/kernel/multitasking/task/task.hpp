@@ -26,6 +26,4 @@ struct Task{
     uint32_t cr3;
 
     TaskStatus status;
-
-    void* routine;
 };

@@ -153,11 +153,8 @@ void Kernel::Drivers::VESA::Init(uint32_t width, uint32_t height)
     SetMode(width, height, bpp);
 
     for(uint32_t j = currentMode.info.physbase; j < currentMode.info.physbase + width * height * (bpp/8); j+=0x1000){
-                                                                                                            // identity map
         Kernel::MemoryManagement::Paging::AllocatePage(Kernel::MemoryManagement::Paging::kernelDirectory, j, (j/0x1000), false, true);        
     }
-
-    
 }
 
 uint32_t Kernel::Drivers::VESA::GetLFBAddress(){

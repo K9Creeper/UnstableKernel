@@ -56,7 +56,9 @@ void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
     Kernel::Memory::GDT::Install();
     printf("Installed | GDT\n");
 
-    Kernel::Memory::TSS::Init(5, 0x10, 0);
+    uint32_t esp;
+    asm volatile("mov %%esp, %0" : "=r"(esp));
+    Kernel::Memory::TSS::Init(5, 0x10, esp);
     printf("Installed | TSS\n");
 
     Kernel::Memory::IDT::Init();
@@ -132,13 +134,8 @@ void SetupMultitasking()
     printf("\n| Setup Multitasking |\n\n");
 
     Kernel::Multitasking::Init();
-
-    uint32_t esp;
-    asm volatile("mov %%esp, %0" : "=r"(esp));
-    Kernel::Memory::TSS::SetStack(0x10, esp);
-
     Kernel::Multitasking::Run();
-    
+
     printf("\n| ------------------ |\n\n");
 }
 
@@ -146,7 +143,7 @@ void EnterUsermode(){
     printf("\n| Enter Usermode |\n\n");
 
     Kernel::Multitasking::CreateTask("Task1", usermode_main);
-    //Kernel::Multitasking::CreateTask("Task2", usermode_main2);
+    Kernel::Multitasking::CreateTask("Task2", usermode_main2);
 
     printf("\n| -------------- |\n\n");
 }
@@ -166,9 +163,9 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupDrivers();
 
-    SetupGraphics();
-
     SetupMultitasking();
+
+    //SetupGraphics();
 
     EnterUsermode();
 

@@ -39,38 +39,55 @@ void Kernel::Multitasking::Run()
     Scheduling::Run();
 }
 
-void Kernel::Multitasking::CreateTask(char *name, void *routine)
-{
-    uint32_t stackLocation = 0xC0000000;
-    Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(sizeof(Task))));
+extern "C" void printf(const char* format, ...);
 
-    memcpy(reinterpret_cast<uint8_t *>(t->name), reinterpret_cast<uint8_t *>(name), strlen(name));
+void Kernel::Multitasking::CreateTask(const char *name, void *routine)
+{
+    Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(Task)));
+    memset(reinterpret_cast<uint8_t *>(t->name), 0, 512);
+    memcpy(reinterpret_cast<uint8_t *>(t->name), reinterpret_cast<const uint8_t *>(name), strlen(name));
 
     t->status = TaskStatus_Created;
-    t->state.eip = t->routine = routine;
+    t->state.eip = routine;
     t->state.eflags = 0x206;
     
-    PageDirectory* page = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageDirectory), true);
-    memset(reinterpret_cast<uint8_t*>(page),0, sizeof(PageDirectory));
-    Kernel::MemoryManagement::Paging::CopyDirectory(Kernel::MemoryManagement::Paging::kernelDirectory, page);
+    t->pageDirectory = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageDirectory), true);
+    memset(reinterpret_cast<uint8_t*>(t->pageDirectory),0, sizeof(PageDirectory));
+    Kernel::MemoryManagement::Paging::CopyDirectory(Kernel::MemoryManagement::Paging::kernelDirectory, t->pageDirectory);
 
-    t->pageDirectory = page;
-    t->cr3 = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(page));
+    t->cr3 = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(t->pageDirectory));
 
-    {
-        uint32_t start = stackLocation - 0x4000;
-        uint32_t end = stackLocation;
+    for(uint32_t start = 0x40000000 - 0x100000; start <= 0x40000000;){
+        Kernel::MemoryManagement::Paging::AllocatePage(t->pageDirectory, start, 0, false, true);
 
-        while(start <= end)
-        {
-            Kernel::MemoryManagement::Paging::AllocatePage(page, start, 0, false, true);
-            start = start + 0x1000;
-        }
+        start+=0x1000;
     }
 
-    t->state.esp = stackLocation;
+    t->state.esp = t->state.ebp= 0x40000000 - (0x100000/0x2);
+
+    printf(
+        "Created Task\n"
+        "ds:      0x%X\n"
+        "edi:     0x%X\n"
+        "esi:     0x%X\n"
+        "ebp:     0x%X\n"
+        "esp:     0x%X\n"
+        "ebx:     0x%X\n"
+        "edx:     0x%X\n"
+        "ecx:     0x%X\n"
+        "eax:     0x%X\n"
+        "int_no:  0x%X\n"
+        "err_code:0x%X\n"
+        "eip:     0x%X\n"
+        "cs:      0x%X\n"
+        "eflags:  0x%X\n"
+        "useresp: 0x%X\n"
+        "ss:      0x%X\n",
+        t->state.ds, t->state.edi, t->state.esi, t->state.ebp, t->state.esp,
+        t->state.ebx, t->state.edx, t->state.ecx, t->state.eax, t->state.int_no,
+        t->state.err_code, t->state.eip, t->state.cs, t->state.eflags, t->state.useresp,
+        t->state.ss
+    );
 
     Scheduling::AddTask(t);
-
-    stackLocation -= 0x4000;
 }

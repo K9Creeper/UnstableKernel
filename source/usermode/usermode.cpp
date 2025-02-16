@@ -4,6 +4,8 @@
 
 #include "../graphics/graphics.hpp"
 
+#include "../kernel/multitasking/multitasking.hpp"
+
 #include "../input/mouse.hpp"
 #include "../input/keyboard.hpp"
 
@@ -21,12 +23,21 @@ extern "C" void printf(const char* name, ...);
 
 extern "C" void usermode_main()
 {
+   uint32_t count = 0;
    printf("Hey!\n");
-   for(;;);
+
+   for(;;){
+      
+   }
 }
 
 extern "C" void usermode_main2()
 {
-   printf("Hey 2!\n");
-   for(;;);
+   uint32_t count = 0;
+   printf("Hey2!\n");
+
+
+   for(;;){
+      
+   }
 }
