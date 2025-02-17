@@ -39,8 +39,6 @@ void Kernel::Multitasking::Run()
     Scheduling::Run();
 }
 
-extern "C" void printf(const char* format, ...);
-
 void Kernel::Multitasking::CreateTask(const char *name, void *routine)
 {
     Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(Task)));
@@ -57,37 +55,10 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine)
 
     t->cr3 = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(t->pageDirectory));
 
-    for(uint32_t start = 0x40000000 - 0x100000; start <= 0x40000000;){
+    for(uint32_t start = 0x40000000 - 0x50000; start <= 0x40000000; start+=0x1000)
         Kernel::MemoryManagement::Paging::AllocatePage(t->pageDirectory, start, 0, false, true);
 
-        start+=0x1000;
-    }
-
-    t->state.esp = t->state.ebp= 0x40000000 - (0x100000/0x2);
-
-    printf(
-        "Created Task\n"
-        "ds:      0x%X\n"
-        "edi:     0x%X\n"
-        "esi:     0x%X\n"
-        "ebp:     0x%X\n"
-        "esp:     0x%X\n"
-        "ebx:     0x%X\n"
-        "edx:     0x%X\n"
-        "ecx:     0x%X\n"
-        "eax:     0x%X\n"
-        "int_no:  0x%X\n"
-        "err_code:0x%X\n"
-        "eip:     0x%X\n"
-        "cs:      0x%X\n"
-        "eflags:  0x%X\n"
-        "useresp: 0x%X\n"
-        "ss:      0x%X\n",
-        t->state.ds, t->state.edi, t->state.esi, t->state.ebp, t->state.esp,
-        t->state.ebx, t->state.edx, t->state.ecx, t->state.eax, t->state.int_no,
-        t->state.err_code, t->state.eip, t->state.cs, t->state.eflags, t->state.useresp,
-        t->state.ss
-    );
+    t->state.esp = t->state.ebp= 0x40000000;
 
     Scheduling::AddTask(t);
 }

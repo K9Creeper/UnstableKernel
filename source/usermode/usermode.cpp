@@ -9,6 +9,10 @@
 #include "../input/mouse.hpp"
 #include "../input/keyboard.hpp"
 
+extern "C" void printf(const char* f, ...);
+
+MouseInfo mouseInfo;
+
 void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
 {
 
@@ -16,28 +20,13 @@ void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
 
 void MouseHandler(const MouseInfo &info)
 {
-
+   mouseInfo = info;
 }
 
-extern "C" void printf(const char* name, ...);
-
-extern "C" void usermode_main()
+extern "C" void GraphicsThread()
 {
-   uint32_t count = 0;
-   printf("Hey!\n");
-
    for(;;){
       
-   }
-}
-
-extern "C" void usermode_main2()
-{
-   uint32_t count = 0;
-   printf("Hey2!\n");
-
-
-   for(;;){
       
    }
 }

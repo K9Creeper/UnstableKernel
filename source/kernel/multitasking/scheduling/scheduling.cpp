@@ -31,8 +31,6 @@ namespace Kernel
 extern "C"
 {
     void context_switch(Registers *regs);
-
-    void printf(const char *format, ...);
 }
 
 void ContextSwitch(Task *t)
@@ -63,15 +61,19 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
         Kernel::Multitasking::Scheduling::previousTask->status = TaskStatus_Ready;
 
         memcpy(reinterpret_cast<uint8_t *>(&Kernel::Multitasking::Scheduling::previousTask->state), reinterpret_cast<uint8_t *>(regs), sizeof(Registers));
-        // Lol, what am i doing, i like don't know why, but it just doesnt want to do the thing, because this is a userspace task
+        // Lol, what am i doing, i like don't know why, but it just doesnt want to do the thing, jk because this is a userspace task
         Kernel::Multitasking::Scheduling::previousTask->state.esp = Kernel::Multitasking::Scheduling::previousTask->state.useresp;
 
         asm volatile("mov %%cr3, %0" : "=r"(Kernel::Multitasking::Scheduling::previousTask->cr3));
     }
 
+    static uint32_t prevIdx = 0;
     Task *next = nullptr;
 
-    for (uint32_t i = 0; i < Kernel::Multitasking::Scheduling::taskList.GetSize(); i++)
+    if(prevIdx >= Kernel::Multitasking::Scheduling::taskList.GetSize() - 1)
+        prevIdx = 0;
+
+    for (uint32_t i = prevIdx; i < Kernel::Multitasking::Scheduling::taskList.GetSize(); i++)
     {
         Task *t = Kernel::Multitasking::Scheduling::taskList.Get(i);
         if (!t)
@@ -94,12 +96,14 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
         }
 
         next = t;
+        prevIdx = i;
 
         break;
     }
 
-    if (next && next != Kernel::Multitasking::Scheduling::currentTask)
+    if (next && next != Kernel::Multitasking::Scheduling::currentTask){
         ContextSwitch(next);
+    }
 }
 
 void Kernel::Multitasking::Scheduling::Init()

@@ -32,8 +32,7 @@
 
 // May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
 
-extern "C" void usermode_main();
-extern "C" void usermode_main2();
+extern "C" void GraphicsThread();
 
 extern void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap);
 extern void MouseHandler(const MouseInfo &info);
@@ -126,6 +125,8 @@ void SetupGraphics()
     Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     printf("Initialized | Graphics\n");
 
+    Kernel::Multitasking::CreateTask("GraphicsThread", GraphicsThread);
+
     printf("\n| -------------- |\n\n");
 }
 
@@ -137,15 +138,6 @@ void SetupMultitasking()
     Kernel::Multitasking::Run();
 
     printf("\n| ------------------ |\n\n");
-}
-
-void EnterUsermode(){
-    printf("\n| Enter Usermode |\n\n");
-
-    Kernel::Multitasking::CreateTask("Task1", usermode_main);
-    Kernel::Multitasking::CreateTask("Task2", usermode_main2);
-
-    printf("\n| -------------- |\n\n");
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
@@ -165,9 +157,7 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupMultitasking();
 
-    //SetupGraphics();
-
-    EnterUsermode();
+    SetupGraphics();
 
     asm volatile("sti");
 
