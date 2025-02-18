@@ -11,8 +11,6 @@
 #include "../physical_memory_manager/physical_memory_manager.hpp"
 #include "../kheap/kheap.hpp"
 
-#include "page_allocater.hpp"
-
 namespace Kernel
 {
     namespace MemoryManagement
@@ -29,14 +27,12 @@ namespace Kernel
     }
 }
 
+// from boot
 extern "C" PageDirectory *pageDirectory;
-
-extern "C" void printf(const char *format, ...);
 
 void Kernel::MemoryManagement::Paging::Init()
 {
-    PageDirectoryAllocater.PreInit();
-    kernelDirectory = PageDirectoryAllocater.AllocatePageDirectory(true);
+    kernelDirectory = reinterpret_cast<PageDirectory*>(KHeap::Early::pkmalloc_(sizeof(PageDirectory), true));
     memset(reinterpret_cast<uint8_t *>(kernelDirectory), 0, sizeof(PageDirectory));
 
     uint32_t i = 0xC0000000; // + 4mb
@@ -57,8 +53,6 @@ void Kernel::MemoryManagement::Paging::Init()
         AllocatePage(kernelDirectory, i, i / 0x1000, true, true);
         i += 0x1000;
     }
-
-    PageDirectoryAllocater.Init();
 }
 
 void DisablePSEReg()

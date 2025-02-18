@@ -24,6 +24,7 @@ namespace Kernel
 
             Task *currentTask = nullptr;
             Task *previousTask = nullptr;
+            Task *toDeleteTask = nullptr;
         }
     }
 }
@@ -32,6 +33,8 @@ extern "C"
 {
     void context_switch(Registers *regs);
 }
+
+extern "C" void printf(const char *format, ...);
 
 void ContextSwitch(Task *t)
 {
@@ -42,6 +45,11 @@ void ContextSwitch(Task *t)
         Kernel::MemoryManagement::Paging::SwitchDirectory(reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3), true);
     }
 
+    if (Kernel::Multitasking::Scheduling::previousTask && Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
+    {
+        Kernel::Multitasking::Scheduling::toDeleteTask = Kernel::Multitasking::Scheduling::previousTask;
+    }
+
     Kernel::Multitasking::Scheduling::previousTask = Kernel::Multitasking::Scheduling::currentTask;
 
     Kernel::Multitasking::Scheduling::currentTask->status = TaskStatus_Running;
@@ -50,13 +58,24 @@ void ContextSwitch(Task *t)
     return;
 }
 
-void Scheduler_(Registers *regs, const uint32_t &tick)
+void Scheduler_(Registers *regs, uint32_t tick)
 {
+    if (Kernel::Multitasking::Scheduling::toDeleteTask)
+    {
+        if(Kernel::Multitasking::Scheduling::previousTask == Kernel::Multitasking::Scheduling::toDeleteTask)
+            Kernel::Multitasking::Scheduling::previousTask = nullptr;
+        
+        Kernel::MemoryManagement::KHeap::kfree(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask->pageDirectory));
+        Kernel::MemoryManagement::KHeap::kfree(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask));
+
+        Kernel::Multitasking::Scheduling::toDeleteTask = nullptr;
+    }
+
     if (Kernel::Multitasking::Scheduling::taskList.GetSize() == 0)
         return;
 
     // Like do not look at this...none of this is ideal.....this whole project is not ideal.
-    if (Kernel::Multitasking::Scheduling::previousTask)
+    if (Kernel::Multitasking::Scheduling::previousTask && Kernel::Multitasking::Scheduling::previousTask->status != TaskStatus_Zombie && regs)
     {
         Kernel::Multitasking::Scheduling::previousTask->status = TaskStatus_Ready;
 
@@ -70,28 +89,28 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
     static uint32_t prevIdx = 0;
     Task *next = nullptr;
 
-    if(prevIdx >= Kernel::Multitasking::Scheduling::taskList.GetSize() - 1)
+    if (prevIdx >= Kernel::Multitasking::Scheduling::taskList.GetSize() - 1)
         prevIdx = 0;
 
     for (uint32_t i = prevIdx; i < Kernel::Multitasking::Scheduling::taskList.GetSize(); i++)
     {
+        if (prevIdx >= Kernel::Multitasking::Scheduling::taskList.GetSize() - 1)
+        {
+            prevIdx = 0;
+        }
+
         Task *t = Kernel::Multitasking::Scheduling::taskList.Get(i);
-        if (!t)
+        if (!t || t->status == TaskStatus_Zombie)
         {
             Kernel::Multitasking::Scheduling::taskList.Remove(i);
+            if (i - 1 >= 0)
+                i--;
+
             continue;
         }
 
         if (t == Kernel::Multitasking::Scheduling::currentTask && Kernel::Multitasking::Scheduling::taskList.GetSize() > 1)
         {
-            continue;
-        }
-
-        if (Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
-        {
-            // should do a clean up and free
-
-            Kernel::Multitasking::Scheduling::taskList.Remove(i);
             continue;
         }
 
@@ -101,7 +120,8 @@ void Scheduler_(Registers *regs, const uint32_t &tick)
         break;
     }
 
-    if (next && next != Kernel::Multitasking::Scheduling::currentTask){
+    if (next && next != Kernel::Multitasking::Scheduling::currentTask)
+    {
         ContextSwitch(next);
     }
 }

@@ -13,7 +13,7 @@ namespace Kernel{
             extern uint16_t hzFrequency;
             extern uint32_t ticks;
             
-            typedef void (*pit_handle)(Registers* regs, const uint32_t& ticks);
+            typedef void (*pit_handle)(Registers* regs, uint32_t ticks);
 
             extern int AddHandle(void* handle);
             extern void RemoveHandle(int num);

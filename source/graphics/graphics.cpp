@@ -4,8 +4,6 @@
 
 #include "graphics.hpp"
 
-#include "framebuffer.hpp"
-
 #include "../kernel/memory_management/kheap/kheap.hpp"
 
 namespace Graphics{
@@ -40,6 +38,10 @@ void Graphics::Paint(uint32_t x, uint32_t y, uint32_t color){
     uint32_t* pixel = backBuffer.GetPixel(x, y);
     if(pixel)
         (*pixel) = color;
+}
+
+Framebuffer* Graphics::GetBackBuffer(){
+    return &backBuffer;
 }
 
 void Graphics::SwapBuffers(bool clear){

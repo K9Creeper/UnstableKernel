@@ -30,12 +30,8 @@
 
 #include "multitasking/multitasking.hpp"
 
-// May be a good source to look at: https://github.com/collinsmichael/spartan/ and https://github.com/szhou42/osdev/tree/master
-
-extern "C" void GraphicsThread();
-
-extern void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap);
-extern void MouseHandler(const MouseInfo &info);
+#define cli asm volatile("cli"); printf("\n| Disabled Interupts |\n\n"); 
+#define sti asm volatile("sti"); printf("\n| Enabled Interupts |\n\n");
 
 void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
 {
@@ -45,7 +41,7 @@ void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
     Kernel::Multiboot::mb_magic = magic;
 
     Kernel::Memory::InitMemInfo();
-    printf("Kernel Memory Info | Start: 0x%X | end: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
+    printf("Kernel Memory Info | Start: 0x%X | End: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
 
     Kernel::MemoryManagement::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);
 
@@ -77,7 +73,7 @@ void SetupMemoryManagement()
     printf("\n| Setup Memory Management |\n\n");
 
     Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
-    printf("Initialzied | PMM\n");
+    printf("Initialzied | PMM | Size: 0x%X -- %D MB\n", Kernel::Memory::Info::pmm_size, (Kernel::Memory::Info::pmm_size / 0x100000));
 
     Kernel::MemoryManagement::Paging::Init();
     printf("Initialzied | Paging\n");
@@ -96,7 +92,7 @@ void SetupDrivers()
 {
     printf("\n| Setup Drivers |\n\n");
 
-    Kernel::Drivers::PIT::Init();
+    Kernel::Drivers::PIT::Init(250);
     printf("Initialized | PIT\n");
 
     Kernel::Drivers::Input::Keyboard::Init();
@@ -125,8 +121,6 @@ void SetupGraphics()
     Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     printf("Initialized | Graphics\n");
 
-    Kernel::Multitasking::CreateTask("GraphicsThread", GraphicsThread);
-
     printf("\n| -------------- |\n\n");
 }
 
@@ -140,9 +134,19 @@ void SetupMultitasking()
     printf("\n| ------------------ |\n\n");
 }
 
+extern "C" void UsermodeEntry();
+extern "C" void UsermodeSyscallTest();
+
+void EnterUsermode(){
+    printf("\n| Entering Usermode |\n\n");
+
+    Kernel::Multitasking::CreateTask("UsermodeEntry", UsermodeEntry);
+    Kernel::Multitasking::CreateTask("UsermodeSyscallTest", UsermodeSyscallTest);
+}
+
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 {
-    asm volatile("cli");
+    cli
 
     Kernel::Debug::COM1::Init();
     printf("-- This is the Kernel Debug Log --\n\n");
@@ -157,9 +161,11 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupMultitasking();
 
+    sti
+
     SetupGraphics();
 
-    asm volatile("sti");
+    EnterUsermode();
 
     for (;;)
     {

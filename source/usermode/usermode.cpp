@@ -2,31 +2,23 @@
 /// usermode.cpp
 /// @brief This file defines the usermode entry routine.
 
-#include "../graphics/graphics.hpp"
+#include "../kernel/multitasking/syscall.hpp"
 
-#include "../kernel/multitasking/multitasking.hpp"
-
-#include "../input/mouse.hpp"
-#include "../input/keyboard.hpp"
+#include "graphics/graphics.hpp"
 
 extern "C" void printf(const char* f, ...);
 
-MouseInfo mouseInfo;
-
-void KeyboardHandler(const KeyboardKey &k, const KeyboardKey *keymap)
+// This function will handle our initialization and idle...
+extern "C" void UsermodeEntry()
 {
+   printf("\n\n| In User Mode |\n\n");
 
+   sys_create_thread("GraphicsThread", Usermode::Graphics::Thread)
+
+   // WE DO NOT WANT TO EXIT OUTTA THIS GUY
+   for(;;);
 }
 
-void MouseHandler(const MouseInfo &info)
-{
-   mouseInfo = info;
-}
-
-extern "C" void GraphicsThread()
-{
-   for(;;){
-      
-      
-   }
+extern "C" void UsermodeSyscallTest(){
+   sys_exit();
 }

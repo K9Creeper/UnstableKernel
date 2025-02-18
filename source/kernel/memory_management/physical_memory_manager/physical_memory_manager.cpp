@@ -19,8 +19,6 @@ namespace Kernel
     }
 }
 
-extern "C" void printf(const char *format, ...);
-
 void PMMBitmap::Clear()
 {
     memset(reinterpret_cast<uint8_t *>(array), 0, memSize); // fill with zeros
