@@ -15,7 +15,8 @@ namespace Usermode{
                 
                 extern uint32_t mouseCursorSize;
 
-
+                extern float desktopNavBarHeightRatio;
+                extern uint32_t desktopNavBarColor;
             }
         }
     }

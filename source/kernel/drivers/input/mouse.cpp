@@ -6,6 +6,8 @@
 
 #include "../../memory/interrupt_request/interrupt_request.hpp"
 
+#include "../vesa/vesa.hpp"
+
 #define MOUSE_LEFT_BUTTON(flag) (flag & 0x1)
 #define MOUSE_RIGHT_BUTTON(flag) (flag & 0x2)
 #define MOUSE_MIDDLE_BUTTON(flag) (flag & 0x4)
@@ -99,6 +101,21 @@ void MouseHandler_(Registers * regs){
 
     // Finished 1 cycle
     if(Kernel::Drivers::Input::Mouse::cycle == 0){
+        
+        // Clamp here...
+        if(Kernel::Drivers::VESA::bInitalized)
+        {
+            if(Kernel::Drivers::Input::Mouse::mouseInfo.X > Kernel::Drivers::VESA::currentMode.info.width)
+                Kernel::Drivers::Input::Mouse::mouseInfo.X = Kernel::Drivers::VESA::currentMode.info.width;
+            else if(Kernel::Drivers::Input::Mouse::mouseInfo.X < 0)
+                Kernel::Drivers::Input::Mouse::mouseInfo.X = 0;
+
+            if(Kernel::Drivers::Input::Mouse::mouseInfo.Y > Kernel::Drivers::VESA::currentMode.info.height)
+                Kernel::Drivers::Input::Mouse::mouseInfo.Y = Kernel::Drivers::VESA::currentMode.info.height;
+            else if(Kernel::Drivers::Input::Mouse::mouseInfo.Y < 0)
+                Kernel::Drivers::Input::Mouse::mouseInfo.Y = 0;             
+        }
+
         for(uint8_t i = 0; i < 16; i++)
             if(Kernel::Drivers::Input::Mouse::mouseHandles[i])
                 reinterpret_cast<mouse_input_handle>(Kernel::Drivers::Input::Mouse::mouseHandles[i])(Kernel::Drivers::Input::Mouse::mouseInfo);
@@ -147,8 +164,8 @@ void Kernel::Drivers::Input::Mouse::Init(){
     Mouse_Write(0xF4);
     Mouse_Read();
 
-    mouseInfo.X = 20;
-    mouseInfo.Y = 20;
+    mouseInfo.X = 0;
+    mouseInfo.Y = 0;
 
     Kernel::Memory::IRQ::AddHandle(12, MouseHandler_);
 }

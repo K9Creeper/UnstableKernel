@@ -27,7 +27,7 @@ uint32_t Graphics::Framebuffer::GetSize()const{
     return size;
 }
 
-uint32_t* Graphics::Framebuffer::GetPixel(uint32_t x, uint32_t y){
+uint32_t* Graphics::Framebuffer::GetPixel(int x, int y){
     if(y > height-1 || x > width-1 || x < 0 || y < 0 )
         return nullptr;
         

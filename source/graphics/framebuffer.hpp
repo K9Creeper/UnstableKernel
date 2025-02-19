@@ -26,7 +26,7 @@ namespace Graphics
         
         uint32_t GetSize()const;
 
-        uint32_t* GetPixel(uint32_t x, uint32_t y);
+        uint32_t* GetPixel(int x, int y);
 
         uint32_t* GetLFB()const;
         void SetLFB(uint32_t *lfb);

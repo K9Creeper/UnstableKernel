@@ -4,6 +4,8 @@
 
 #include "style.hpp"
 
+// https://coolors.co/palette/131836-154073-2a80b4-f3f6f6-f89641
+
 namespace Usermode{
     namespace Graphics{
         namespace Native{
@@ -13,7 +15,8 @@ namespace Usermode{
                 
                 uint32_t mouseCursorSize = 16;
 
-
+                float desktopNavBarHeightRatio = 0.1;
+                uint32_t desktopNavBarColor = 0x154073;
             }
         }
     }

@@ -32,6 +32,7 @@ void Usermode::Graphics::Thread()
 
         Native::DrawDesktop(fb);
 
+        // We want to draw this above everything else...
         Native::DrawCursor(fb);
 
         ::Graphics::SwapBuffers();
