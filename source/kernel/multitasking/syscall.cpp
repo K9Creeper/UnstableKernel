@@ -8,6 +8,9 @@
 #include "multitasking.hpp"
 #include "scheduling/scheduling.hpp"
 
+#include "../drivers/input/mouse.hpp"
+#include "../drivers/input/keyboard.hpp"
+
 namespace Kernel
 {
     namespace Multitasking
@@ -39,4 +42,12 @@ void Kernel::Multitasking::SYSCALL::_exit(void){
 
 void Kernel::Multitasking::SYSCALL::_create_thread(const char* name, void* t){
     Kernel::Multitasking::CreateTask(name, t);
+}
+
+bool Kernel::Multitasking::SYSCALL::_add_mouse_handle(void* handle){
+    return Kernel::Drivers::Input::Mouse::AddHandle(handle) >= 0;
+}
+
+bool Kernel::Multitasking::SYSCALL::_add_keyboard_handle(void* handle){
+    return Kernel::Drivers::Input::Keyboard::AddHandle(handle) >= 0;
 }

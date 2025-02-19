@@ -11,19 +11,31 @@ namespace Usermode{
     namespace Graphics{
         bool bThreadRunning = false;
 
+        namespace Native{
+            extern void DrawDesktop(::Graphics::Framebuffer* fb);
+            extern void DrawCursor(::Graphics::Framebuffer* fb);
+        }
+
     }
 }
+
 
 void Usermode::Graphics::Thread()
 {
     bThreadRunning = true;
 
     while(bThreadRunning){
-        ::Graphics::FillBuffer(0xFF0000);
+        ::Graphics::Framebuffer* fb = ::Graphics::GetBackBuffer();
 
-        
+        if(!fb)
+            continue;
+
+        Native::DrawDesktop(fb);
+
+        Native::DrawCursor(fb);
 
         ::Graphics::SwapBuffers();
     }
-    sys_exit();
+
+    sys_exit()
 }

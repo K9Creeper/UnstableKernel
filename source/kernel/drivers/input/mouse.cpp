@@ -59,8 +59,6 @@ uint8_t Mouse_Read()
     return inportb(0x60);
 }
 
-extern "C" void printf(const char* format, ...);
-
 void MouseHandler_(Registers * regs){
     if(Kernel::Drivers::Input::Mouse::cycle == 0){
         Kernel::Drivers::Input::Mouse::mouse_byte[0] = Mouse_Read();

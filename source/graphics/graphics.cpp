@@ -40,7 +40,7 @@ void Graphics::Paint(uint32_t x, uint32_t y, uint32_t color){
         (*pixel) = color;
 }
 
-Framebuffer* Graphics::GetBackBuffer(){
+Graphics::Framebuffer* Graphics::GetBackBuffer(){
     return &backBuffer;
 }
 

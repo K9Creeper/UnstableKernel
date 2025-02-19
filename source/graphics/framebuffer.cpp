@@ -50,3 +50,11 @@ bool Graphics::Framebuffer::SwapTo(Framebuffer* other){
 
     return true;
 }
+
+uint32_t Graphics::Framebuffer::GetWidth()const{
+    return width;
+}
+
+uint32_t Graphics::Framebuffer::GetHeight()const{
+    return height;
+}

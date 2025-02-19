@@ -92,7 +92,7 @@ void SetupDrivers()
 {
     printf("\n| Setup Drivers |\n\n");
 
-    Kernel::Drivers::PIT::Init(250);
+    Kernel::Drivers::PIT::Init(100);
     printf("Initialized | PIT\n");
 
     Kernel::Drivers::Input::Keyboard::Init();

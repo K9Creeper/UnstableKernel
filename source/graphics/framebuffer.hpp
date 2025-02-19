@@ -33,6 +33,9 @@ namespace Graphics
 
         bool SwapTo(Framebuffer* other);
 
+        uint32_t GetWidth()const;
+        uint32_t GetHeight()const;
+
     private:
     };
 }
