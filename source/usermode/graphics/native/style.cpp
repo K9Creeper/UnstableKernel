@@ -11,7 +11,7 @@ namespace Usermode{
                 uint32_t desktopBkgColor = 0x131836;
                 uint32_t mouseCursorColor = 0xFAFAFA;
                 
-                uint32_t mouseCursorSize = 50;
+                uint32_t mouseCursorSize = 16;
 
 
             }
