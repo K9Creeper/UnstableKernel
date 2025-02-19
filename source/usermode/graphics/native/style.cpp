@@ -11,12 +11,14 @@ namespace Usermode{
         namespace Native{
             namespace Style{
                 uint32_t desktopBkgColor = 0x131836;
-                uint32_t mouseCursorColor = 0xFAFAFA;
+                uint32_t mouseCursorColor = 0xF89641;
                 
                 uint32_t mouseCursorSize = 16;
 
                 float desktopNavBarHeightRatio = 0.1;
                 uint32_t desktopNavBarColor = 0x154073;
+
+                uint32_t textColor = 0xF3F6F6;
             }
         }
     }

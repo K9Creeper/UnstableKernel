@@ -33,19 +33,11 @@ void Usermode::Graphics::Native::DrawCursor(::Graphics::Framebuffer *fb)
     int x = Input::mouseInfo.X;
     int y = Input::mouseInfo.Y;
 
-    int thickness = 1;
+    int half = (Style::mouseCursorSize / 2);
 
-    int half = (Style::mouseCursorSize/2);
-
-    for (int i = -thickness; i <= thickness; ++i)
-    {        
-        for (int j = 0; j < Style::mouseCursorSize; ++j)
-        {
-            uint32_t color = (j == 0 || j == Style::mouseCursorSize - 1) ? 0x0 : Style::mouseCursorColor;
-
-            PutPixel(fb, x + i, y - half + j, color);
-
-            PutPixel(fb, x - half + j, y + i, color);
-        }
+    for (int j = 0; j < Style::mouseCursorSize; ++j)
+    {
+        PutPixel(fb, x, y - half + j, Style::mouseCursorColor);
+        PutPixel(fb, x - half + j, y, Style::mouseCursorColor);
     }
 }
