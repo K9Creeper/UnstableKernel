@@ -43,7 +43,7 @@ void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
     Kernel::Memory::InitMemInfo();
     printf("Kernel Memory Info | Start: 0x%X | End: 0x%X\n", Kernel::Memory::Info::kernel_start, Kernel::Memory::Info::kernel_end);
 
-    Kernel::MemoryManagement::KHeap::Early::PreInit(Kernel::Memory::Info::kernel_end);
+    Kernel::MemoryManagement::kheap.PreInit(Kernel::Memory::Info::kernel_end);
 
     Kernel::Memory::GDT::Init();
     printf("Initialized | GDT\n");
@@ -75,15 +75,15 @@ void SetupMemoryManagement()
     Kernel::MemoryManagement::PMM::Init(Kernel::Memory::Info::pmm_size);
     printf("Initialzied | PMM | Size: 0x%X -- %D MB\n", Kernel::Memory::Info::pmm_size, (Kernel::Memory::Info::pmm_size / 0x100000));
 
-    Kernel::MemoryManagement::Paging::Init();
+    Kernel::MemoryManagement::InitPaging();
     printf("Initialzied | Paging\n");
 
-    Kernel::MemoryManagement::KHeap::Init(0xC0400000, 0xC0500000, 0xCFFFFF00);
+    Kernel::MemoryManagement::kheap.Init(0xC0400000, 0xC0500000, 0xCFFFFF00, false, false, &Kernel::MemoryManagement::pManager);
     printf("Initialized & Installed | KHeap\n");
     printf("Located at 0x%X, Initial End at 0x%X, Max Address 0x%X\n",
-           Kernel::Memory::Info::kheap_start,
-           Kernel::Memory::Info::kheap_end,
-           Kernel::Memory::Info::kheap_max_address);
+        Kernel::MemoryManagement::kheap.GetHeapStart(),
+        Kernel::MemoryManagement::kheap.GetHeapEnd(),
+        Kernel::MemoryManagement::kheap.GetHeapMax());
 
     printf("\n| ----------------------- |\n\n");
 }

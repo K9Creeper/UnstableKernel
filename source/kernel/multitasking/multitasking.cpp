@@ -41,24 +41,41 @@ void Kernel::Multitasking::Run()
 
 void Kernel::Multitasking::CreateTask(const char *name, void *routine)
 {
-    Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(Task)));
+    Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::kheap.malloc_(sizeof(Task)));
     memset(reinterpret_cast<uint8_t *>(t->name), 0, 512);
     memcpy(reinterpret_cast<uint8_t *>(t->name), reinterpret_cast<const uint8_t *>(name), strlen(name));
 
     t->status = TaskStatus_Created;
     t->state.eip = routine;
     t->state.eflags = 0x206;
-    
-    t->pageDirectory = Kernel::MemoryManagement::KHeap::kmalloc_(sizeof(PageDirectory), true);
-    memset(reinterpret_cast<uint8_t*>(t->pageDirectory),0, sizeof(PageDirectory));
-    Kernel::MemoryManagement::Paging::CopyDirectory(Kernel::MemoryManagement::Paging::kernelDirectory, t->pageDirectory);
 
-    t->cr3 = Kernel::MemoryManagement::Paging::Virtual2Phyiscal(Kernel::MemoryManagement::Paging::kernelDirectory, reinterpret_cast<uint32_t>(t->pageDirectory));
+    //t->heap.PreInit(0x40002000);
 
-    for(uint32_t start = 0x40000000 - 0x50000; start <= 0x40000000; start+=0x1000)
-        Kernel::MemoryManagement::Paging::AllocatePage(t->pageDirectory, start, 0, false, true);
+    Kernel::MemoryManagement::pManager.AllocateRegion(0x40000000, 0x40500000);
 
-    t->state.esp = t->state.ebp= 0x40000000;
+    PageDirectory *pd = Kernel::MemoryManagement::kheap.malloc_(sizeof(PageDirectory), true);
+    memset(reinterpret_cast<uint8_t *>(pd), 0, sizeof(PageDirectory));
+
+    Kernel::MemoryManagement::pManager.CopyDirectory(pd);
+
+    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(pd));
+
+    t->pManager.Init(reinterpret_cast<uint32_t>(pd), &t->heap);
+
+    //t->heap.Init(0x40400000, 0x40500000, 0x4FFFFF00, false, false, &t->pManager);
+
+    t->pManager.AllocateRegion(0x40000000 - 0x50000, 0x40000000, false, false, true);
+
+    t->state.esp = t->state.ebp = 0x40000000;
+
+    {
+        uint32_t i = 0x40000000;
+        while (i <= 0x40500000)
+        {
+            Kernel::MemoryManagement::pManager.FreePage(i, false);
+            i += 0x1000;
+        }
+    }
 
     Scheduling::AddTask(t);
 }

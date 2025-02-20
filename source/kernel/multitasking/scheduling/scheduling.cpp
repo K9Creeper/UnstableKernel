@@ -40,9 +40,14 @@ void ContextSwitch(Task *t)
 {
     Kernel::Multitasking::Scheduling::currentTask = t;
 
-    if (reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->pageDirectory))
+
+    if (Kernel::Multitasking::Scheduling::currentTask->pManager.GetDirectory())
     {
-        Kernel::MemoryManagement::Paging::SwitchDirectory(reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3), true);
+        printf("Switching 0x%X\n", Kernel::Multitasking::Scheduling::currentTask->cr3);
+
+        Kernel::MemoryManagement::pManager.SwitchToDirectory(false, Kernel::Multitasking::Scheduling::currentTask->cr3);
+    
+        printf("Hey!\n");
     }
 
     if (Kernel::Multitasking::Scheduling::previousTask && Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
@@ -65,8 +70,9 @@ void Scheduler_(Registers *regs, uint32_t tick)
         if(Kernel::Multitasking::Scheduling::previousTask == Kernel::Multitasking::Scheduling::toDeleteTask)
             Kernel::Multitasking::Scheduling::previousTask = nullptr;
         
-        Kernel::MemoryManagement::KHeap::kfree(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask->pageDirectory));
-        Kernel::MemoryManagement::KHeap::kfree(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask));
+        Kernel::MemoryManagement::kheap.free(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask->pManager.GetDirectory()));
+
+        Kernel::MemoryManagement::kheap.free(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask));
 
         Kernel::Multitasking::Scheduling::toDeleteTask = nullptr;
     }
@@ -131,7 +137,7 @@ void Kernel::Multitasking::Scheduling::Init()
     if (bInitialized)
         return;
 
-    taskList.RePlace(reinterpret_cast<void *>(Kernel::MemoryManagement::KHeap::kmalloc_(MAX_TASK_COUNT * sizeof(Task))), MAX_TASK_COUNT);
+    taskList.RePlace(reinterpret_cast<void *>(Kernel::MemoryManagement::kheap.malloc_(MAX_TASK_COUNT * sizeof(Task))), MAX_TASK_COUNT);
 
     bInitialized = true;
 }

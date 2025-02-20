@@ -25,7 +25,7 @@ void Graphics::Init(uint32_t lfbLocation, uint32_t w, uint32_t h, uint32_t p, ui
     bPerPixel = b;
 
     foregroundBuffer.Init(reinterpret_cast<uint32_t*>(lfbLocation), pxWidth, pxHeight, pitch, bPerPixel);
-    backBuffer.Init(reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::KHeap::kmalloc_(foregroundBuffer.GetSize())), pxWidth, pxHeight, pitch, bPerPixel);
+    backBuffer.Init(reinterpret_cast<uint32_t*>(Kernel::MemoryManagement::kheap.malloc_(foregroundBuffer.GetSize())), pxWidth, pxHeight, pitch, bPerPixel);
 }
 
 void Graphics::FillBuffer(uint32_t color){

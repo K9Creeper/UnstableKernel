@@ -8,6 +8,9 @@
 
 #include "../../../chelpers/registers.h"
 
+#include "../../../memory_management/paging.hpp"
+#include "../../../memory_management/heap.hpp"
+
 enum TaskStatus : uint16_t {
     TaskStatus_Created = 0,
     TaskStatus_Ready,
@@ -20,7 +23,9 @@ struct Task{
     
     Registers state;
 
-    void* pageDirectory;
+    Paging pManager;
+    
+    Heap heap;
 
     // physical
     uint32_t cr3;

@@ -2,6 +2,9 @@
 /// paging.hpp
 /// @brief This file declares and defines important structures relating to the core function of paging.
 #pragma once
+
+#include <stdint.h>
+
 struct PageDirectoryEntry
 {
     unsigned int present : 1;
@@ -16,6 +19,7 @@ struct PageDirectoryEntry
     unsigned int available : 3;
     unsigned int frame : 20;
 };
+
 struct PageEntry
 {
     unsigned int present : 1;
@@ -28,12 +32,51 @@ struct PageEntry
     unsigned int available : 3;
     unsigned int frame : 20;
 };
+
 struct PageTable
 {
     PageEntry pages[1024];
 };
+
 struct PageDirectory
 {
     PageDirectoryEntry tables[1024];
     PageTable *ref_tables[1024];
+};
+
+class Heap;
+
+class Paging
+{
+protected:
+    Heap* heap;
+    PageDirectory* dir;
+private:
+    bool bEnabled;
+    bool bInitialzed;
+
+    bool bPSEEnabled = true;
+
+    void DisablePSEReg();
+
+    PageTable* CopyPageTable(PageDirectory *dst_page_dir, uint32_t page_dir_idx, PageTable *src);
+public:
+    void Init(uint32_t directoryLoc, Heap* heap);
+
+    bool isEnabled()const;
+    bool isInitialzed()const;
+
+    PageDirectory* GetDirectory()const;
+
+    void EnablePaging();
+    void SwitchToDirectory(bool isPhysical, uint32_t cr3 = 0);
+
+    uint32_t Virtual2Phyiscal(uint32_t virtual_address, PageDirectory* diff = nullptr);
+
+    void AllocateRegion(uint32_t start, uint32_t end, bool identity = false, bool isKernel = false, bool isWritable = false);
+
+    void AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKernel = false, int isWritable = false, PageDirectory* other = nullptr);
+    void FreePage(uint32_t virtual_address, bool bFree);
+
+    void CopyDirectory(PageDirectory *dst);
 };
