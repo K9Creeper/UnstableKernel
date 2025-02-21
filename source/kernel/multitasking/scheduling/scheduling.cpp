@@ -40,14 +40,18 @@ void ContextSwitch(Task *t)
 {
     Kernel::Multitasking::Scheduling::currentTask = t;
 
-
     if (Kernel::Multitasking::Scheduling::currentTask->pManager.GetDirectory())
     {
-        printf("Switching 0x%X\n", Kernel::Multitasking::Scheduling::currentTask->cr3);
+        // We wanna use the cr3
+        Kernel::Multitasking::Scheduling::currentTask->pManager.SwitchToDirectory(true, reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3));
 
-        Kernel::MemoryManagement::pManager.SwitchToDirectory(false, Kernel::Multitasking::Scheduling::currentTask->cr3);
-    
-        printf("Hey!\n");
+        if (Kernel::Multitasking::Scheduling::currentTask->status == TaskStatus_Created)
+        {
+            Kernel::Multitasking::Scheduling::currentTask->heap.PreInit(0x40000000);
+            Kernel::Multitasking::Scheduling::currentTask->pManager.SwapHeap(&Kernel::Multitasking::Scheduling::currentTask->heap);
+            Kernel::Multitasking::Scheduling::currentTask->heap.Init(0x40400000, 0x40500000, 0x5FFFFF00, true, false, &Kernel::Multitasking::Scheduling::currentTask->pManager);
+            Kernel::Multitasking::Scheduling::currentTask->pManager.AllocateRegion(0x70000000, 0x70500000, false, false, true);
+        }
     }
 
     if (Kernel::Multitasking::Scheduling::previousTask && Kernel::Multitasking::Scheduling::previousTask->status == TaskStatus_Zombie)
@@ -67,12 +71,10 @@ void Scheduler_(Registers *regs, uint32_t tick)
 {
     if (Kernel::Multitasking::Scheduling::toDeleteTask)
     {
-        if(Kernel::Multitasking::Scheduling::previousTask == Kernel::Multitasking::Scheduling::toDeleteTask)
+        if (Kernel::Multitasking::Scheduling::previousTask == Kernel::Multitasking::Scheduling::toDeleteTask)
             Kernel::Multitasking::Scheduling::previousTask = nullptr;
-        
-        Kernel::MemoryManagement::kheap.free(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask->pManager.GetDirectory()));
 
-        Kernel::MemoryManagement::kheap.free(reinterpret_cast<uint32_t>(Kernel::Multitasking::Scheduling::toDeleteTask));
+        // should do our free mem here
 
         Kernel::Multitasking::Scheduling::toDeleteTask = nullptr;
     }

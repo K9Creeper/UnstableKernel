@@ -39,6 +39,8 @@ void Kernel::Multitasking::Run()
     Scheduling::Run();
 }
 
+extern "C" void printf(const char *f, ...);
+
 void Kernel::Multitasking::CreateTask(const char *name, void *routine)
 {
     Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::kheap.malloc_(sizeof(Task)));
@@ -49,33 +51,22 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine)
     t->state.eip = routine;
     t->state.eflags = 0x206;
 
-    //t->heap.PreInit(0x40002000);
-
-    Kernel::MemoryManagement::pManager.AllocateRegion(0x40000000, 0x40500000);
-
-    PageDirectory *pd = Kernel::MemoryManagement::kheap.malloc_(sizeof(PageDirectory), true);
-    memset(reinterpret_cast<uint8_t *>(pd), 0, sizeof(PageDirectory));
-
-    Kernel::MemoryManagement::pManager.CopyDirectory(pd);
-
-    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(pd));
-
-    t->pManager.Init(reinterpret_cast<uint32_t>(pd), &t->heap);
-
-    //t->heap.Init(0x40400000, 0x40500000, 0x4FFFFF00, false, false, &t->pManager);
-
-    t->pManager.AllocateRegion(0x40000000 - 0x50000, 0x40000000, false, false, true);
-
-    t->state.esp = t->state.ebp = 0x40000000;
+    t->pManager.Init(Kernel::MemoryManagement::kheap.malloc_(sizeof(PageDirectory), true), &Kernel::MemoryManagement::kheap);
 
     {
         uint32_t i = 0x40000000;
-        while (i <= 0x40500000)
+        while (i <= 0x40400000)
         {
-            Kernel::MemoryManagement::pManager.FreePage(i, false);
+            Kernel::MemoryManagement::pManager.AllocatePage(i, 0, false, true, Kernel::MemoryManagement::current);
             i += 0x1000;
         }
     }
+
+    Kernel::MemoryManagement::pManager.CopyDirectory(t->pManager.GetDirectory());
+
+    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(t->pManager.GetDirectory()), Kernel::MemoryManagement::current);
+
+    t->state.esp = t->state.ebp = 0x70500000;
 
     Scheduling::AddTask(t);
 }

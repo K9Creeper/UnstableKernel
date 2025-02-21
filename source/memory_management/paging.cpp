@@ -14,17 +14,30 @@
 // boot.s
 extern "C" PageDirectory *pageDirectory;
 
-void Paging::Init(uint32_t directoryLoc, Heap *heap)
+namespace Kernel
+{
+    namespace MemoryManagement
+    {
+        PageDirectory *current = pageDirectory;
+    }
+}
+
+static bool bEnabled = false;
+static bool bPSEEnabled = true;
+
+void Paging::Init(uint32_t directoryLoc, Heap *heap, bool shouldClear)
 {
     if (!directoryLoc || !heap)
         return;
 
     dir = reinterpret_cast<PageDirectory *>(directoryLoc);
-    memset(reinterpret_cast<uint8_t *>(dir), 0, sizeof(PageDirectory));
+
+    if (shouldClear)
+        memset(reinterpret_cast<uint8_t *>(dir), 0, sizeof(PageDirectory));
 
     this->heap = heap;
 
-    Paging::bInitialzed = true;
+    bInitialzed = true;
 }
 
 bool Paging::isEnabled() const
@@ -47,7 +60,6 @@ void Paging::AllocateRegion(uint32_t start, uint32_t end, bool identity, bool is
     uint32_t i = start;
     while (i <= end)
     {
-
         if (identity)
             AllocatePage(i, i / 0x1000, isKernel, isWritable);
         else
@@ -65,10 +77,15 @@ void Paging::DisablePSEReg()
     asm volatile("mov %%cr4, %0" : "=r"(cr4));
     cr4 &= 0xffffffef;
     asm volatile("mov %0, %%cr4" ::"r"(cr4));
+
+    bPSEEnabled = false;
 }
 
 void Paging::EnablePaging()
 {
+    if (bEnabled)
+        return;
+
     // will do its thang
     DisablePSEReg();
 
@@ -81,15 +98,14 @@ void Paging::EnablePaging()
     bEnabled = true;
 }
 
-extern "C" void printf(const char* f, ...);
-
 void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
 {
     uint32_t t;
 
     if (cr3)
     {
-        if (!isPhysical){
+        if (!isPhysical)
+        {
             t = Virtual2Phyiscal(cr3, pageDirectory);
         }
         else
@@ -102,17 +118,17 @@ void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
         else
             t = reinterpret_cast<uint32_t>(dir);
     }
-
-    printf("Switch to Directory: 0x%X\n", t);
+    
+    Kernel::MemoryManagement::current = dir;
 
     asm volatile("mov %0, %%cr3" ::"r"(t));
 }
 
-
 uint32_t Paging::Virtual2Phyiscal(uint32_t virtual_address, PageDirectory *diff)
 {
     PageDirectory *d = dir;
-    if (diff){
+    if (diff)
+    {
         d = diff;
     }
 
@@ -137,6 +153,11 @@ uint32_t Paging::Virtual2Phyiscal(uint32_t virtual_address, PageDirectory *diff)
     }
 
     return (table->pages[pageTblIdx].frame << 12) + pageFrameOffset;
+}
+
+void Paging::SwapHeap(Heap *heap)
+{
+    this->heap = heap;
 }
 
 void Paging::AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKernel, int isWritable, PageDirectory *other)
@@ -240,19 +261,24 @@ PageTable *Paging::CopyPageTable(PageDirectory *dst_page_dir, uint32_t page_dir_
     return table;
 }
 
-void Paging::CopyDirectory(PageDirectory *dst)
+void Paging::CopyDirectory(PageDirectory *dst, PageDirectory * src)
 {
+    PageDirectory* c = dir;
+
+    if(src)
+        c = src;
+
     for (uint32_t i = 0; i < 1024; i++)
     {
-        if (Kernel::MemoryManagement::pManager.dir->ref_tables[i] == dir->ref_tables[i])
+        if (Kernel::MemoryManagement::pManager.dir->ref_tables[i] == c->ref_tables[i])
         {
-            dst->tables[i] = dir->tables[i];
-            dst->ref_tables[i] = dir->ref_tables[i];
+            dst->tables[i] = c->tables[i];
+            dst->ref_tables[i] = c->ref_tables[i];
         }
         else
         {
             dst->ref_tables[i] = CopyPageTable(dst, i, dir->ref_tables[i]);
-            uint32_t phys = Virtual2Phyiscal(reinterpret_cast<uint32_t>(dst->ref_tables[i]));
+            uint32_t phys = Virtual2Phyiscal(reinterpret_cast<uint32_t>(dst->ref_tables[i]), c);
             dst->tables[i].frame = phys >> 12;
             dst->tables[i].user = 1;
             dst->tables[i].rw = 1;

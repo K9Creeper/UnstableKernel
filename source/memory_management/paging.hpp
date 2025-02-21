@@ -52,19 +52,19 @@ protected:
     Heap* heap;
     PageDirectory* dir;
 private:
-    bool bEnabled;
+    
     bool bInitialzed;
-
-    bool bPSEEnabled = true;
 
     void DisablePSEReg();
 
     PageTable* CopyPageTable(PageDirectory *dst_page_dir, uint32_t page_dir_idx, PageTable *src);
 public:
-    void Init(uint32_t directoryLoc, Heap* heap);
+    void Init(uint32_t directoryLoc, Heap* heap, bool shouldClear = true);
 
     bool isEnabled()const;
     bool isInitialzed()const;
+
+    void SwapHeap(Heap* heap);
 
     PageDirectory* GetDirectory()const;
 
@@ -78,5 +78,5 @@ public:
     void AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKernel = false, int isWritable = false, PageDirectory* other = nullptr);
     void FreePage(uint32_t virtual_address, bool bFree);
 
-    void CopyDirectory(PageDirectory *dst);
+    void CopyDirectory(PageDirectory *dst, PageDirectory * src = nullptr);
 };

@@ -141,7 +141,7 @@ void EnterUsermode(){
     printf("\n| Entering Usermode |\n\n");
 
     Kernel::Multitasking::CreateTask("UsermodeEntry", UsermodeEntry);
-    Kernel::Multitasking::CreateTask("UsermodeSyscallTest", UsermodeSyscallTest);
+    //Kernel::Multitasking::CreateTask("UsermodeSyscallTest", UsermodeSyscallTest);
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)

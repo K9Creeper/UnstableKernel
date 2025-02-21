@@ -30,7 +30,9 @@
         "interrupt_service.h": "c",
         "interrupt_request.h": "c",
         "string.h": "c",
-        "ordered_array.h": "c"
+        "ordered_array.h": "c",
+        "stack": "cpp",
+        "deque": "cpp"
     },
     "C_Cpp.default.compilerPath": "cl.exe",
     "C_Cpp.errorSquiggles": "disabled"

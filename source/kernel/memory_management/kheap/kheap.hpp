@@ -10,6 +10,7 @@ namespace Kernel
 {
     namespace MemoryManagement
     {
+        extern void* current;
         extern Heap kheap;
     }
 }
