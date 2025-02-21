@@ -40,5 +40,5 @@ void Usermode::Graphics::Thread()
         ::Graphics::SwapBuffers();
     }
 
-    sys_exit()
+    sys_exit();
 }

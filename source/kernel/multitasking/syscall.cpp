@@ -27,6 +27,9 @@ extern "C" void printf(const char* format, ...);
 extern void Scheduler_(Registers *regs, uint32_t tick);
 
 void Kernel::Multitasking::SYSCALL::_exit(void){
+    if(!Scheduling::currentTask)
+        return;
+
     Scheduling::currentTask->status = TaskStatus_Zombie;
 
 
@@ -38,6 +41,20 @@ void Kernel::Multitasking::SYSCALL::_exit(void){
 
     // Since we waiting, we waiting :]
     for(;;);
+}
+
+uint32_t Kernel::Multitasking::SYSCALL::malloc(uint32_t size, bool align){
+    if(Scheduling::currentTask)
+        return 0x0;
+
+    return Scheduling::currentTask->heap.malloc_(size, align);
+}
+
+void Kernel::Multitasking::SYSCALL::free(uint32_t loc){
+    if(Scheduling::currentTask)
+        return;
+    
+    return Scheduling::currentTask->heap.free(loc);
 }
 
 void Kernel::Multitasking::SYSCALL::_create_thread(const char* name, void* t){

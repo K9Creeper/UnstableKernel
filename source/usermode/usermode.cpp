@@ -17,7 +17,7 @@ extern "C" void UsermodeEntry()
 
    Usermode::Input::Init();
 
-   sys_create_thread("GraphicsThread", Usermode::Graphics::Thread)
+   sys_create_thread("GraphicsThread", Usermode::Graphics::Thread);
 
    // WE DO NOT WANT TO EXIT OUTTA THIS GUY
    for(;;);
