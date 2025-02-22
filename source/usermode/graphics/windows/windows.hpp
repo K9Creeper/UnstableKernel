@@ -4,13 +4,17 @@
 
 #pragma once
 
+#include "../../../graphics/framebuffer.hpp"
+
 namespace Usermode
 {
     namespace Graphics
     {
         namespace Windows
         {
-            extern void RenderWindows();
+            extern bool bInitialized;
+            extern void Init();
+            extern void RenderWindows(::Graphics::Framebuffer* fb);
         }
     }
 }

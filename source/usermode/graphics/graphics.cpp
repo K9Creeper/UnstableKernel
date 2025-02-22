@@ -16,12 +16,19 @@ namespace Usermode{
             extern void DrawCursor(::Graphics::Framebuffer* fb);
         }
 
+        namespace Windows{
+            extern void Init();
+            extern void RenderWindows(::Graphics::Framebuffer* fb);
+
+        }
     }
 }
 
 
 void Usermode::Graphics::Thread()
 {
+    Usermode::Graphics::Windows::Init();
+
     bThreadRunning = true;
 
     while(bThreadRunning){
@@ -32,7 +39,7 @@ void Usermode::Graphics::Thread()
 
         Native::DrawDesktop(fb);
 
-        
+        Usermode::Graphics::Windows::RenderWindows(fb);
 
         // We want to draw this above everything else...
         Native::DrawCursor(fb);

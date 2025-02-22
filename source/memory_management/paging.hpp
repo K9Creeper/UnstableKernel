@@ -65,6 +65,7 @@ public:
     bool isInitialzed()const;
 
     void SwapHeap(Heap* heap);
+    Heap* GetHeap()const;
 
     PageDirectory* GetDirectory()const;
 

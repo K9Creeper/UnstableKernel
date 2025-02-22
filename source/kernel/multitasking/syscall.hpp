@@ -9,7 +9,7 @@
 namespace Kernel{
     namespace Multitasking{
         namespace SYSCALL{            
-            extern void _create_thread(const char* name, void* t);
+            extern void _create_task(const char* name, void* t, bool isThread = false);
 
             extern bool _add_mouse_handle(void* handle);
             extern bool _add_keyboard_handle(void* handle);
@@ -22,7 +22,7 @@ namespace Kernel{
     }
 }
 
-#define sys_create_thread Kernel::Multitasking::SYSCALL::_create_thread
+#define sys_create_task Kernel::Multitasking::SYSCALL::_create_task
 
 #define sys_add_mouse_handle Kernel::Multitasking::SYSCALL::_add_mouse_handle
 #define sys_add_keyboard_handle Kernel::Multitasking::SYSCALL::_add_keyboard_handle

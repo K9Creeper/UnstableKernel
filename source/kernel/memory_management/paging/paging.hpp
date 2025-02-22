@@ -14,6 +14,9 @@ namespace Kernel
     {
         extern Paging pManager;
 
+        extern PageDirectory* current;
+        extern Paging* currentManager;
+
         extern void InitPaging();
     }
 }

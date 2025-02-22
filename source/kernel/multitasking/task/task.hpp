@@ -23,9 +23,11 @@ struct Task{
     
     Registers state;
 
-    Paging pManager;
+    Paging* pManager;
     
-    Heap heap;
+    Heap* heap;
+
+    bool isThread;
 
     // physical
     uint32_t cr3;

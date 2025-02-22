@@ -11,7 +11,7 @@
 #define WS_SHOW_TITLE_BAR 0x00010U
 #define WS_SHOW_TOOLS 0x00020U
 
-#include "../../../graphics/framebuffer.hpp"
+#include "../../../../graphics/framebuffer.hpp"
 
 namespace Usermode
 {
@@ -23,6 +23,8 @@ namespace Usermode
             {
                 // window name
                 char name[512];
+
+                uint16_t zindex;
 
                 // left, top, right, bottom
                 int l, t, r, b;

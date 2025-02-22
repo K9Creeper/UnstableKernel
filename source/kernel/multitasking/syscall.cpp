@@ -44,21 +44,21 @@ void Kernel::Multitasking::SYSCALL::_exit(void){
 }
 
 uint32_t Kernel::Multitasking::SYSCALL::malloc(uint32_t size, bool align){
-    if(Scheduling::currentTask)
+    if(!Scheduling::currentTask)
         return 0x0;
 
-    return Scheduling::currentTask->heap.malloc_(size, align);
+    return Scheduling::currentTask->heap->malloc_(size, align);
 }
 
 void Kernel::Multitasking::SYSCALL::free(uint32_t loc){
-    if(Scheduling::currentTask)
+    if(!Scheduling::currentTask)
         return;
     
-    return Scheduling::currentTask->heap.free(loc);
+    return Scheduling::currentTask->heap->free(loc);
 }
 
-void Kernel::Multitasking::SYSCALL::_create_thread(const char* name, void* t){
-    Kernel::Multitasking::CreateTask(name, t);
+void Kernel::Multitasking::SYSCALL::_create_task(const char* name, void* t, bool isThread){
+    Kernel::Multitasking::CreateTask(name, t, isThread);
 }
 
 bool Kernel::Multitasking::SYSCALL::_add_mouse_handle(void* handle){

@@ -41,7 +41,7 @@ void Kernel::Multitasking::Run()
 
 extern "C" void printf(const char *f, ...);
 
-void Kernel::Multitasking::CreateTask(const char *name, void *routine)
+void Kernel::Multitasking::CreateTask(const char *name, void *routine, bool isThread)
 {
     Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::kheap.malloc_(sizeof(Task)));
     memset(reinterpret_cast<uint8_t *>(t->name), 0, 512);
@@ -51,7 +51,16 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine)
     t->state.eip = routine;
     t->state.eflags = 0x206;
 
-    t->pManager.Init(Kernel::MemoryManagement::kheap.malloc_(sizeof(PageDirectory), true), &Kernel::MemoryManagement::kheap);
+    t->isThread = isThread;
+
+    t->pManager = Kernel::MemoryManagement::kheap.malloc_(sizeof(Paging));
+
+    if (!isThread)
+        t->heap = Kernel::MemoryManagement::kheap.malloc_(sizeof(Heap));
+    else
+        t->heap = Kernel::MemoryManagement::currentManager->GetHeap();
+
+    t->pManager->Init(Kernel::MemoryManagement::kheap.malloc_(sizeof(PageDirectory), true), &Kernel::MemoryManagement::kheap);
 
     {
         uint32_t i = 0x40000000;
@@ -62,9 +71,9 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine)
         }
     }
 
-    Kernel::MemoryManagement::pManager.CopyDirectory(t->pManager.GetDirectory());
+    Kernel::MemoryManagement::pManager.CopyDirectory(t->pManager->GetDirectory());
 
-    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(t->pManager.GetDirectory()), Kernel::MemoryManagement::current);
+    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(t->pManager->GetDirectory()), Kernel::MemoryManagement::current);
 
     t->state.esp = t->state.ebp = 0x70500000;
 

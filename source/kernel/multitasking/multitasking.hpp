@@ -14,6 +14,6 @@ namespace Kernel
         extern void Init();
         extern void Run();
 
-        extern void CreateTask(const char* name, void* routine);
+        extern void CreateTask(const char* name, void* routine, bool isThread = false);
     }
 }

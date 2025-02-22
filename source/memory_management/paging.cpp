@@ -19,6 +19,7 @@ namespace Kernel
     namespace MemoryManagement
     {
         PageDirectory *current = pageDirectory;
+        Paging* currentManager = nullptr;
     }
 }
 
@@ -119,9 +120,10 @@ void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
             t = reinterpret_cast<uint32_t>(dir);
     }
     
-    Kernel::MemoryManagement::current = dir;
-
     asm volatile("mov %0, %%cr3" ::"r"(t));
+
+    Kernel::MemoryManagement::currentManager = this;
+    Kernel::MemoryManagement::current = dir;
 }
 
 uint32_t Paging::Virtual2Phyiscal(uint32_t virtual_address, PageDirectory *diff)
@@ -158,6 +160,10 @@ uint32_t Paging::Virtual2Phyiscal(uint32_t virtual_address, PageDirectory *diff)
 void Paging::SwapHeap(Heap *heap)
 {
     this->heap = heap;
+}
+
+Heap* Paging::GetHeap()const{
+    return heap;
 }
 
 void Paging::AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKernel, int isWritable, PageDirectory *other)

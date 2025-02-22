@@ -40,17 +40,23 @@ void ContextSwitch(Task *t)
 {
     Kernel::Multitasking::Scheduling::currentTask = t;
 
-    if (Kernel::Multitasking::Scheduling::currentTask->pManager.GetDirectory())
+    if (Kernel::Multitasking::Scheduling::currentTask->pManager->GetDirectory())
     {
         // We wanna use the cr3
-        Kernel::Multitasking::Scheduling::currentTask->pManager.SwitchToDirectory(true, reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3));
+        Kernel::Multitasking::Scheduling::currentTask->pManager->SwitchToDirectory(true, reinterpret_cast<PageDirectory *>(Kernel::Multitasking::Scheduling::currentTask->cr3));
 
         if (Kernel::Multitasking::Scheduling::currentTask->status == TaskStatus_Created)
         {
-            Kernel::Multitasking::Scheduling::currentTask->heap.PreInit(0x40000000);
-            Kernel::Multitasking::Scheduling::currentTask->pManager.SwapHeap(&Kernel::Multitasking::Scheduling::currentTask->heap);
-            Kernel::Multitasking::Scheduling::currentTask->heap.Init(0x40400000, 0x40500000, 0x5FFFFF00, true, false, &Kernel::Multitasking::Scheduling::currentTask->pManager);
-            Kernel::Multitasking::Scheduling::currentTask->pManager.AllocateRegion(0x70000000, 0x70500000, false, false, true);
+            if (!Kernel::Multitasking::Scheduling::currentTask->isThread)
+                Kernel::Multitasking::Scheduling::currentTask->heap->PreInit(0x40000000);
+
+            Kernel::Multitasking::Scheduling::currentTask->pManager->SwapHeap(Kernel::Multitasking::Scheduling::currentTask->heap);
+
+            if (!Kernel::Multitasking::Scheduling::currentTask->isThread)
+            {
+                Kernel::Multitasking::Scheduling::currentTask->heap->Init(0x40400000, 0x40500000, 0x5FFFFF00, true, false, Kernel::Multitasking::Scheduling::currentTask->pManager);
+            }
+            Kernel::Multitasking::Scheduling::currentTask->pManager->AllocateRegion(0x70000000, 0x70500000, false, false, true);
         }
     }
 
@@ -74,7 +80,8 @@ void Scheduler_(Registers *regs, uint32_t tick)
         if (Kernel::Multitasking::Scheduling::previousTask == Kernel::Multitasking::Scheduling::toDeleteTask)
             Kernel::Multitasking::Scheduling::previousTask = nullptr;
 
-        // should do our free mem here
+        // We should prolly free memory here!
+        // but im actually to lazy to do that...
 
         Kernel::Multitasking::Scheduling::toDeleteTask = nullptr;
     }
