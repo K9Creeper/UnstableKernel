@@ -32,13 +32,15 @@ namespace Usermode
                 // How to render the window
                 uint32_t windowStyleFlags = WS_WINDOWED | WS_SHOW_TOOLS | WS_SHOW_TITLE_BAR;
 
+                uint32_t width, height;
+
                 struct Viewport
                 {
                     // left, top, right, bottom
                     int l, t, r, b;
                 } viewport;
 
-                // our framebuffer, includes our viewport and title bar
+                // our framebuffer, includes ONLY the viewport
                 ::Graphics::Framebuffer framebuffer;
             };
         }

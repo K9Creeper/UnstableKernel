@@ -7,9 +7,13 @@
 #include "../../graphics/graphics.hpp"
 #include "../../kernel/multitasking/syscall.hpp"
 
+#include "windows/windows.hpp"
+
 namespace Usermode{
     namespace Graphics{
         bool bThreadRunning = false;
+
+        ::Graphics::Framebuffer* currentFb;
 
         namespace Native{
             extern void DrawDesktop(::Graphics::Framebuffer* fb);
@@ -19,11 +23,40 @@ namespace Usermode{
         namespace Windows{
             extern void Init();
             extern void RenderWindows(::Graphics::Framebuffer* fb);
-
         }
+
+        void DrawAndSwap();
     }
 }
 
+uint32_t Usermode::Graphics::GetScreenX(){
+    return Usermode::Graphics::currentFb->GetWidth();
+}
+
+uint32_t Usermode::Graphics::GetScreenY(){
+    return Usermode::Graphics::currentFb->GetHeight();
+}
+
+uint32_t Usermode::Graphics::GetScreenPitch(){
+    return Usermode::Graphics::currentFb->GetPitch();
+}
+
+uint32_t Usermode::Graphics::GetScreenBPP(){
+    return Usermode::Graphics::currentFb->GetBPP();
+}
+
+void Usermode::Graphics::DrawAndSwap(){
+    // This is the background...    
+    Native::DrawDesktop(currentFb);
+
+    Usermode::Graphics::Windows::RenderWindows(currentFb);
+
+    // We want to draw this above everything else...
+    Native::DrawCursor(currentFb);
+
+    // Swap Buffers
+    ::Graphics::SwapBuffers();
+}
 
 void Usermode::Graphics::Thread()
 {
@@ -31,20 +64,18 @@ void Usermode::Graphics::Thread()
 
     bThreadRunning = true;
 
+    currentFb = ::Graphics::GetBackBuffer();
+
+    Usermode::Graphics::Windows::CreateWindow("Test", 0, 200, 200, 100, 100);
+
     while(bThreadRunning){
-        ::Graphics::Framebuffer* fb = ::Graphics::GetBackBuffer();
-
-        if(!fb)
+        if(!currentFb){
+            currentFb = ::Graphics::GetBackBuffer();
             continue;
+        }
 
-        Native::DrawDesktop(fb);
-
-        Usermode::Graphics::Windows::RenderWindows(fb);
-
-        // We want to draw this above everything else...
-        Native::DrawCursor(fb);
-
-        ::Graphics::SwapBuffers();
+        // Render
+        DrawAndSwap();        
     }
 
     sys_exit();

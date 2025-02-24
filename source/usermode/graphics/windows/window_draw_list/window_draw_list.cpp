@@ -7,17 +7,18 @@
 
 #include "../window/window.hpp"
 
-void WindowDrawList::FocusWindow(void * w){
-    Usermode::Graphics::Windows::Window* window = w;
-    if(window)
+void WindowDrawList::FocusWindow(void *w)
+{
+    Usermode::Graphics::Windows::Window *window = w;
+    if (window)
         window->zindex = 99999;
 
-    shouldBeSorted = true;
+    ForceSort();
 }
 
-bool WindowDrawList::AddWindow(void *w)
+bool WindowDrawList::AddWindow(void *w, bool setUnder)
 {
-    Usermode::Graphics::Windows::Window* window = w;
+    Usermode::Graphics::Windows::Window *window = w;
 
     if (this->size + 1 > this->max_size)
         return false;
@@ -32,24 +33,33 @@ bool WindowDrawList::AddWindow(void *w)
 
     // just append the item, it'll be sorted...eventually.
     {
-        this->array[i] = window;
+        if (setUnder && i > 0)
+        {
+            void *w = this->array[i - 1];
+            this->array[i] = w;
+
+            this->array[i - 1] = window;
+        }else{
+            this->array[i] = window;
+        }
 
         this->size++;
 
-        shouldBeSorted = true;
+        ForceSort();
     }
 
     return true;
 }
 
-void WindowDrawList::RemoveWindow(uint32_t i){
+void WindowDrawList::RemoveWindow(uint32_t i)
+{
     Remove(i);
-    shouldBeSorted = true;
+    ForceSort();
 }
 
 void WindowDrawList::ForceSort()
 {
-    if(size <= 1)
+    if (size <= 1)
         return;
     bool sort = true;
     while (sort)
@@ -97,6 +107,4 @@ void WindowDrawList::ForceSort()
             reinterpret_cast<Usermode::Graphics::Windows::Window *>(array[i])->zindex = i;
         }
     }
-
-    shouldBeSorted = false;
 }

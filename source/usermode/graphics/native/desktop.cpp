@@ -37,6 +37,8 @@ static void FillBuffer(::Graphics::Framebuffer* fb, uint32_t color){
             PutPixel(fb, x, y, color);
 }
 
+
+
 void Usermode::Graphics::Native::DrawDesktop(::Graphics::Framebuffer* fb){
     // Lets draw bkg
     FillBuffer(fb, Style::desktopBkgColor);

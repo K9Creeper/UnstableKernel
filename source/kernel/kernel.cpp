@@ -113,13 +113,16 @@ void SetupGraphics()
 
     Kernel::Drivers::VESA::Init(640, 480);
     printf("Initialized | VESA\n");
-    printf("Width: %D, Height: %D, Bytes Per Pixel: %D\n",
+    printf("Width: %D, Height: %D, Bytes Per Pixel: %D, Pitch: %D\n\n",
            Kernel::Drivers::VESA::currentMode.info.width,
            Kernel::Drivers::VESA::currentMode.info.height,
-           Kernel::Drivers::VESA::currentMode.info.bpp);
+           Kernel::Drivers::VESA::currentMode.info.bpp,
+           Kernel::Drivers::VESA::currentMode.info.pitch
+        );
 
     Graphics::Init(Kernel::Drivers::VESA::GetLFBAddress(), Kernel::Drivers::VESA::currentMode.info.width, Kernel::Drivers::VESA::currentMode.info.height, Kernel::Drivers::VESA::currentMode.info.pitch, Kernel::Drivers::VESA::currentMode.info.bpp);
     printf("Initialized | Graphics\n");
+    printf("Max Address: 0x%X\n", Kernel::Drivers::VESA::GetMaxLFBAddress());
 
     printf("\n| -------------- |\n\n");
 }
@@ -141,7 +144,7 @@ void EnterUsermode(){
     printf("\n| Entering Usermode |\n\n");
 
     Kernel::Multitasking::CreateTask("UsermodeEntry", UsermodeEntry);
-    //Kernel::Multitasking::CreateTask("UsermodeSyscallTest", UsermodeSyscallTest);
+    Kernel::Multitasking::CreateTask("UsermodeSyscallTest", UsermodeSyscallTest);
 }
 
 extern "C" void kernel_main(uint32_t addr, uint32_t magic)

@@ -17,6 +17,9 @@ namespace Usermode{
                 uint32_t desktopNavBarColor = 0x1B345C;
 
                 uint32_t textColor = 0xEBF1F7;
+
+                uint32_t windowAccent = 0xFFFFFF;
+                float windowTitleBarHeightRatio = 0.08;
             }
         }
     }

@@ -10,11 +10,9 @@
 
 class WindowDrawList : public OrderedArray<void *> {
     public:
-        bool shouldBeSorted = false;
-
         void FocusWindow(void* item);
 
-        bool AddWindow(void* item);
+        bool AddWindow(void* item, bool setUnder = false);
         void RemoveWindow(uint32_t i);
 
         void ForceSort();

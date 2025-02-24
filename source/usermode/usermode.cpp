@@ -19,6 +19,8 @@ extern "C" void UsermodeEntry()
 
    sys_create_task("GraphicsThread", Usermode::Graphics::Thread, true);
 
+   
+
    // WE DO NOT WANT TO EXIT OUTTA THIS GUY
    for(;;);
 }

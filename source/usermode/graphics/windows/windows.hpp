@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "window/window.hpp"
+
 #include "../../../graphics/framebuffer.hpp"
 
 namespace Usermode
@@ -13,8 +15,11 @@ namespace Usermode
         namespace Windows
         {
             extern bool bInitialized;
-            extern void Init();
-            extern void RenderWindows(::Graphics::Framebuffer* fb);
+
+            extern Usermode::Graphics::Windows::Window* CreateWindow(const char* windowName, uint32_t windowFlags, 
+                uint32_t x, uint32_t y, 
+                uint32_t width, uint32_t height, 
+                bool focus = true);
         }
     }
 }
