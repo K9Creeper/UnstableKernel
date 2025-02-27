@@ -89,11 +89,15 @@ void Graphics::Framebuffer::CopyTo(Graphics::Framebuffer *other, uint32_t l, uin
         int xx = 0;
         for (int x = l; x <= r; ++x)
         {
-            uint32_t *c = this->GetPixel(++xx, yy);
+            uint32_t *c = this->GetPixel(xx, yy);
             uint32_t *d = other->GetPixel(x, y);
 
-            if (!c || !d)
+            ++xx;
+
+            if (!c || !d){
                 continue;
+            }
+
 
             *d = *c;
         }

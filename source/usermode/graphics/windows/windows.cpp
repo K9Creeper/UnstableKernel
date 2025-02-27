@@ -23,7 +23,7 @@ namespace Usermode
         extern uint32_t GetScreenPitch();
         extern uint32_t GetScreenBPP();
 
-        extern ::Graphics::Framebuffer* currentFb;
+        extern ::Graphics::Framebuffer *currentFb;
 
         namespace Windows
         {
@@ -32,61 +32,70 @@ namespace Usermode
             WindowDrawList windowDrawList;
 
             void Init();
-            void RenderWindows(::Graphics::Framebuffer* fb);
+            void RenderWindows(::Graphics::Framebuffer *fb);
         }
     }
 }
 
-extern "C" void printf(const char* f, ...);
+extern "C" void printf(const char *f, ...);
 
 void Usermode::Graphics::Windows::Init()
 {
     if (bInitialized)
         return;
 
-    windowDrawList.RePlace(sys_malloc(sizeof(void*) * MAX_WINDOWS), MAX_WINDOWS);
+    windowDrawList.RePlace(sys_malloc(sizeof(void *) * MAX_WINDOWS), MAX_WINDOWS);
 
     bInitialized = true;
 }
 
-static void PutPixel(::Graphics::Framebuffer* fb, int x, int y, uint32_t color){
-    if(uint32_t* p = fb->GetPixel(x, y))
+static void PutPixel(::Graphics::Framebuffer *fb, int x, int y, uint32_t color)
+{
+    if (uint32_t *p = fb->GetPixel(x, y))
         *p = color;
 }
 
-static void DrawBox(::Graphics::Framebuffer* fb, int l, int t, int r, int b, uint32_t color){
-    for(int y = t; y <= b; y++)
-        for(int x = l; x <= r; x++)
+static void DrawBox(::Graphics::Framebuffer *fb, int l, int t, int r, int b, uint32_t color)
+{
+    for (int y = t; y <= b; y++)
+        for (int x = l; x <= r; x++)
             PutPixel(fb, x, y, color);
 }
 
-static void DrawWindow(::Graphics::Framebuffer* fb, Usermode::Graphics::Windows::Window* window)
+static void DrawWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows::Window *window)
 {
-    ::Graphics::Framebuffer* wfb = &window->framebuffer;
-    if(!(window->windowStyleFlags & WS_BORDERLESS || window->windowStyleFlags & WS_FULLSCREEN))
+    ::Graphics::Framebuffer *wfb = &window->framebuffer;
+    if (!(window->windowStyleFlags & WS_BORDERLESS || window->windowStyleFlags & WS_FULLSCREEN))
+    {
         DrawBox(fb, window->l, window->t, window->r, window->b, Usermode::Graphics::Native::Style::windowAccent);
-    
+    }
+
     // Now work with the wfb
-    DrawBox(wfb, 0, 0, window->width, window->height, 0xFF0000);
+    DrawBox(wfb, 0, 0, window->width, window->height, 0xB00B5);
 }
 
-static void RenderWindow(::Graphics::Framebuffer* fb, Usermode::Graphics::Windows::Window* window){
+static void RenderWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows::Window *window)
+{
     DrawWindow(fb, window);
 
     // Copy window's fb to current fb
     window->framebuffer.CopyTo(fb, window->viewport.l, window->viewport.t, window->viewport.r, window->viewport.b);
 }
 
-Usermode::Graphics::Windows::Window* Usermode::Graphics::Windows::CreateWindow(const char* windowName, uint32_t windowFlags, 
-    uint32_t x, uint32_t y, 
-    uint32_t width, uint32_t height, 
-    bool focus){
-    Usermode::Graphics::Windows::Window* window = reinterpret_cast<Usermode::Graphics::Windows::Window*>(sys_malloc(sizeof(Usermode::Graphics::Windows::Window)));
+Usermode::Graphics::Windows::Window *Usermode::Graphics::Windows::CreateWindow(const char *windowName, uint32_t windowFlags,
+                                                                               uint32_t x, uint32_t y,
+                                                                               uint32_t width, uint32_t height,
+                                                                               bool focus)
+{
+    Usermode::Graphics::Windows::Window *window = reinterpret_cast<Usermode::Graphics::Windows::Window *>(sys_malloc(sizeof(Usermode::Graphics::Windows::Window)));
     memset(reinterpret_cast<uint8_t *>(window->name), 0, 512);
     memcpy(reinterpret_cast<uint8_t *>(window->name), reinterpret_cast<const uint8_t *>(windowName), strlen(windowName));
 
-    if(!windowFlags)
+    if (!windowFlags)
         window->windowStyleFlags = windowFlags;
+
+    window->width = width;
+    window->height = height;
 
     window->l = x;
     window->t = y;
@@ -94,18 +103,15 @@ Usermode::Graphics::Windows::Window* Usermode::Graphics::Windows::CreateWindow(c
     window->r = x + width;
     window->b = y + height;
 
-    window->width = width;
-    window->height = height;
-
-    if(window->windowStyleFlags & WS_BORDERLESS || window->windowStyleFlags & WS_FULLSCREEN)
+    if (window->windowStyleFlags & WS_BORDERLESS || window->windowStyleFlags & WS_FULLSCREEN)
         window->viewport.t = window->t;
     else
-        window->viewport.t = window->t + Usermode::Graphics::Native::Style::windowTitleBarHeightRatio * Usermode::Graphics::GetScreenY(); // This will be dynamic and change...but im too lazy to do that
+        window->viewport.t = window->t + 50;
 
     window->viewport.l = window->l;
+    window->viewport.r = window->r;
 
     window->viewport.b = window->b;
-    window->viewport.t = window->t;
 
     window->framebuffer.Init(sys_malloc(currentFb->GetSize()), Usermode::Graphics::GetScreenX(), Usermode::Graphics::GetScreenY(), Usermode::Graphics::GetScreenPitch(), Usermode::Graphics::GetScreenBPP());
     window->framebuffer.Clear();
@@ -115,7 +121,7 @@ Usermode::Graphics::Windows::Window* Usermode::Graphics::Windows::CreateWindow(c
 
     Usermode::Graphics::Windows::windowDrawList.AddWindow(window, !focus);
 
-    if(focus)
+    if (focus)
         Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
 
     return window;
@@ -123,12 +129,12 @@ Usermode::Graphics::Windows::Window* Usermode::Graphics::Windows::CreateWindow(c
 
 static bool forceSort = false;
 
-void Usermode::Graphics::Windows::RenderWindows(::Graphics::Framebuffer* fb)
+void Usermode::Graphics::Windows::RenderWindows(::Graphics::Framebuffer *fb)
 {
-    for(uint32_t i = 0; i < windowDrawList.GetSize(); i++)
+    for (uint32_t i = 0; i < windowDrawList.GetSize(); i++)
     {
-        Window* w = windowDrawList.Get(i);
-        if(!w)
+        Window *w = windowDrawList.Get(i);
+        if (!w)
         {
             forceSort = true;
             continue;
@@ -137,7 +143,8 @@ void Usermode::Graphics::Windows::RenderWindows(::Graphics::Framebuffer* fb)
         RenderWindow(fb, w);
     }
 
-    if(forceSort){
+    if (forceSort)
+    {
         windowDrawList.ForceSort();
         forceSort = false;
     }
