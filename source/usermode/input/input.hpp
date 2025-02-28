@@ -15,6 +15,10 @@ namespace Usermode{
         extern MouseInfo mouseInfo;
         extern KeyboardKey* keyboardMap;
 
+        // These will be handled in the GUI...
+        extern MouseInfo mouseInfoBuffer;
+        extern KeyboardKey keyboardMapBuffer;
+
         extern void Init();
     }
 }

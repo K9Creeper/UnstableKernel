@@ -14,6 +14,9 @@ namespace Usermode{
         MouseInfo mouseInfo;
 
         KeyboardKey* keyboardMap = nullptr;
+
+        MouseInfo mouseInfoBuffer;
+        KeyboardKey keyboardMapBuffer;
     }
 }
 

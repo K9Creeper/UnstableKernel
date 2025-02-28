@@ -13,6 +13,8 @@
 #include "../../../chelpers/memory.h"
 #include "../../../chelpers/string.h"
 
+#include "../../input/input.hpp"
+
 namespace Usermode
 {
     namespace Graphics
@@ -37,8 +39,6 @@ namespace Usermode
     }
 }
 
-extern "C" void printf(const char *f, ...);
-
 void Usermode::Graphics::Windows::Init()
 {
     if (bInitialized)
@@ -47,6 +47,11 @@ void Usermode::Graphics::Windows::Init()
     windowDrawList.RePlace(sys_malloc(sizeof(void *) * MAX_WINDOWS), MAX_WINDOWS);
 
     bInitialized = true;
+}
+
+static bool PointInRect(int x, int y, int l, int t, int r, int b)
+{
+    return (x >= l && x <= r) && (y >= t && y <= b);
 }
 
 static void PutPixel(::Graphics::Framebuffer *fb, int x, int y, uint32_t color)
@@ -71,11 +76,84 @@ static void DrawWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows:
     }
 
     // Now work with the wfb
-    DrawBox(wfb, 0, 0, window->width, window->height, 0xB00B5);
+    DrawBox(wfb, 0, 0, window->width, window->height, 0x00FF00);
+}
+
+
+static bool HoveringWindow(Usermode::Graphics::Windows::Window *window){
+    Usermode::Graphics::Windows::Window* hovering = nullptr;
+    for(uint16_t i = 0; i < Usermode::Graphics::Windows::windowDrawList.GetSize(); i++)
+    {
+        Usermode::Graphics::Windows::Window* w = Usermode::Graphics::Windows::windowDrawList.Get(i);
+        if(PointInRect(Usermode::Input::mouseInfoBuffer.X, Usermode::Input::mouseInfoBuffer.Y, w->l, w->t, w->r, w->b))
+        {
+            hovering = w;
+        }
+    }
+
+    return window == hovering;
 }
 
 static void RenderWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows::Window *window)
 {
+    bool isHovering = HoveringWindow(window);
+    // Handle Dragging
+    if (isHovering && PointInRect(Usermode::Input::mouseInfoBuffer.X, Usermode::Input::mouseInfoBuffer.Y, window->l, window->t, window->r, window->viewport.t))
+    {
+        // On Down
+        if (Usermode::Input::mouseInfoBuffer.currState[0] && !Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
+            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
+
+            Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
+        }
+        // Release
+        if (!Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+        }
+        // Down
+        if (Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+            int diffx = Usermode::Input::mouseInfoBuffer.X - window->mDownX;
+            int diffy = Usermode::Input::mouseInfoBuffer.Y - window->mDownY;
+
+            window->l += diffx;
+            window->r += diffx;
+            window->t += diffy;
+            window->b += diffy;
+
+            window->viewport.l += diffx;
+            window->viewport.r += diffx;
+            window->viewport.t += diffy;
+            window->viewport.b += diffy;
+
+            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
+            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
+        }
+    }
+    else if (isHovering)
+    {
+        // On Down
+        if (Usermode::Input::mouseInfoBuffer.currState[0] && !Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
+            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
+
+            Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
+        }
+        // Release
+        if (!Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+            
+        }
+        // Down
+        if (Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
+        {
+
+        }
+    }
+
     DrawWindow(fb, window);
 
     // Copy window's fb to current fb
@@ -106,7 +184,7 @@ Usermode::Graphics::Windows::Window *Usermode::Graphics::Windows::CreateWindow(c
     if (window->windowStyleFlags & WS_BORDERLESS || window->windowStyleFlags & WS_FULLSCREEN)
         window->viewport.t = window->t;
     else
-        window->viewport.t = window->t + 50;
+        window->viewport.t = window->t + 20;
 
     window->viewport.l = window->l;
     window->viewport.r = window->r;

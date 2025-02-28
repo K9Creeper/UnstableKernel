@@ -86,10 +86,10 @@ void MouseHandler_(Registers * regs){
         Kernel::Drivers::Input::Mouse::mouse_byte[2]= Mouse_Read();
 
         Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_X = Kernel::Drivers::Input::Mouse::mouse_byte[1];
-        Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y = Kernel::Drivers::Input::Mouse::mouse_byte[2];
+        Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y = -Kernel::Drivers::Input::Mouse::mouse_byte[2];
 
         Kernel::Drivers::Input::Mouse::mouseInfo.X += Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_X;
-        Kernel::Drivers::Input::Mouse::mouseInfo.Y -= Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y;
+        Kernel::Drivers::Input::Mouse::mouseInfo.Y += Kernel::Drivers::Input::Mouse::mouseInfo.CHANGE_Y;
 
         if(Kernel::Drivers::Input::Mouse::mouseInfo.X < 0)
                 Kernel::Drivers::Input::Mouse::mouseInfo.X = 0;

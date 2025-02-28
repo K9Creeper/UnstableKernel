@@ -62,6 +62,7 @@ void WindowDrawList::ForceSort()
     if (size <= 1)
         return;
     bool sort = true;
+
     while (sort)
     {
         sort = false;
@@ -90,10 +91,10 @@ void WindowDrawList::ForceSort()
                 continue;
             }
 
-            if (w1->zindex > w2->zindex)
+            if (w1->zindex < w2->zindex)
             {
-                array[i] = w1;
-                array[i - 1] = w2;
+                array[i] = w2;
+                array[i - 1] = w1;
                 sort = true;
             }
         }

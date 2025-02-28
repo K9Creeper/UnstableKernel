@@ -24,7 +24,7 @@ namespace Usermode
                 // window name
                 char name[512];
 
-                uint16_t zindex;
+                uint16_t zindex = 0;
 
                 // left, top, right, bottom
                 int l, t, r, b;
@@ -42,6 +42,8 @@ namespace Usermode
 
                 // our framebuffer, includes ONLY the viewport
                 ::Graphics::Framebuffer framebuffer;
+
+                int mDownX, mDownY;
             };
         }
     }

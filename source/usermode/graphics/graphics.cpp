@@ -4,6 +4,8 @@
 
 #include "graphics.hpp"
 
+#include "../input/input.hpp"
+
 #include "../../graphics/graphics.hpp"
 #include "../../kernel/multitasking/syscall.hpp"
 
@@ -58,6 +60,12 @@ void Usermode::Graphics::DrawAndSwap(){
     ::Graphics::SwapBuffers();
 }
 
+static void HandleInput(){
+    Usermode::Input::mouseInfoBuffer = Usermode::Input::mouseInfo;
+    if(Usermode::Input::keyboardMap)
+        Usermode::Input::keyboardMapBuffer = *Usermode::Input::keyboardMap;
+}
+
 void Usermode::Graphics::Thread()
 {
     Usermode::Graphics::Windows::Init();
@@ -66,9 +74,12 @@ void Usermode::Graphics::Thread()
 
     currentFb = ::Graphics::GetBackBuffer();
 
-    Usermode::Graphics::Windows::CreateWindow("Test", 0, 200, 200, 100, 100);
+    Usermode::Graphics::Windows::CreateWindow("Test1", 0, 200, 200, 100, 100);
+    Usermode::Graphics::Windows::CreateWindow("Test2", 0, 400, 200, 100, 100);
 
     while(bThreadRunning){
+        HandleInput();
+
         if(!currentFb){
             currentFb = ::Graphics::GetBackBuffer();
             continue;

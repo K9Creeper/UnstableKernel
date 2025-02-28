@@ -81,7 +81,7 @@ uint32_t Graphics::Framebuffer::GetBPP() const
     return bpp;
 }
 
-void Graphics::Framebuffer::CopyTo(Graphics::Framebuffer *other, uint32_t l, uint32_t t, uint32_t r, uint32_t b)
+void Graphics::Framebuffer::CopyTo(Graphics::Framebuffer *other, int l, int t, int r, int b)
 {
     int yy = 0;
     for (int y = t; y <= b; ++y)

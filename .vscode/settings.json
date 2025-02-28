@@ -32,7 +32,9 @@
         "string.h": "c",
         "ordered_array.h": "c",
         "stack": "cpp",
-        "deque": "cpp"
+        "deque": "cpp",
+        "bit": "cpp",
+        "xstddef": "cpp"
     },
     "C_Cpp.default.compilerPath": "cl.exe",
     "C_Cpp.errorSquiggles": "disabled"

@@ -45,7 +45,7 @@ namespace Graphics
         uint32_t GetBPP() const;
 
         // Like copy mem from this to other
-        void CopyTo(Graphics::Framebuffer *other, uint32_t l, uint32_t t, uint32_t r, uint32_t b);
+        void CopyTo(Graphics::Framebuffer *other, int l, int t, int r, int b);
 
     private:
     };

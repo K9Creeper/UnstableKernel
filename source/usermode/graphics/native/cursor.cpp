@@ -30,8 +30,8 @@ void Usermode::Graphics::Native::DrawCursor(::Graphics::Framebuffer *fb)
     if (!Input::bInitialized)
         return;
 
-    int x = Input::mouseInfo.X;
-    int y = Input::mouseInfo.Y;
+    int x = Input::mouseInfoBuffer.X;
+    int y = Input::mouseInfoBuffer.Y;
 
     int half = (Style::mouseCursorSize / 2);
 

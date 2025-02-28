@@ -165,6 +165,7 @@ protected_mode_32:use32
     sti
     popa
     ret
+
 padding:
     db 0x0
     db 0x0
@@ -190,4 +191,5 @@ asm_out_reg_ptr:
     dd 0xaaaaaaaa
 temp_esp:
     dw 0x0000
+
 Bios32HelperEnd:
