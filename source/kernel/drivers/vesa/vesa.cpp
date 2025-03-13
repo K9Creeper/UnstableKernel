@@ -29,14 +29,12 @@ namespace Kernel
     }
 }
 
-extern "C" void printf(const char *format, ...);
-
 void LoadvbeInfo(){
     Registers16 reg_in = {0};
     Registers16 reg_out = {0};
     reg_in.ax = 0x4F00;
     reg_in.di = 0x9500;
-    Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
+    Kernel::Bios32::Call(0x10, &reg_in, &reg_out, true);
     memcpy(reinterpret_cast<unsigned char *>(&Kernel::Drivers::VESA::vbeInfo), reinterpret_cast<unsigned char *>(0x9500), sizeof(Kernel::Drivers::VESA::VbeInfoBlock));
 }
 
@@ -50,7 +48,7 @@ void VESAGetMode(uint16_t mode, Kernel::Drivers::VESA::VbeModeInfoStruct *modeIn
     reg_in.ax = 0x4F01;
     reg_in.cx = mode;
     reg_in.di = 0x9000;
-    Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
+    Kernel::Bios32::Call(0x10, &reg_in, &reg_out, true);
     memcpy(reinterpret_cast<unsigned char *>(modeInfo), reinterpret_cast<unsigned char *>(0x9000), sizeof(Kernel::Drivers::VESA::VbeModeInfoStruct));
 }
 
@@ -96,7 +94,7 @@ void VESASetMode(uint32_t mode)
     Registers16 reg_out = {0};
     reg_in.ax = 0x4F02;
     reg_in.bx = mode;
-    Kernel::Bios32::Call(0x10, &reg_in, &reg_out);
+    Kernel::Bios32::Call(0x10, &reg_in, &reg_out, true);
 }
 
 void Kernel::Drivers::VESA::SetMode(uint32_t mode)

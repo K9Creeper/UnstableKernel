@@ -25,6 +25,7 @@ namespace Usermode{
         namespace Windows{
             extern void Init();
             extern void RenderWindows(::Graphics::Framebuffer* fb);
+            extern void HandleDragFocusInput();
         }
 
         void DrawAndSwap();
@@ -64,6 +65,8 @@ static void HandleInput(){
     Usermode::Input::mouseInfoBuffer = Usermode::Input::mouseInfo;
     if(Usermode::Input::keyboardMap)
         Usermode::Input::keyboardMapBuffer = *Usermode::Input::keyboardMap;
+
+    Usermode::Graphics::Windows::HandleDragFocusInput();
 }
 
 void Usermode::Graphics::Thread()

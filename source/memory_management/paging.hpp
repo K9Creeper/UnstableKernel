@@ -72,7 +72,7 @@ public:
     void EnablePaging();
     void SwitchToDirectory(bool isPhysical, uint32_t cr3 = 0);
 
-    uint32_t Virtual2Phyiscal(uint32_t virtual_address, PageDirectory* diff = nullptr);
+    uint32_t Virtual2Physical(uint32_t virtual_address, PageDirectory* diff = nullptr);
 
     void AllocateRegion(uint32_t start, uint32_t end, bool identity = false, bool isKernel = false, bool isWritable = false);
 

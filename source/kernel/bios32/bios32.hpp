@@ -8,6 +8,6 @@
 namespace Kernel{
     namespace Bios32{
         extern void Init();
-        extern void Call(uint8_t n, Registers16 * in_reg, Registers16 * out_reg);
+        extern void Call(uint8_t n, Registers16 * in_reg, Registers16 * out_reg, bool bEnableInt = false);
     }
 }

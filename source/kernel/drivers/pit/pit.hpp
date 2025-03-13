@@ -18,8 +18,12 @@ namespace Kernel{
             extern int AddHandle(void* handle);
             extern void RemoveHandle(int num);
 
+            extern void Sleep(unsigned int ms);
+
             extern void Init(uint16_t hz = 100);
             extern void SetFrequency(uint16_t hz);
         }
     }
 }
+
+#define sleep Kernel::Drivers::PIT::Sleep

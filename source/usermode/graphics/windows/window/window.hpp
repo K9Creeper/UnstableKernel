@@ -42,8 +42,6 @@ namespace Usermode
 
                 // our framebuffer, includes ONLY the viewport
                 ::Graphics::Framebuffer framebuffer;
-
-                int mDownX, mDownY;
             };
         }
     }

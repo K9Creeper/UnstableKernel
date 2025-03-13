@@ -49,7 +49,9 @@ namespace Kernel{
 void Kernel::Memory::IDT::Install()
 {
     Kernel::Memory::IRQ::Remap();
+
     Kernel::Memory::ISRS::AddGates();
+
     Kernel::Memory::IRQ::AddGates();
 
     _idt_load();

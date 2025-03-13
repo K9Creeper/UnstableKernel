@@ -14,7 +14,8 @@ extern "C"
     bool ispunct(const char c);
 
     int strlen(const char *str);
-
+    char *strsep(char **stringp, const char *delim);
+    
     int find(const char *str, const char *f);
     void itoa(int num, char *str, int base);
     void uitoa(uint32_t num, char*str, int base);

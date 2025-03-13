@@ -22,8 +22,6 @@ namespace Kernel
     }
 }
 
-extern "C" void printf(const char* format, ...);
-
 extern void Scheduler_(Registers *regs, uint32_t tick);
 
 void Kernel::Multitasking::SYSCALL::_exit(void){

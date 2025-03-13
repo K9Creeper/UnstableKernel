@@ -107,7 +107,7 @@ void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
     {
         if (!isPhysical)
         {
-            t = Virtual2Phyiscal(cr3, pageDirectory);
+            t = Virtual2Physical(cr3, pageDirectory);
         }
         else
             t = cr3;
@@ -115,7 +115,7 @@ void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
     else
     {
         if (!isPhysical)
-            t = Virtual2Phyiscal(dir, pageDirectory);
+            t = Virtual2Physical(dir, pageDirectory);
         else
             t = reinterpret_cast<uint32_t>(dir);
     }
@@ -126,7 +126,7 @@ void Paging::SwitchToDirectory(bool isPhysical, uint32_t cr3)
     Kernel::MemoryManagement::current = dir;
 }
 
-uint32_t Paging::Virtual2Phyiscal(uint32_t virtual_address, PageDirectory *diff)
+uint32_t Paging::Virtual2Physical(uint32_t virtual_address, PageDirectory *diff)
 {
     PageDirectory *d = dir;
     if (diff)
@@ -186,7 +186,7 @@ void Paging::AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKerne
 
         memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t *>(0), sizeof(PageTable));
 
-        uint32_t t = Virtual2Phyiscal(table, Kernel::MemoryManagement::pManager.GetDirectory());
+        uint32_t t = Virtual2Physical(table, Kernel::MemoryManagement::pManager.GetDirectory());
         pd->tables[pageDirIdx].frame = t >> 12;
         pd->tables[pageDirIdx].present = 1;
         pd->tables[pageDirIdx].rw = 1;
@@ -250,7 +250,7 @@ PageTable *Paging::CopyPageTable(PageDirectory *dst_page_dir, uint32_t page_dir_
 
         uint32_t tmp_virtual_address = 0;
         AllocatePage(dst_virtual_address, 0, false, true, dst_page_dir);
-        AllocatePage(tmp_virtual_address, Virtual2Phyiscal(dst_virtual_address, dst_page_dir), false, true);
+        AllocatePage(tmp_virtual_address, Virtual2Physical(dst_virtual_address, dst_page_dir), false, true);
         if (src->pages[i].present)
             table->pages[i].present = 1;
         if (src->pages[i].rw)
@@ -284,7 +284,7 @@ void Paging::CopyDirectory(PageDirectory *dst, PageDirectory * src)
         else
         {
             dst->ref_tables[i] = CopyPageTable(dst, i, dir->ref_tables[i]);
-            uint32_t phys = Virtual2Phyiscal(reinterpret_cast<uint32_t>(dst->ref_tables[i]), c);
+            uint32_t phys = Virtual2Physical(reinterpret_cast<uint32_t>(dst->ref_tables[i]), c);
             dst->tables[i].frame = phys >> 12;
             dst->tables[i].user = 1;
             dst->tables[i].rw = 1;

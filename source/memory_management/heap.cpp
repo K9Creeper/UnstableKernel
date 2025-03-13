@@ -477,7 +477,7 @@ uint32_t Heap::malloc_(uint32_t size, bool shouldAlign, uint32_t *physAddress)
     // if physical address is requested, calculate and return it
     if (physAddress != nullptr)
     {
-      *physAddress = pManager->Virtual2Phyiscal(reinterpret_cast<uint32_t>(address));
+      *physAddress = pManager->Virtual2Physical(reinterpret_cast<uint32_t>(address));
     }
 
     // return the virtual address of the newly allocated memory

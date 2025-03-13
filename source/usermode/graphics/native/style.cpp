@@ -18,7 +18,7 @@ namespace Usermode{
 
                 uint32_t textColor = 0xEBF1F7;
 
-                uint32_t windowAccent = 0xFFFFFF;
+                uint32_t windowAccent = 0xd9ebff;
                 float windowTitleBarHeightRatio = 0.08;
             }
         }

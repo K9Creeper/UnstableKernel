@@ -39,8 +39,6 @@ void Kernel::Multitasking::Run()
     Scheduling::Run();
 }
 
-extern "C" void printf(const char *f, ...);
-
 void Kernel::Multitasking::CreateTask(const char *name, void *routine, bool isThread)
 {
     Task *t = reinterpret_cast<Task *>(Kernel::MemoryManagement::kheap.malloc_(sizeof(Task)));
@@ -73,7 +71,7 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine, bool isTh
 
     Kernel::MemoryManagement::pManager.CopyDirectory(t->pManager->GetDirectory());
 
-    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Phyiscal(reinterpret_cast<uint32_t>(t->pManager->GetDirectory()), Kernel::MemoryManagement::current);
+    t->cr3 = Kernel::MemoryManagement::pManager.Virtual2Physical(reinterpret_cast<uint32_t>(t->pManager->GetDirectory()), Kernel::MemoryManagement::current);
 
     t->state.esp = t->state.ebp = 0x70500000;
 

@@ -35,6 +35,7 @@ namespace Usermode
 
             void Init();
             void RenderWindows(::Graphics::Framebuffer *fb);
+            void HandleDragFocusInput();
         }
     }
 }
@@ -79,13 +80,13 @@ static void DrawWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows:
     DrawBox(wfb, 0, 0, window->width, window->height, 0x00FF00);
 }
 
-
-static bool HoveringWindow(Usermode::Graphics::Windows::Window *window){
-    Usermode::Graphics::Windows::Window* hovering = nullptr;
-    for(uint16_t i = 0; i < Usermode::Graphics::Windows::windowDrawList.GetSize(); i++)
+static bool HoveringWindow(Usermode::Graphics::Windows::Window *window)
+{
+    Usermode::Graphics::Windows::Window *hovering = nullptr;
+    for (uint16_t i = 0; i < Usermode::Graphics::Windows::windowDrawList.GetSize(); i++)
     {
-        Usermode::Graphics::Windows::Window* w = Usermode::Graphics::Windows::windowDrawList.Get(i);
-        if(PointInRect(Usermode::Input::mouseInfoBuffer.X, Usermode::Input::mouseInfoBuffer.Y, w->l, w->t, w->r, w->b))
+        Usermode::Graphics::Windows::Window *w = Usermode::Graphics::Windows::windowDrawList.Get(i);
+        if (PointInRect(Usermode::Input::mouseInfoBuffer.X, Usermode::Input::mouseInfoBuffer.Y, w->l, w->t, w->r, w->b))
         {
             hovering = w;
         }
@@ -96,64 +97,6 @@ static bool HoveringWindow(Usermode::Graphics::Windows::Window *window){
 
 static void RenderWindow(::Graphics::Framebuffer *fb, Usermode::Graphics::Windows::Window *window)
 {
-    bool isHovering = HoveringWindow(window);
-    // Handle Dragging
-    if (isHovering && PointInRect(Usermode::Input::mouseInfoBuffer.X, Usermode::Input::mouseInfoBuffer.Y, window->l, window->t, window->r, window->viewport.t))
-    {
-        // On Down
-        if (Usermode::Input::mouseInfoBuffer.currState[0] && !Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
-            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
-
-            Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
-        }
-        // Release
-        if (!Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-        }
-        // Down
-        if (Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-            int diffx = Usermode::Input::mouseInfoBuffer.X - window->mDownX;
-            int diffy = Usermode::Input::mouseInfoBuffer.Y - window->mDownY;
-
-            window->l += diffx;
-            window->r += diffx;
-            window->t += diffy;
-            window->b += diffy;
-
-            window->viewport.l += diffx;
-            window->viewport.r += diffx;
-            window->viewport.t += diffy;
-            window->viewport.b += diffy;
-
-            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
-            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
-        }
-    }
-    else if (isHovering)
-    {
-        // On Down
-        if (Usermode::Input::mouseInfoBuffer.currState[0] && !Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-            window->mDownX = Usermode::Input::mouseInfoBuffer.X;
-            window->mDownY = Usermode::Input::mouseInfoBuffer.Y;
-
-            Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
-        }
-        // Release
-        if (!Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-            
-        }
-        // Down
-        if (Usermode::Input::mouseInfoBuffer.currState[0] && Usermode::Input::mouseInfoBuffer.prevState[0])
-        {
-
-        }
-    }
-
     DrawWindow(fb, window);
 
     // Copy window's fb to current fb
@@ -206,6 +149,76 @@ Usermode::Graphics::Windows::Window *Usermode::Graphics::Windows::CreateWindow(c
 }
 
 static bool forceSort = false;
+
+void Usermode::Graphics::Windows::HandleDragFocusInput()
+{
+    static Window *w;
+
+    static int mDownX;
+    static int mDownY;
+
+    for (uint32_t i = 0; i < windowDrawList.GetSize(); i++)
+    {
+        Window *window = windowDrawList.Get(i);
+
+        if (!window)
+            continue;
+
+        bool isHovering = HoveringWindow(window);
+
+        // Handle Dragging
+        bool mouseDown = Usermode::Input::mouseInfoBuffer.currState[0];
+        bool mouseWasDown = Usermode::Input::mouseInfoBuffer.prevState[0];
+        int mouseX = Usermode::Input::mouseInfoBuffer.X;
+        int mouseY = Usermode::Input::mouseInfoBuffer.Y;
+
+        bool isMousePressed = mouseDown && !mouseWasDown;
+        bool isMouseReleased = !mouseDown && mouseWasDown;
+        bool isMouseHeld = mouseDown && mouseWasDown;
+
+        if(isHovering)
+        {
+            if (isMousePressed || isMouseHeld)
+                Usermode::Graphics::Windows::windowDrawList.FocusWindow(window);
+        }
+
+        if (isHovering && PointInRect(mouseX, mouseY, window->l, window->t, window->r, window->viewport.t))
+        {
+            if (isMousePressed)
+            {
+                w = window;
+                mDownX = mouseX;
+                mDownY = mouseY;
+            }
+        }
+
+        if (w == window)
+        {
+            if (isMouseReleased)
+            {
+                w = nullptr;
+            }
+            else if (isMouseHeld)
+            {
+                int diffX = mouseX - mDownX;
+                int diffY = mouseY - mDownY;
+
+                window->l += diffX;
+                window->r += diffX;
+                window->t += diffY;
+                window->b += diffY;
+
+                window->viewport.l += diffX;
+                window->viewport.r += diffX;
+                window->viewport.t += diffY;
+                window->viewport.b += diffY;
+
+                mDownX = mouseX;
+                mDownY = mouseY;
+            }
+        }
+    }
+}
 
 void Usermode::Graphics::Windows::RenderWindows(::Graphics::Framebuffer *fb)
 {

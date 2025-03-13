@@ -22,7 +22,9 @@ extern new_idt_ptr;
 extern new_reg_ptr;
 extern new_intnum_ptr;
 
-%define REBASE(x)                              (((x) - Bios32Helper) + 0x7c00)
+%define REBASED_OFFSET                         0x7c00
+
+%define REBASE(x)                              (((x) - Bios32Helper) + REBASED_OFFSET)
 %define GDTENTRY(x)                            ((x) << 3)
 %define CODE32                                 GDTENTRY(1)  ; 0x08
 %define DATA32                                 GDTENTRY(2)  ; 0x10

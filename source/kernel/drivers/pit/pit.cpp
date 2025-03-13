@@ -49,6 +49,13 @@ void Kernel::Drivers::PIT::RemoveHandle(int num){
         handles[num] = nullptr; 
 }
 
+void Kernel::Drivers::PIT::Sleep(unsigned int ms) {
+    unsigned int target_ticks = ticks + (ms * hzFrequency) / 1000;
+    while (ticks < target_ticks) {
+        asm volatile("hlt");
+    }
+}
+
 void Kernel::Drivers::PIT::Init(uint16_t hz){
     SetFrequency(hz);
     Kernel::Memory::IRQ::AddHandle(0, TimerHandler_);

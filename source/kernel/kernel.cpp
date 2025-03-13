@@ -48,6 +48,9 @@ void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
     Kernel::Memory::GDT::Init();
     printf("Initialized | GDT\n");
 
+    Kernel::Bios32::Init();
+    printf("Initialized | Bios32 Service\n");
+
     Kernel::Memory::GDT::Install();
     printf("Installed | GDT\n");
 
@@ -61,9 +64,6 @@ void SetupEarlyMemory(const uint32_t &addr, const uint32_t &magic)
 
     Kernel::Memory::IDT::Install();
     printf("Installed | Interrupts & IDT\n");
-
-    Kernel::Bios32::Init();
-    printf("Initialized | Bios32 Service\n");
 
     printf("\n| ------------------ |\n\n");
 }
@@ -92,7 +92,7 @@ void SetupDrivers()
 {
     printf("\n| Setup Drivers |\n\n");
 
-    Kernel::Drivers::PIT::Init(100);
+    Kernel::Drivers::PIT::Init(250);
     printf("Initialized | PIT\n");
 
     Kernel::Drivers::Input::Keyboard::Init();
@@ -162,11 +162,16 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
 
     SetupDrivers();
 
+    sti
+    sleep(500);
+
     SetupMultitasking();
 
-    sti
+    sleep(500);
 
     SetupGraphics();
+
+    sleep(250);
 
     EnterUsermode();
 
