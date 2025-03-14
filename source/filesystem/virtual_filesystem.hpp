@@ -8,6 +8,8 @@
 
 #include "ext2.hpp"
 
+#define VFS_MAX_CHILDREN 512
+
 enum VirtualFileSystemNodeTypes : uint16_t{
     FileSystemNodeType_FIFO = 0x1000,
     FileSystemNodeType_CharacterDevice = 0x2000,
@@ -21,11 +23,10 @@ struct VirtualFileSystemNode;
 
 class VirtualFileSystemNodeList{
 	protected:
-        VirtualFileSystemNode* array[512];
+        VirtualFileSystemNode* array[VFS_MAX_CHILDREN];
 
-		uint32_t max_size;
-	public:
-        VirtualFileSystemNodeList() : max_size{512}{}
+        public:
+        VirtualFileSystemNodeList(){}
 		~VirtualFileSystemNodeList(){}
 
 		bool Add(VirtualFileSystemNode* item);
@@ -63,5 +64,8 @@ struct VirtualFileSystemNode{
 struct VirtualFileSystemTree{
     VirtualFileSystemNode* root;
 
+    VirtualFileSystemNode* Find(const char* path);
+
     void Insert(VirtualFileSystemNode* sub, VirtualFileSystemNode* node);
+    void Remove(VirtualFileSystemNode* sub, VirtualFileSystemNode* node);
 };

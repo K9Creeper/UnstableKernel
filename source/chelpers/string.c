@@ -18,28 +18,64 @@ int strlen(const char *str)
   return len;
 }
 
-char *strsep(char **stringp, const char *delim)
+char *strtok(char *str, const char *delim, char *out)
 {
-  char *s;
-  const char *spanp;
-  int c, sc;
-  char *tok;
-  if ((s = *stringp) == 0)
-      return 0;
-  for (tok = s;;) {
-      c = *s++;
-      spanp = delim;
-      do {
-          if ((sc = *spanp++) == c) {
-              if (c == 0)
-                  s = 0;
-              else
-                  s[-1] = 0;
-              *stringp = s;
-              return (tok);
-          }
-      } while (sc != 0);
+  int i = 0;
+  for (; i < strlen(str); i++)
+  {
+    out[i] = str[i];
   }
+  
+  {
+    out[i] = '\0';
+  }
+
+  static char *next = 0;
+  if (out)
+    next = out;
+
+  if (!next)
+    return 0;
+
+  while (*next && (*next == *delim))
+    next++;
+
+  if (*next == '\0')
+    return 0;
+
+  char *token = next;
+
+  while (*next && (*next != *delim))
+    next++;
+
+  if (*next)
+  {
+    *next = '\0';
+    next++;
+  }
+  else
+  {
+    next = 0;
+  }
+
+  return token;
+}
+
+bool equal(const char* a, const char* b){
+  int len = strlen(a);
+  if(len == strlen(b))
+  {
+    for(int i = 0; i < len; i++)
+    {
+      if(a[i] != b[i])
+        return false;
+    }
+
+    if(len > 0)
+      return true;
+  }
+
+  return false;
 }
 
 int find(const char *str,

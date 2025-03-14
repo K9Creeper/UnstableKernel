@@ -8,12 +8,12 @@ bool VirtualFileSystemNodeList::Add(VirtualFileSystemNode *item)
 {
     int i = 0;
 
-    while (i < this->max_size || !this->Get(i))
+    while (i < VFS_MAX_CHILDREN && this->Get(i))
     {
         i++;
     }
 
-    if (i >= this->max_size)
+    if (i >= VFS_MAX_CHILDREN)
         return false;
 
     this->array[i] = item;
@@ -28,7 +28,7 @@ VirtualFileSystemNode *VirtualFileSystemNodeList::Get(uint32_t i)
 
 void VirtualFileSystemNodeList::Remove(uint32_t i)
 {
-    while (i < this->max_size - 1)
+    while (i < VFS_MAX_CHILDREN - 1)
     {
         this->array[i] = this->array[i + 1];
         i++;
@@ -37,16 +37,5 @@ void VirtualFileSystemNodeList::Remove(uint32_t i)
 
 uint32_t VirtualFileSystemNodeList::GetMaxSize() const
 {
-    return max_size;
-}
-
-void VirtualFileSystemTree::Insert(VirtualFileSystemNode *sub, VirtualFileSystemNode *node)
-{
-    if (!sub)
-    {
-        this->root = node;
-        return;
-    }
-
-    reinterpret_cast<VirtualFileSystemNode*>(node)->parent = sub;
+    return VFS_MAX_CHILDREN;
 }

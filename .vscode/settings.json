@@ -34,7 +34,9 @@
         "stack": "cpp",
         "deque": "cpp",
         "bit": "cpp",
-        "xstddef": "cpp"
+        "xstddef": "cpp",
+        "stdint.h": "c",
+        "stdbool.h": "c"
     },
     "C_Cpp.default.compilerPath": "cl.exe",
     "C_Cpp.errorSquiggles": "disabled"
