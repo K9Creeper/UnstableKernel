@@ -106,8 +106,8 @@ void SetupDrivers()
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
 
-    Kernel::Drivers::Filesystem::Init();
-    printf("Initialized | Filesystem\n");
+    //Kernel::Drivers::Filesystem::Init();
+    //printf("Initialized | Filesystem\n");
 
     printf("\n| ------------- |\n\n");
 }
@@ -168,15 +168,10 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     SetupDrivers();
 
     sti
-    sleep(500);
 
     SetupMultitasking();
 
-    sleep(500);
-
     SetupGraphics();
-
-    sleep(250);
 
     EnterUsermode();
 
