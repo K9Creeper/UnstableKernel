@@ -50,6 +50,30 @@ struct BlockGroupDescriptor{
     char unused0[8];
 }__attribute__ ((packed));
 
+struct INode {
+    uint16_t permission;
+    uint16_t userid;
+    uint32_t size;
+    uint32_t atime;
+    uint32_t ctime;
+    uint32_t mtime;
+    uint32_t dtime;
+    uint16_t gid;
+    uint16_t hard_links;
+    uint32_t num_sectors;
+    uint32_t flags;
+    uint32_t os_specific1;
+    uint32_t blocks[15];
+    uint32_t generation;
+    uint32_t file_acl;
+    union {
+        uint32_t dir_acl;
+        uint32_t size_high;
+    };
+    uint32_t f_block_addr;
+    char os_specific2[12];
+}__attribute__ ((packed));
+
 struct EXT2FileSystem {
     void* disk_device;
 

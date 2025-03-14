@@ -78,22 +78,35 @@ bool equal(const char* a, const char* b){
   return false;
 }
 
-int find(const char *str,
-         const char *f)
-{
-  int ret = -1;
-  for (int i = 0; i < strlen(str) - strlen(f); i++)
-    for (int j = 0; i < strlen(f); j++)
-    {
-      if (str[i + j] != f[j])
-      {
-        ret = -1;
+int find(const char *str, const char *f) {
+  if (str == 0 || f == 0) {
+    return -1;
+  }
+
+  if (*f == '\0') {
+    return 0;
+  }
+
+  int str_len = strlen(str);
+  int f_len = strlen(f);
+
+  if (f_len > str_len) {
+    return -1;
+  }
+
+  for (int i = 0; i <= str_len - f_len; ++i) {
+    int j;
+    for (j = 0; j < f_len; ++j) {
+      if (str[i + j] != f[j]) {
         break;
       }
-      else
-        ret = i;
     }
-  return ret;
+    if (j == f_len) {
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 void itoa(int num, char *str, int base)

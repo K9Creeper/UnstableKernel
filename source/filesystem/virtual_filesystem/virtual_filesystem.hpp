@@ -1,12 +1,10 @@
-/// --------
+/// ----------------------
 /// virtual_filesystem.hpp
 /// @brief This file defines the structures of the virtual filesystem.
 
 #pragma once
 
 #include <stdint.h>
-
-#include "ext2.hpp"
 
 #define VFS_MAX_CHILDREN 512
 
@@ -17,6 +15,18 @@ enum VirtualFileSystemNodeTypes : uint16_t{
     FileSystemNodeType_BlockDevice = 0x6000,
     FileSystemNodeType_RegularFile = 0x8000,
     FileSystemNodeType_SymbolicLink = 0xA000,
+};
+
+enum VirtualFileSystemNodeFlags : uint16_t{
+    VirtualFileSystemNodeFlags_ReadOnly = 0x0000,
+    VirtualFileSystemNodeFlags_WriteOnly,
+    VirtualFileSystemNodeFlags_ReadAndWriteOnly,
+    VirtualFileSystemNodeFlags_Appened = 0x0008,
+    VirtualFileSystemNodeFlags_Create = 0x0200,
+    VirtualFileSystemNodeFlags_Truncate = 0x0400,
+    VirtualFileSystemNodeFlags_Exclude = 0x0800,
+    VirtualFileSystemNodeFlags_NoFollow = 0x1000,
+    VirtualFileSystemNodeFlags_Path = 0x2000,
 };
 
 struct VirtualFileSystemNode;
@@ -66,6 +76,7 @@ struct VirtualFileSystemTree{
 
     VirtualFileSystemNode* Find(const char* path);
 
+    void Insert(const char* parentPath, VirtualFileSystemNode* node);
     void Insert(VirtualFileSystemNode* sub, VirtualFileSystemNode* node);
     void Remove(VirtualFileSystemNode* sub, VirtualFileSystemNode* node);
 };

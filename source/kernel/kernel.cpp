@@ -26,7 +26,7 @@
 
 #include "drivers/pci/pci.hpp"
 
-#include "drivers/filesystem/virtual_filesystem.hpp"
+#include "drivers/filesystem/virtual_filesystem/virtual_filesystem.hpp"
 
 #include "../graphics/graphics.hpp"
 
@@ -106,6 +106,9 @@ void SetupDrivers()
     Kernel::Drivers::PCI::Init();
     printf("Initialized | PCI\n");
 
+    Kernel::Drivers::Filesystem::Init();
+    printf("Initialized | Filesystem\n");
+
     printf("\n| ------------- |\n\n");
 }
 
@@ -163,9 +166,6 @@ extern "C" void kernel_main(uint32_t addr, uint32_t magic)
     SetupMemoryManagement();
 
     SetupDrivers();
-
-    Kernel::Drivers::Filesystem::Init();
-    printf("Initialized | Filesystem\n");
 
     sti
     sleep(500);

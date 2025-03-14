@@ -27,7 +27,7 @@ void Kernel::Multitasking::Init()
         return;
 
     Scheduling::Init();
-
+    
     bInitialized = true;
 }
 
