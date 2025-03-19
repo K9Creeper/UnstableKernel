@@ -15,11 +15,16 @@ namespace Usermode{
 
                 float desktopNavBarHeightRatio = 0.08;
                 uint32_t desktopNavBarColor = 0x1B345C;
+                uint8_t desktopNavBarOpacity = 230;
 
                 uint32_t textColor = 0xEBF1F7;
 
-                uint32_t windowAccent = 0xd9ebff;
+                uint8_t windowOpacity = 215;
+                uint32_t windowAccent = 0x454545;
                 float windowTitleBarHeightRatio = 0.08;
+
+                uint32_t windowBorderColor = 0xFFFFFF;
+                uint8_t windowBorderThickness = 1;
             }
         }
     }

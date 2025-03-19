@@ -51,10 +51,10 @@ void Kernel::Multitasking::CreateTask(const char *name, void *routine, bool isTh
 
     t->isThread = isThread;
 
-    t->pManager = Kernel::MemoryManagement::kheap.malloc_(sizeof(Paging));
+    t->pManager = Kernel::MemoryManagement::kheap.malloc_(sizeof(Paging), true);
 
     if (!isThread)
-        t->heap = Kernel::MemoryManagement::kheap.malloc_(sizeof(Heap));
+        t->heap = Kernel::MemoryManagement::kheap.malloc_(sizeof(Heap), true);
     else
         t->heap = Kernel::MemoryManagement::currentManager->GetHeap();
 

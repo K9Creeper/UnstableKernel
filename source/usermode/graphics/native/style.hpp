@@ -19,9 +19,16 @@ namespace Usermode{
 
                 extern float desktopNavBarHeightRatio;
                 extern uint32_t desktopNavBarColor;
+                extern uint8_t desktopNavBarOpacity;
 
+                extern uint32_t textColor;
+
+                extern uint8_t windowOpacity;
                 extern uint32_t windowAccent;
                 extern float windowTitleBarHeightRatio;
+
+                extern uint32_t windowBorderColor;
+                extern uint8_t windowBorderThickness;
             }
         }
     }

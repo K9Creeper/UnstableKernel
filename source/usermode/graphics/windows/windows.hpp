@@ -19,6 +19,7 @@ namespace Usermode
             extern Usermode::Graphics::Windows::Window* CreateWindow(const char* windowName, uint32_t windowFlags, 
                 uint32_t x, uint32_t y, 
                 uint32_t width, uint32_t height, 
+                void* callback = nullptr,
                 bool focus = true);
         }
     }

@@ -12,6 +12,8 @@
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
 
+extern "C" void printf(const char* f, ...);
+
 bool HeapOrderedArray::Insert(void *item)
 {
   uint32_t i;
@@ -102,6 +104,7 @@ void Heap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, boo
   bReadOnly = readonly;
 
   heapIndex.RePlace(reinterpret_cast<void *>(start), HEAP_INDEX_SIZE);
+  
   start += sizeof(void *) * HEAP_INDEX_SIZE;
 
   if ((start & 0xFFFFF000) != 0)
@@ -179,7 +182,7 @@ void Heap::Expand(uint32_t new_size)
   }
 
   // update the heap end address
-  heap_end = heap_start + new_size;
+  heap_end = heap_start + new_size;  
 }
 
 uint32_t Heap::Contract(uint32_t new_size)
@@ -275,7 +278,6 @@ void *Heap::Alloc(uint32_t size, bool page_align)
 
       // update the footer to match the new header size
       Footer *footer = (Footer *)((uint32_t)header + header->size - sizeof(Footer));
-      footer->header = nullptr;
       footer->header = header;
       footer->magic = HEAP_MAGIC;
     }
@@ -472,16 +474,16 @@ uint32_t Heap::malloc_(uint32_t size, bool shouldAlign, uint32_t *physAddress)
   if (bInitialized)
   {
     // if the kernel heap is initialized, allocate memory
-    void *address = Alloc(size, shouldAlign);
+    uint32_t address = Alloc(size, shouldAlign);
 
     // if physical address is requested, calculate and return it
     if (physAddress != nullptr)
     {
-      *physAddress = pManager->Virtual2Physical(reinterpret_cast<uint32_t>(address));
+      *physAddress = pManager->Virtual2Physical(address);
     }
 
     // return the virtual address of the newly allocated memory
-    return reinterpret_cast<uint32_t>(address);
+    return address;
   }
   else if (bPreInitialized)
   {

@@ -12,12 +12,11 @@ namespace Usermode{
     namespace Input{
         extern bool bInitialized;
 
-        extern MouseInfo mouseInfo;
-        extern KeyboardKey* keyboardMap;
+        extern int AddMouseHandle(mouse_input_handle h);
+        extern int AddKeyboardHandle(keyboard_input_handle h);
 
-        // These will be handled in the GUI...
-        extern MouseInfo mouseInfoBuffer;
-        extern KeyboardKey keyboardMapBuffer;
+        extern void RemoveMouseHandle(int h);
+        extern void RemoveKeyboardHandle(int h);
 
         extern void Init();
     }

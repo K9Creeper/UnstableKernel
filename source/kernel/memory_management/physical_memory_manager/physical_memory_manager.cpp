@@ -31,7 +31,7 @@ void Kernel::MemoryManagement::PMM::Init(uint32_t mem_size)
     const int count = mem_size / 0x1000;
     const int size = (count / bitmap.GetBytesPerEntry());
 
-    bitmap.RePlace(reinterpret_cast<uint32_t *>(Kernel::MemoryManagement::kheap.malloc_(size)), size);
+    bitmap.RePlace(reinterpret_cast<void *>(Kernel::MemoryManagement::kheap.malloc_(size)), size);
 
     bitmap.Clear();
 }

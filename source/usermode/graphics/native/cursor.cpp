@@ -16,6 +16,8 @@ namespace Usermode
         {
             void DrawCursor(::Graphics::Framebuffer *fb);
         }
+
+        extern MouseInfo mouseInfoBuffer;
     }
 }
 
@@ -30,8 +32,8 @@ void Usermode::Graphics::Native::DrawCursor(::Graphics::Framebuffer *fb)
     if (!Input::bInitialized)
         return;
 
-    int x = Input::mouseInfoBuffer.X;
-    int y = Input::mouseInfoBuffer.Y;
+    int x = Usermode::Graphics::mouseInfoBuffer.X;
+    int y = Usermode::Graphics::mouseInfoBuffer.Y;
 
     int half = (Style::mouseCursorSize / 2);
 

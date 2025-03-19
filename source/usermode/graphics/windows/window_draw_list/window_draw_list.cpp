@@ -13,6 +13,8 @@ void WindowDrawList::FocusWindow(void *w)
     if (window)
         window->zindex = 99999;
 
+    lastFocusedWindow = window;
+
     ForceSort();
 }
 
@@ -55,6 +57,17 @@ void WindowDrawList::RemoveWindow(uint32_t i)
 {
     Remove(i);
     ForceSort();
+}
+
+bool WindowDrawList::isWindowFocused(void* item)const{
+    if(!item || !lastFocusedWindow)
+        return false;
+
+    return item == lastFocusedWindow;
+}
+
+void* WindowDrawList::GetFocusedWindow()const{
+    return lastFocusedWindow;
 }
 
 void WindowDrawList::ForceSort()

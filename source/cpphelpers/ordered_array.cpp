@@ -23,6 +23,8 @@ void OrderedArray<type_t>::RePlace(void *address, uint32_t max_size)
 template <typename type_t>
 type_t OrderedArray<type_t>::Get(uint32_t i)
 {
+	if(i >= this->max_size)
+		return this->array[this->max_size - 1];
 	return this->array[i];
 }
 

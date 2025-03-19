@@ -15,7 +15,7 @@ namespace Graphics{
 
     extern void Init(uint32_t lfbLocation, uint32_t pxWidth, uint32_t pxHeight, uint32_t pitch, uint32_t bPerPixel);
     extern void FillBuffer(uint32_t color);
-    extern void Paint(uint32_t x, uint32_t y, uint32_t color);
+    extern void Paint(uint32_t x, uint32_t y, uint32_t color, uint8_t opactity = 255);
     extern Framebuffer* GetBackBuffer();
     extern void SwapBuffers(bool clear = true);
 }

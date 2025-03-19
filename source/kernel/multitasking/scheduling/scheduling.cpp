@@ -49,7 +49,7 @@ void ContextSwitch(Task *t)
         {
             if (!Kernel::Multitasking::Scheduling::currentTask->isThread)
                 Kernel::Multitasking::Scheduling::currentTask->heap->PreInit(0x40000000);
-
+            
             Kernel::Multitasking::Scheduling::currentTask->pManager->SwapHeap(Kernel::Multitasking::Scheduling::currentTask->heap);
 
             if (!Kernel::Multitasking::Scheduling::currentTask->isThread)
