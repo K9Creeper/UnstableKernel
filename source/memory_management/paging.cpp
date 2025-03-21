@@ -14,6 +14,8 @@
 // boot.s
 extern "C" PageDirectory *pageDirectory;
 
+extern "C" void printf(const char* f, ...);
+
 namespace Kernel
 {
     namespace MemoryManagement
@@ -184,7 +186,9 @@ void Paging::AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKerne
     {
         table = heap->malloc_(sizeof(PageTable), true);
 
-        memset(reinterpret_cast<uint8_t *>(table), reinterpret_cast<uint8_t *>(0), sizeof(PageTable));
+        //printf("Table 0x%X\n", table);
+
+        memset(reinterpret_cast<uint8_t *>(table), 0, sizeof(PageTable));
 
         uint32_t t = Virtual2Physical(table, Kernel::MemoryManagement::pManager.GetDirectory());
         pd->tables[pageDirIdx].frame = t >> 12;
@@ -203,6 +207,9 @@ void Paging::AllocatePage(uint32_t virtual_address, uint32_t frame, bool isKerne
             t = frame;
         else
             t = Kernel::MemoryManagement::PMM::AllocateBlock();
+
+        //printf("In pagealloc trying 0x%X -- frame: 0x%X\n", virtual_address, t);
+
         table->pages[pageTblIdx].frame = t;
         table->pages[pageTblIdx].present = 1;
         table->pages[pageTblIdx].rw = 1;

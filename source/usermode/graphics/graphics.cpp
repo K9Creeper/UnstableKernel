@@ -154,8 +154,8 @@ void Usermode::Graphics::Thread()
 
     currentFb = ::Graphics::GetBackBuffer();
 
-    Usermode::Graphics::Windows::CreateWindow("Test1", 0, 200, 200, 100, 100, WndProc);
-    Usermode::Graphics::Windows::CreateWindow("Test3", 0, 400, 200, 200, 100, WndProc);
+    Usermode::Graphics::Windows::CreateWindow("WindowTest1", 0, 200, 200, 150, 100, WndProc);
+    Usermode::Graphics::Windows::CreateWindow("WindowTest2", 0, 400, 200, 100, 150, WndProc);
 
     while (bThreadRunning)
     {

@@ -184,7 +184,7 @@ Usermode::Graphics::Windows::Window *Usermode::Graphics::Windows::CreateWindow(c
 
     window->viewport.b = window->b;
 
-    uint32_t nLfb = sys_malloc(currentFb->GetSize());
+    uint32_t nLfb = sys_malloc(currentFb->GetSize(), true);
 
     window->framebuffer.Init(nLfb, Usermode::Graphics::GetScreenX(), Usermode::Graphics::GetScreenY(), Usermode::Graphics::GetScreenPitch(), Usermode::Graphics::GetScreenBPP());
 

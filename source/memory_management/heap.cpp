@@ -12,7 +12,7 @@
 #define HEAP_INDEX_SIZE 0x20000
 #define HEAP_MIN_SIZE 0x70000
 
-extern "C" void printf(const char* f, ...);
+extern "C" void printf(const char *f, ...);
 
 bool HeapOrderedArray::Insert(void *item)
 {
@@ -86,9 +86,9 @@ void Heap::PreInit(uint32_t end)
   if (bPreInitialized)
     return;
 
-    nextPlacementAddress = end;
+  nextPlacementAddress = end;
 
-    bPreInitialized = true;
+  bPreInitialized = true;
 }
 
 void Heap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, bool readonly, Paging *pMan)
@@ -98,13 +98,13 @@ void Heap::Init(uint32_t start, uint32_t end, uint32_t max, bool supervisor, boo
 
   pManager = pMan;
 
-  pManager->AllocateRegion(start, end, false, !supervisor, !readonly);
+  pManager->AllocateRegion(start, end, false, supervisor, !readonly);
 
   bSupervisor = supervisor;
   bReadOnly = readonly;
 
   heapIndex.RePlace(reinterpret_cast<void *>(start), HEAP_INDEX_SIZE);
-  
+
   start += sizeof(void *) * HEAP_INDEX_SIZE;
 
   if ((start & 0xFFFFF000) != 0)
@@ -166,23 +166,32 @@ int Heap::FindSmallestHole(uint32_t size, bool page_align)
   return i; // found a suitable block
 }
 
-void Heap::Expand(uint32_t new_size)
+void Heap::Expand(uint32_t new_length)
 {
-  // get the nearest following page boundary
-  if ((new_size & 0xFFFFF000) != 0)
+  if (new_length <= 0)
+    return;
+
+  // Round up to nearest page boundary
+  if ((new_length & 0xFFFFF000) != 0)
   {
-    new_size &= 0xFFFFF000;
-    new_size += 0x1000;
+    new_length &= 0xFFFFF000;
+    new_length += 0x1000;
   }
 
-  for (uint32_t i = 0; i < new_size + 0x1000; i += 0x1000)
+  uint32_t i = heap_end;
+  while (i < heap_start + new_length)
   {
-    // allocate a frame at the current address
-    pManager->AllocatePage(heap_end + i, 0, !bSupervisor, !bReadOnly);
+    pManager->AllocatePage(i, 0, bSupervisor, !bReadOnly);
+
+    //printf("Allocated: 0x%X\n", i);
+    //*reinterpret_cast<uint32_t *>(i) = 0;
+
+    i += 0x1000;
   }
 
-  // update the heap end address
-  heap_end = heap_start + new_size;  
+  heap_end = heap_start + new_length;
+
+  //printf("Expanding heap: heap_end = 0x%x, new_length = 0x%x\n", heap_end, new_length);
 }
 
 uint32_t Heap::Contract(uint32_t new_size)
@@ -236,7 +245,8 @@ void *Heap::Alloc(uint32_t size, bool page_align)
     uint32_t new_length = heap_end - heap_start;
 
     i = 0;
-    uint32_t idx = -1;
+    bool b = false;
+    uint32_t idx = 0;
     uint32_t value = 0;
 
     // find the last header in the heap
@@ -248,13 +258,14 @@ void *Heap::Alloc(uint32_t size, bool page_align)
       {
         value = tmp;
         idx = i;
+        b = true;
       }
 
       i++;
     }
 
     // if no headers found, create a new one at the end of the heap
-    if (idx == -1)
+    if (!b)
     {
       Header *header = (Header *)old_end_address;
       header->size = new_length - old_length;
@@ -277,7 +288,9 @@ void *Heap::Alloc(uint32_t size, bool page_align)
       header->size += new_length - old_length;
 
       // update the footer to match the new header size
-      Footer *footer = (Footer *)((uint32_t)header + header->size - sizeof(Footer));
+      uint32_t footer_addr = (uint32_t)header + header->size - sizeof(Footer);
+
+      Footer *footer = (Footer *)footer_addr;
       footer->header = header;
       footer->magic = HEAP_MAGIC;
     }
